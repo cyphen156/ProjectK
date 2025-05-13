@@ -17,10 +17,10 @@ public class Bullet : MonoBehaviour
         damage = 30f;
     }
 
-    public void Fire(Vector3 inDirect)
+    public void SetDirection(Vector3 inDirection)
     {
         //총에서 만들어서 호출
-        direction = inDirect;
+        direction = inDirection;
     }
 
     private void Update()
