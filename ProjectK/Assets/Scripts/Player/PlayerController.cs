@@ -29,13 +29,13 @@ public class PlayerController : MonoBehaviour
         inputHorizontal = Input.GetAxis("Horizontal");
         inputVertical = Input.GetAxis("Vertical");
 
-        if (Input.GetKey(KeyCode.LeftShift))
+        moveSpeed = defaultSpeed; // 기본 움직임 속도
+
+        if (Input.GetKey(KeyCode.LeftShift)) // 달리기
         {
-            playerMove.Move(inputHorizontal * Time.deltaTime * runSpeed, inputVertical * Time.deltaTime * runSpeed);
+            moveSpeed = runSpeed;
         }
-        else
-        {
-            playerMove.Move(inputHorizontal * Time.deltaTime * moveSpeed, inputVertical * Time.deltaTime * moveSpeed);
-        }
+
+        playerMove.Move(inputHorizontal * Time.deltaTime * moveSpeed, inputVertical * Time.deltaTime * moveSpeed);
     }
 }
