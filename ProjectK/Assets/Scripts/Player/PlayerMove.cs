@@ -2,9 +2,9 @@ using UnityEngine;
 
 public class PlayerMove : MonoBehaviour
 {
-    public void Move(float horizontal, float vertical)
+    public void Move(float inHorizontal, float inVertical)
     {
-        transform.position += new Vector3(horizontal, 0, vertical);
+        transform.position += new Vector3(inHorizontal, 0, inVertical);
     }
 }
 
