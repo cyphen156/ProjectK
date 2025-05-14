@@ -20,6 +20,7 @@ public class PlayerController : MonoBehaviour
     private PlayerMove playerMove; // 플레이어 무브 클래스
     private float inputHorizontal; // AD 인풋 값
     private float inputVertical; // WS 인풋 값
+    private Gun playerGun;
 
     [Header("PlayerAnimation")]
     private PlayerAnimation playerAnimation;
@@ -35,6 +36,11 @@ public class PlayerController : MonoBehaviour
         currentPlayerState = PlayerState.Idle;
     }
 
+    private void Start()
+    {
+        playerGun = GetComponentInChildren<Gun>();
+    }
+
     private void Update()
     {
         InputMove();
@@ -45,9 +51,10 @@ public class PlayerController : MonoBehaviour
 
     private void InputReload()
     {
-        if(Input.GetKeyDown(KeyCode.R))
+        if (Input.GetKeyDown(KeyCode.R))
         {
             currentPlayerState = PlayerState.Reload;
+            playerGun.Reload();
         }
     }
 
@@ -56,6 +63,8 @@ public class PlayerController : MonoBehaviour
         if (Input.GetKeyDown(KeyCode.Mouse0))
         {
             currentPlayerState = PlayerState.Attack;
+
+            playerGun.Fire(transform.forward);
         }
     }
 
@@ -67,7 +76,7 @@ public class PlayerController : MonoBehaviour
         inputHorizontal = Input.GetAxis("Horizontal");
         inputVertical = Input.GetAxis("Vertical");
 
-        if(inputHorizontal == 0 && inputVertical == 0)
+        if (inputHorizontal == 0 && inputVertical == 0)
         {
             currentPlayerState = PlayerState.Idle;
             return;
@@ -93,4 +102,5 @@ public class PlayerController : MonoBehaviour
     {
         playerAnimation.AnimationConrtrol(currentPlayerState);
     }
+
 }
