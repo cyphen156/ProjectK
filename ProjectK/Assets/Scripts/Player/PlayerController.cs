@@ -20,6 +20,7 @@ public class PlayerController : MonoBehaviour
     private PlayerMove playerMove; // 플레이어 무브 클래스
     private float inputHorizontal; // AD 인풋 값
     private float inputVertical; // WS 인풋 값
+    private Vector3 mousePosition;
     private Gun playerGun;
 
     [Header("PlayerAnimation")]
@@ -39,6 +40,7 @@ public class PlayerController : MonoBehaviour
     private void Start()
     {
         playerGun = GetComponentInChildren<Gun>();
+        mousePosition = new Vector3(0, 0, 0);
     }
 
     private void Update()
@@ -47,6 +49,7 @@ public class PlayerController : MonoBehaviour
         InputAttack(); // 테스트용
         InputReload(); // 테스트용
         AniConrtrol();
+        RotateCharacterOnMousePosition();
     }
 
     private void InputReload()
@@ -103,4 +106,14 @@ public class PlayerController : MonoBehaviour
         playerAnimation.AnimationConrtrol(currentPlayerState);
     }
 
+    private void RotateCharacterOnMousePosition()
+    {
+        mousePosition = Input.mousePosition;
+        mousePosition.z = Camera.main.transform.position.y; // 혹은 캐릭터까지의 거리
+
+        Vector3 MouseWorldPosition = Camera.main.ScreenToWorldPoint(mousePosition);
+        MouseWorldPosition.y = 0f;
+
+        transform.LookAt(MouseWorldPosition);
+    }
 }
