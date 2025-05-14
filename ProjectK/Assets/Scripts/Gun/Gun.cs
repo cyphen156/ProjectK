@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class Gun : MonoBehaviour
 {
-    [SerializeField] private GameObject bulletPrefab;
+    [SerializeField] private Bullet bulletPrefab;
     [SerializeField] private Transform playerTransform;
     [SerializeField] private Transform fireTransform;
 
@@ -62,7 +62,7 @@ public class Gun : MonoBehaviour
         }
     }
 
-    public void Fire()
+    public void Fire(Vector3 inDirection)
     {
        // Debug.Log("รั น฿ป็ ฟไรป");
         if (isReloading == true || isRating == true )
@@ -73,9 +73,10 @@ public class Gun : MonoBehaviour
         {
             return;
         }
-      //  Debug.Log("รั น฿ป็");
-        Vector3 direction = fireTransform.position - playerTransform.position;
-        GameObject bullet = Instantiate(bulletPrefab, fireTransform);
+        //  Debug.Log("รั น฿ป็");
+        Debug.Log(inDirection);
+        Bullet bullet = Instantiate(bulletPrefab, fireTransform.position, Quaternion.identity);
+        bullet.SetDirection(inDirection);
         isRating = true;
         restRateTime = defaultRateTime;
         restBulletCount -= 1;
