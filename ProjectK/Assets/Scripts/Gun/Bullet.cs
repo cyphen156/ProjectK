@@ -21,7 +21,6 @@ public class Bullet : MonoBehaviour
     {
         //총에서 만들어서 호출
         direction = inDirection;
-       
     }
 
     private void Update()
