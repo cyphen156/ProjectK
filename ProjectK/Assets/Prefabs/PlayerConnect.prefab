@@ -6130,6 +6130,7 @@ GameObject:
   - component: {fileID: 1198002568489924210}
   - component: {fileID: 2643631284595903801}
   - component: {fileID: 145514225819120958}
+  - component: {fileID: 8847328568699138083}
   m_Layer: 0
   m_Name: PlayerConnect
   m_TagString: Untagged
@@ -6240,6 +6241,18 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 3528a9b910e7f1a4bb40090d3d636548, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!114 &8847328568699138083
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8160031286155752097}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 54ac12fc8b7d124439f324ff5c0e9d8a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
 --- !u!1 &8168254297558941174
@@ -7414,7 +7427,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!4 &6871246772302811992
 Transform:
   m_ObjectHideFlags: 0

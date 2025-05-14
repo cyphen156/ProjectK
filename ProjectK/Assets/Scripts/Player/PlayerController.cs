@@ -48,7 +48,7 @@ public class PlayerController : MonoBehaviour
         InputMove();
         InputAttack(); // 테스트용
         InputReload(); // 테스트용
-        //AniConrtrol();
+        AniConrtrol();
         RotateCharacterOnMousePosition();
     }
 
@@ -108,12 +108,12 @@ public class PlayerController : MonoBehaviour
 
     private void RotateCharacterOnMousePosition()
     {
-        Vector3 mousePos = Input.mousePosition;
-        mousePos.z = Camera.main.transform.position.y; // 혹은 캐릭터까지의 거리
+        mousePosition = Input.mousePosition;
+        mousePosition.z = Camera.main.transform.position.y; // 혹은 캐릭터까지의 거리
 
-        Vector3 worldPos = Camera.main.ScreenToWorldPoint(mousePos);
-        worldPos.y = 0f;
+        Vector3 MouseWorldPosition = Camera.main.ScreenToWorldPoint(mousePosition);
+        MouseWorldPosition.y = 0f;
 
-        transform.LookAt(worldPos);
+        transform.LookAt(MouseWorldPosition);
     }
 }
