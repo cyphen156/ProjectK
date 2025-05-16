@@ -12,9 +12,9 @@ public class AudioManager : MonoBehaviour
         Gun.OnFire += FireSound;
     }
 
-    private void FireSound(Vector3 _vec3)
+    private void FireSound(Vector3 inFirePosition)
     {
-        AudioSource.PlayClipAtPoint(fireClip, _vec3);
+        AudioSource.PlayClipAtPoint(fireClip, inFirePosition);
     }
 
 }
