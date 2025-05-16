@@ -41,5 +41,14 @@ public class MasterDataManager :MonoBehaviour
     public Item GetMasterItemData(int inId)
     {
         return masterItemDictionary[inId];
+        List<(int, Item)> ff = new();
+
     }
 }
+
+class HaveItem
+{
+    Item item;
+    int count; 
+}
+
