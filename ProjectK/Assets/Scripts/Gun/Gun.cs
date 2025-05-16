@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 
 
@@ -8,6 +9,7 @@ public class Gun : MonoBehaviour
     [SerializeField] private Transform playerTransform;
     [SerializeField] private Transform fireTransform;
 
+    public static event Action<Vector3> OnFire;
     private bool isReloading;
     private float defaultReloadTime; //기본 탄창 채우는 시간
     private float restReloadTime; //채우기 까지 남은 시간
@@ -62,6 +64,8 @@ public class Gun : MonoBehaviour
         }
     }
 
+    
+
     public void Fire(Vector3 inDirection)
     {
        // Debug.Log("총 발사 요청");
@@ -77,6 +81,12 @@ public class Gun : MonoBehaviour
         Debug.Log(inDirection);
         Bullet bullet = Instantiate(bulletPrefab, fireTransform.position, Quaternion.identity);
         bullet.SetDirection(inDirection);
+
+        if(OnFire != null)
+        {
+            OnFire.Invoke(transform.position);
+        }
+
         isRating = true;
         restRateTime = defaultRateTime;
         restBulletCount -= 1;
