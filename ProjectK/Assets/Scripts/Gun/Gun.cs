@@ -6,7 +6,6 @@ using UnityEngine;
 public class Gun : MonoBehaviour
 {
     [SerializeField] private Bullet bulletPrefab;
-    [SerializeField] private Transform playerTransform;
     [SerializeField] private Transform fireTransform;
 
     public static event Action<Vector3> OnFire;
@@ -45,26 +44,7 @@ public class Gun : MonoBehaviour
     {
         //총알 생성될 위치 
         fireTransform = transform.Find("fireTransform");
-
-        //플레이어 위치
-        Transform findTransform = transform;
-        while (findTransform != null)
-        {
-            if (findTransform.name == "Player")
-            {
-                playerTransform = findTransform;
-                break;
-            }
-
-            findTransform = findTransform.parent;
-        }
-        if (playerTransform == null)
-        {
-            Debug.LogError("플레이어 트랜스폼 찾지 못했음");
-        }
     }
-
-    
 
     public void Fire(Vector3 inDirection)
     {
@@ -102,6 +82,8 @@ public class Gun : MonoBehaviour
         isReloading = true;
         restReloadTime = defaultReloadTime;
     }
+
+   
 
     private void Update()
     {
