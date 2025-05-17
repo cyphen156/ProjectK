@@ -11,35 +11,40 @@ public class Gun : MonoBehaviour
     public static event Action<Vector3> OnFire;
     private bool isReloading;
     private float defaultReloadTime; //기본 탄창 채우는 시간
+    private float equiptReloadTime; //스텟 적용
     private float restReloadTime; //채우기 까지 남은 시간
 
     private int defaultBulletCount; //기본 총알 수
+    private int equiptBulletCount; //스텟 적용
     private int restBulletCount; //남은 총알 수
 
-    private int defaultRps; //1초당 총알 발사 갯수
-
+    private int defaultRps; //스텟 적용
+    private int equiptRps; //1초당 총알 발사 갯수
+    
     private bool isRating; //연사속도대기
-    private float defaultRateTime;
+    private float rateTime;
     private float restRateTime;
 
-    private float focusRegion; //탄 밀집도 : 클수록 퍼진다.
+    private float defaultFocusRegion; //탄 밀집도 : 클수록 퍼진다.
+    private float equiptFocusRegion;
+
 
     private void Awake()
     {
-        defaultReloadTime = 2f; //장전시간
+        defaultReloadTime = 2f;
         restReloadTime = 0f;
 
-        defaultRps = 15; //초당 발사 갯수
-        CalRateTime();
+        defaultRps = 15;
         restRateTime = 0f;
 
-        defaultBulletCount = 15; //탄창 용량
-        restBulletCount = defaultBulletCount;
+        defaultBulletCount = 15;
+        restBulletCount = equiptBulletCount;
 
-        focusRegion = 1f; //조준 반경
-
+        defaultFocusRegion = 1f; //조준 반경
+  
         isRating = false;
         isReloading = false;
+        ResetEquiptValue();
     }
 
     private void Start()
@@ -75,7 +80,7 @@ public class Gun : MonoBehaviour
         }
 
         isRating = true;
-        restRateTime = defaultRateTime;
+        restRateTime = rateTime;
         restBulletCount -= 1;
     }
 
@@ -87,10 +92,30 @@ public class Gun : MonoBehaviour
             return;
         }
         isReloading = true;
-        restReloadTime = defaultReloadTime;
+        restReloadTime = equiptReloadTime;
     }
 
-    public void AttachEquiptment(ItemBase inEquiptItem)
+    public void EquiptItems(ItemBase[] inEquiptItems)
+    {
+        ResetEquiptValue();
+        //착용 중인 아이템 적용
+        for (int i = 0; i < inEquiptItems.Length; i++)
+        {
+            AttachEquiptment(inEquiptItems[i]);
+        }
+    }
+
+    private void ResetEquiptValue()
+    {
+        //장비 적용 값 default로 초기화
+        equiptReloadTime = defaultReloadTime; //장전시간
+        equiptRps = defaultRps; //초당 발사 갯수
+        CalRateTime();
+        equiptBulletCount = defaultBulletCount; //탄창 용량
+        equiptFocusRegion = defaultFocusRegion;
+    }
+
+    private void AttachEquiptment(ItemBase inEquiptItem)
     {
         if(inEquiptItem == null)
         {
@@ -109,50 +134,20 @@ public class Gun : MonoBehaviour
         switch (targetStat)
         {
             case Stat.Focus:
-                focusRegion -= power;
+                equiptFocusRegion = defaultFocusRegion - power;
                 break;
             case Stat.AmmoSize:
-                defaultBulletCount += power;
+                equiptBulletCount = defaultBulletCount + power;
                 break;
             case Stat.ReloadTime:
-                defaultReloadTime -= power;
+                equiptReloadTime = defaultReloadTime - power;
                 break;
             case Stat.Rps:
-                defaultRps += power;
+                equiptRps = defaultRps + power;
                 CalRateTime();
                 break;
-        }
-    }
-
-    public void DetachEquiptment(ItemBase inEquiptItem)
-    {
-        if(inEquiptItem == null)
-        {
-            return;
-        }
-
-        ItemMainType mainType = inEquiptItem.itemType;
-        if (mainType != ItemMainType.AttachMent)
-        {
-            Debug.LogError("장착물이 아닙니다.");
-            return;
-        }
-        Stat targetStat = inEquiptItem.stat;
-        int power = inEquiptItem.power;
-        switch (targetStat)
-        {
-            case Stat.Focus:
-                focusRegion += power;
-                break;
-            case Stat.AmmoSize:
-                defaultBulletCount -= power;
-                break;
-            case Stat.ReloadTime:
-                defaultReloadTime += power;
-                break;
-            case Stat.Rps:
-                defaultRps -= power;
-                CalRateTime();
+            default:
+                Debug.LogWarning("정의 되지 않은 스텟");
                 break;
         }
     }
@@ -174,7 +169,7 @@ public class Gun : MonoBehaviour
 
     private bool IsFullBullet()
     {
-        return defaultBulletCount == restBulletCount;
+        return equiptBulletCount == restBulletCount;
     }
 
     private void CountReloadTime()
@@ -187,7 +182,7 @@ public class Gun : MonoBehaviour
         if(restReloadTime <= 0)
         {
             isReloading = false;
-            restBulletCount = defaultBulletCount;
+            restBulletCount = equiptBulletCount;
             DoneRateTime();
         }
     }
@@ -213,6 +208,8 @@ public class Gun : MonoBehaviour
 
     private void CalRateTime()
     {
-        defaultRateTime = 1f /defaultRps; //연사속도
+        rateTime = 1f /equiptRps; //연사속도
     }
+
+  
 }
