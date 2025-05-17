@@ -38,7 +38,7 @@ public class Gun : MonoBehaviour
         restRateTime = 0f;
 
         defaultBulletCount = 15;
-        restBulletCount = equiptBulletCount;
+        restBulletCount = defaultBulletCount;
 
         defaultFocusRegion = 1f; //조준 반경
   
@@ -117,7 +117,7 @@ public class Gun : MonoBehaviour
 
     private void AttachEquiptment(ItemBase inEquiptItem)
     {
-        if(inEquiptItem == null)
+        if(inEquiptItem == null || inEquiptItem.itemType == ItemMainType.None)
         {
             return;
         }
