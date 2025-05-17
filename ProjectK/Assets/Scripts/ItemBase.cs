@@ -109,7 +109,7 @@ public class ItemBase
         amount += inAddAmount;
     }
 
-    public void RemoveItem(int inRemoveAmount = 1)
+    public void ReduceItem(int inRemoveAmount = 1)
     {
         amount -= inRemoveAmount;
     }
