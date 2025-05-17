@@ -46,7 +46,7 @@ public class DropBoxTable
     private ItemBase Roll(ItemSubType[] typeTable)
     {
         ItemBase rollItem = null;
-        ItemSubType rollSubType = (ItemSubType)random.Next(0, typeTable.Length);
+        ItemSubType rollSubType = typeTable[ random.Next(0, typeTable.Length)];
         if(rollTableDictionary.TryGetValue(rollSubType, out List<int> idList))
         {
             int itemID = idList[random.Next(0, idList.Count)];
