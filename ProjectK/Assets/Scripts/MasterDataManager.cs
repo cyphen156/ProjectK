@@ -1,15 +1,12 @@
-﻿using System;
+﻿
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using UnityEngine;
 
 
 public class MasterDataManager :MonoBehaviour
 {
     public static MasterDataManager Instance;
-    private Dictionary<int, Item> masterItemDictionary;
+    private Dictionary<int, ItemBase> masterItemDictionary;
 
     private void Awake()
     {
@@ -27,28 +24,20 @@ public class MasterDataManager :MonoBehaviour
     private void MakeMasterData()
     {
         masterItemDictionary = new();
-        Item compensator = new Item(1121, ItemType.부착물, SubType.총구, UseType.장착, "보정기", Stat.탄퍼짐, 30);
+        ItemBase compensator = new ItemBase(1121, ItemMainType.AttachMent, ItemSubType.Muzzle, ItemUseType.Equipt, "보정기", Stat.Focus, 30);
         masterItemDictionary.Add(compensator.id, compensator);
-        Item treeBox = new Item(2472, ItemType.소모품, SubType.설치, UseType.설치, "나무상자", Stat.Hp, 100);
+        ItemBase treeBox = new ItemBase(2472, ItemMainType.Expendables, ItemSubType.Deploy, ItemUseType.Deploy, "나무상자", Stat.Hp, 100);
         masterItemDictionary.Add(treeBox.id, treeBox);
     }
 
-    public Dictionary<int, Item> GetMasterDataDic()
+    public Dictionary<int, ItemBase> GetMasterDataDic()
     {
         return masterItemDictionary;
     }
 
-    public Item GetMasterItemData(int inId)
+    public ItemBase GetMasterItemData(int inItemID)
     {
-        return masterItemDictionary[inId];
-        List<(int, Item)> ff = new();
-
+        return masterItemDictionary[inItemID];
     }
-}
-
-class HaveItem
-{
-    Item item;
-    int count; 
 }
 
