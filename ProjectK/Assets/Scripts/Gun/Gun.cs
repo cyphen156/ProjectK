@@ -92,6 +92,11 @@ public class Gun : MonoBehaviour
 
     public void AttachEquiptment(ItemBase inEquiptItem)
     {
+        if(inEquiptItem == null)
+        {
+            return;
+        }
+
         ItemMainType mainType = inEquiptItem.itemType;
         if(mainType != ItemMainType.AttachMent)
         {
@@ -121,6 +126,11 @@ public class Gun : MonoBehaviour
 
     public void DetachEquiptment(ItemBase inEquiptItem)
     {
+        if(inEquiptItem == null)
+        {
+            return;
+        }
+
         ItemMainType mainType = inEquiptItem.itemType;
         if (mainType != ItemMainType.AttachMent)
         {
