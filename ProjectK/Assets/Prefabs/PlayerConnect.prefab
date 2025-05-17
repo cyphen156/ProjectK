@@ -6132,6 +6132,7 @@ GameObject:
   - component: {fileID: 145514225819120958}
   - component: {fileID: 8847328568699138083}
   - component: {fileID: 2745973890671376165}
+  - component: {fileID: 2892335502158358685}
   m_Layer: 0
   m_Name: PlayerConnect
   m_TagString: Untagged
@@ -6268,6 +6269,20 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 35c8bce9b9efc0440b090be86d8cebad, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!114 &2892335502158358685
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8160031286155752097}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 86ec7f6219062ac40b630ccb74040d24, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  gunItems: []
+  consumeItems: []
 --- !u!1 &8168254297558941174
 GameObject:
   m_ObjectHideFlags: 0
