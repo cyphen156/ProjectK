@@ -6,7 +6,6 @@ using UnityEngine;
 public class Gun : MonoBehaviour
 {
     [SerializeField] private Bullet bulletPrefab;
-    [SerializeField] private Transform playerTransform;
     [SerializeField] private Transform fireTransform;
 
     public static event Action<Vector3> OnFire;
@@ -17,20 +16,27 @@ public class Gun : MonoBehaviour
     private int defaultBulletCount; //기본 총알 수
     private int restBulletCount; //남은 총알 수
 
+    private int defaultRps; //1초당 총알 발사 갯수
+
     private bool isRating; //연사속도대기
     private float defaultRateTime;
     private float restRateTime;
+
+    private float focusRegion; //탄 밀집도 : 클수록 퍼진다.
 
     private void Awake()
     {
         defaultReloadTime = 2f; //장전시간
         restReloadTime = 0f;
 
-        defaultRateTime = 0.2f; //연사속도
+        defaultRps = 15; //초당 발사 갯수
+        CalRateTime();
         restRateTime = 0f;
 
-        defaultBulletCount = 15;
+        defaultBulletCount = 15; //탄창 용량
         restBulletCount = defaultBulletCount;
+
+        focusRegion = 1f; //조준 반경
 
         isRating = false;
         isReloading = false;
@@ -45,26 +51,7 @@ public class Gun : MonoBehaviour
     {
         //총알 생성될 위치 
         fireTransform = transform.Find("fireTransform");
-
-        //플레이어 위치
-        Transform findTransform = transform;
-        while (findTransform != null)
-        {
-            if (findTransform.name == "Player")
-            {
-                playerTransform = findTransform;
-                break;
-            }
-
-            findTransform = findTransform.parent;
-        }
-        if (playerTransform == null)
-        {
-            Debug.LogError("플레이어 트랜스폼 찾지 못했음");
-        }
     }
-
-    
 
     public void Fire(Vector3 inDirection)
     {
@@ -101,6 +88,73 @@ public class Gun : MonoBehaviour
         }
         isReloading = true;
         restReloadTime = defaultReloadTime;
+    }
+
+    public void AttachEquiptment(ItemBase inEquiptItem)
+    {
+        if(inEquiptItem == null)
+        {
+            return;
+        }
+
+        ItemMainType mainType = inEquiptItem.itemType;
+        if(mainType != ItemMainType.AttachMent)
+        {
+            Debug.LogError("장착물이 아닙니다.");
+            return;
+        }
+
+        Stat targetStat = inEquiptItem.stat;
+        int power = inEquiptItem.power;
+        switch (targetStat)
+        {
+            case Stat.Focus:
+                focusRegion -= power;
+                break;
+            case Stat.AmmoSize:
+                defaultBulletCount += power;
+                break;
+            case Stat.ReloadTime:
+                defaultReloadTime -= power;
+                break;
+            case Stat.Rps:
+                defaultRps += power;
+                CalRateTime();
+                break;
+        }
+    }
+
+    public void DetachEquiptment(ItemBase inEquiptItem)
+    {
+        if(inEquiptItem == null)
+        {
+            return;
+        }
+
+        ItemMainType mainType = inEquiptItem.itemType;
+        if (mainType != ItemMainType.AttachMent)
+        {
+            Debug.LogError("장착물이 아닙니다.");
+            return;
+        }
+        Stat targetStat = inEquiptItem.stat;
+        int power = inEquiptItem.power;
+        switch (targetStat)
+        {
+            case Stat.Focus:
+                focusRegion += power;
+                break;
+            case Stat.AmmoSize:
+                defaultBulletCount -= power;
+                break;
+            case Stat.ReloadTime:
+                defaultReloadTime += power;
+                break;
+            case Stat.Rps:
+                defaultRps -= power;
+                CalRateTime();
+                break;
+        }
     }
 
     private void Update()
@@ -155,5 +209,10 @@ public class Gun : MonoBehaviour
     private void DoneRateTime()
     {
         isRating = false;
+    }
+
+    private void CalRateTime()
+    {
+        defaultRateTime = 1f /defaultRps; //연사속도
     }
 }
