@@ -19,7 +19,10 @@ Unity6 12th TeamProject Team 4th ProjectK
 모든 외부 에셋은 아래 폴더에 저장하여 관리합니다:
 
 - `DownLoadAssets/`  
-  *(추가된 에셋 목록은 여기에 작성)*
+1. stylize
+2. PolySamuraiPack
+3. CharacterPack
+4. polygonParticlePack
 
 ---
 

@@ -40,8 +40,6 @@ public class PlayerInventory : MonoBehaviour
             }
         }
 
-    }
-
     public ItemBase PickItem(ItemBase inItem)
     {
         ItemBase returnItem = null;
