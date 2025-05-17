@@ -16,20 +16,27 @@ public class Gun : MonoBehaviour
     private int defaultBulletCount; //기본 총알 수
     private int restBulletCount; //남은 총알 수
 
+    private int defaultRps; //1초당 총알 발사 갯수
+
     private bool isRating; //연사속도대기
     private float defaultRateTime;
     private float restRateTime;
+
+    private float focusRegion; //탄 밀집도 : 클수록 퍼진다.
 
     private void Awake()
     {
         defaultReloadTime = 2f; //장전시간
         restReloadTime = 0f;
 
-        defaultRateTime = 0.2f; //연사속도
+        defaultRps = 15; //초당 발사 갯수
+        CalRateTime();
         restRateTime = 0f;
 
-        defaultBulletCount = 15;
+        defaultBulletCount = 15; //탄창 용량
         restBulletCount = defaultBulletCount;
+
+        focusRegion = 1f; //조준 반경
 
         isRating = false;
         isReloading = false;
@@ -83,7 +90,62 @@ public class Gun : MonoBehaviour
         restReloadTime = defaultReloadTime;
     }
 
-   
+    public void AttachEquiptment(ItemBase inEquiptItem)
+    {
+        ItemMainType mainType = inEquiptItem.itemType;
+        if(mainType != ItemMainType.AttachMent)
+        {
+            Debug.LogError("장착물이 아닙니다.");
+            return;
+        }
+
+        Stat targetStat = inEquiptItem.stat;
+        int power = inEquiptItem.power;
+        switch (targetStat)
+        {
+            case Stat.Focus:
+                focusRegion -= power;
+                break;
+            case Stat.AmmoSize:
+                defaultBulletCount += power;
+                break;
+            case Stat.ReloadTime:
+                defaultReloadTime -= power;
+                break;
+            case Stat.Rps:
+                defaultRateTime += power;
+                CalRateTime();
+                break;
+        }
+    }
+
+    public void DetachEquiptment(ItemBase inEquiptItem)
+    {
+        ItemMainType mainType = inEquiptItem.itemType;
+        if (mainType != ItemMainType.AttachMent)
+        {
+            Debug.LogError("장착물이 아닙니다.");
+            return;
+        }
+        Stat targetStat = inEquiptItem.stat;
+        int power = inEquiptItem.power;
+        switch (targetStat)
+        {
+            case Stat.Focus:
+                focusRegion += power;
+                break;
+            case Stat.AmmoSize:
+                defaultBulletCount -= power;
+                break;
+            case Stat.ReloadTime:
+                defaultReloadTime += power;
+                break;
+            case Stat.Rps:
+                defaultRateTime -= power;
+                CalRateTime();
+                break;
+        }
+    }
 
     private void Update()
     {
@@ -137,5 +199,10 @@ public class Gun : MonoBehaviour
     private void DoneRateTime()
     {
         isRating = false;
+    }
+
+    private void CalRateTime()
+    {
+        defaultRateTime = defaultRps / 60f; //연사속도
     }
 }
