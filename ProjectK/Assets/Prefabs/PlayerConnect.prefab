@@ -6133,6 +6133,7 @@ GameObject:
   - component: {fileID: 8847328568699138083}
   - component: {fileID: 2745973890671376165}
   - component: {fileID: 2892335502158358685}
+  - component: {fileID: 3479593415885844583}
   m_Layer: 0
   m_Name: PlayerConnect
   m_TagString: Untagged
@@ -6283,6 +6284,20 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   gunItems: []
   consumeItems: []
+--- !u!114 &3479593415885844583
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8160031286155752097}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a975b83e0157d1643ba49f28b7409616, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  hp: 0
+  stamina: 0
 --- !u!1 &8168254297558941174
 GameObject:
   m_ObjectHideFlags: 0
@@ -7487,7 +7502,7 @@ MeshRenderer:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 9198571272101552669}
-  m_Enabled: 1
+  m_Enabled: 0
   m_CastShadows: 1
   m_ReceiveShadows: 1
   m_DynamicOccludee: 1
@@ -7542,7 +7557,7 @@ BoxCollider:
   m_LayerOverridePriority: 0
   m_IsTrigger: 0
   m_ProvidesContacts: 0
-  m_Enabled: 1
+  m_Enabled: 0
   serializedVersion: 3
   m_Size: {x: 1, y: 1, z: 1}
   m_Center: {x: 0, y: 0, z: 0}
@@ -7559,7 +7574,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   bulletPrefab: {fileID: 3856218466273477182, guid: 76b6b7aea98400d4a87fed5d5b9a514c, type: 3}
-  playerTransform: {fileID: 0}
   fireTransform: {fileID: 4381891015771052091}
 --- !u!1 &9215973777355365759
 GameObject:
