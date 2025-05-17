@@ -30,10 +30,10 @@ public class InGameUIManager : MonoBehaviour
 
     private void Update()
     {
-        TeackingPlayer();
+        TrackingPlayer();
     }
 
-    private void TeackingPlayer()
+    private void TrackingPlayer()
     {
         // 월드 위치 + offset을 화면 좌표로 변환
         Vector3 worldPosition = targetPlayerTransform.position + offset;
