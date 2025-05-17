@@ -39,20 +39,7 @@ public class PlayerInventory : MonoBehaviour
                 PickItem(newItem);
             }
         }
-        if (Input.GetKeyDown(KeyCode.G))
-        {
-            MasterDataManager.Instance.GetMasterDataDic();
-            foreach (KeyValuePair<int, ItemBase> pair in MasterDataManager.Instance.GetMasterDataDic())
-            {
-                ItemBase copy = new ItemBase(pair.Value);
-                ItemBase newItem = new ItemBase(copy, 1);
-                newItem.id = 10;
-                PickItem(newItem);
-            }
-        }
-
     }
-
     public ItemBase PickItem(ItemBase inItem)
     {
         ItemBase returnItem = null;
@@ -83,6 +70,11 @@ public class PlayerInventory : MonoBehaviour
         //슬롯 번호가 들어오면 해당 슬롯의 아이템을 사용
     }
 
+    public ItemBase[] GetGunItmes()
+    {
+        return gunItems;
+    }
+
     private bool EquiptItem(ItemBase inEquipItem, out ItemBase returnItem)
     {
         //장비타입 슬롯 인덱스 찾기
@@ -96,7 +88,6 @@ public class PlayerInventory : MonoBehaviour
 
         returnItem = gunItems[slotIdx]; //착용중이던 아이템
         gunItems[slotIdx] = inEquipItem; //새로 장착
-
         return true;
     }
 
