@@ -39,17 +39,6 @@ public class PlayerInventory : MonoBehaviour
                 PickItem(newItem);
             }
         }
-        if (Input.GetKeyDown(KeyCode.G))
-        {
-            MasterDataManager.Instance.GetMasterDataDic();
-            foreach (KeyValuePair<int, ItemBase> pair in MasterDataManager.Instance.GetMasterDataDic())
-            {
-                ItemBase copy = new ItemBase(pair.Value);
-                ItemBase newItem = new ItemBase(copy, 1);
-                newItem.id = 10;
-                PickItem(newItem);
-            }
-        }
 
     }
 
@@ -81,6 +70,11 @@ public class PlayerInventory : MonoBehaviour
     public void UseItem(int inConsumeSlot)
     {
         //슬롯 번호가 들어오면 해당 슬롯의 아이템을 사용
+    }
+
+    public ItemBase[] GetGunItmes()
+    {
+        return gunItems;
     }
 
     private bool EquiptItem(ItemBase inEquipItem, out ItemBase returnItem)
