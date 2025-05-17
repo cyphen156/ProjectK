@@ -118,7 +118,7 @@ public class Gun : MonoBehaviour
                 defaultReloadTime -= power;
                 break;
             case Stat.Rps:
-                defaultRateTime += power;
+                defaultRps += power;
                 CalRateTime();
                 break;
         }
@@ -151,7 +151,7 @@ public class Gun : MonoBehaviour
                 defaultReloadTime += power;
                 break;
             case Stat.Rps:
-                defaultRateTime -= power;
+                defaultRps -= power;
                 CalRateTime();
                 break;
         }
@@ -213,6 +213,6 @@ public class Gun : MonoBehaviour
 
     private void CalRateTime()
     {
-        defaultRateTime = defaultRps / 60f; //연사속도
+        defaultRateTime = 1f /defaultRps; //연사속도
     }
 }
