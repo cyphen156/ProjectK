@@ -95,7 +95,10 @@ public class PlayerInventory : MonoBehaviour
         }
 
         returnItem = gunItems[slotIdx]; //착용중이던 아이템
+        Gun gun = gameObject.GetComponentInChildren<Gun>();
+        gun.DetachEquiptment(returnItem);
         gunItems[slotIdx] = inEquipItem; //새로 장착
+        gun.AttachEquiptment(inEquipItem);
 
         return true;
     }
