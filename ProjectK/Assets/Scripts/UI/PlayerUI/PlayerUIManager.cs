@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -6,8 +7,16 @@ public class PlayerUIManager : MonoBehaviour
     private PlayerController playerController;
     public PlayerStat playerStat;
     [SerializeField] private Transform crosshairTransform;
+    [SerializeField] private Button[] DropboxSlotButtons;
     private Slider hpSlider;
     private Slider staminaSlider;
+    private GameObject dropBoxPanelObj;
+    private bool isOnDropBoxPanel;
+
+    private void Awake()
+    {
+        isOnDropBoxPanel = false;
+    }
 
     private void OnEnable()
     {
@@ -27,10 +36,23 @@ public class PlayerUIManager : MonoBehaviour
     {
         playerStat = playerController.GetComponent<PlayerStat>();
         crosshairTransform = transform.Find("Crosshair");
+
+        StartSettingHUDUI();
+
+        StartSettingDropBoxUI();
+    }
+
+    private void Update()
+    {
+        crosshairTransform.position = Camera.main.WorldToScreenPoint(playerController.mouseWorldPosition);
+    }
+
+    private void StartSettingHUDUI()
+    {
         hpSlider = transform.Find("PlayerHUDPanel/HpSlider").GetComponent<Slider>();
         staminaSlider = transform.Find("PlayerHUDPanel/StaminaSlider").GetComponent<Slider>();
 
-        // hp¹Ù, ½ºÅ×¹Ì³ª¹Ù ÃÊ±âÈ­
+        // hpë°”, ìŠ¤í…Œë¯¸ë‚˜ë°” ì´ˆê¸°í™”
         hpSlider.maxValue = 100f;
         staminaSlider.maxValue = 100f;
         if (playerStat != null)
@@ -40,12 +62,43 @@ public class PlayerUIManager : MonoBehaviour
         }
         else
         {
-            Debug.LogError("playerStatÀ» º¯¼ö¿¡ ³Ö¾ú´ÂÁö ÀÎ½ºÆåÅÍ¿¡¼­ È®ÀÎ ÇÊ¿ä!");
+            Debug.LogError("playerStatì„ ë³€ìˆ˜ì— ë„£ì—ˆëŠ”ì§€ ì¸ìŠ¤í™í„°ì—ì„œ í™•ì¸ í•„ìš”!");
         }
     }
 
-    void Update()
+    private void StartSettingDropBoxUI()
     {
-        crosshairTransform.position = Camera.main.WorldToScreenPoint(playerController.mouseWorldPosition);
+        // ë²„íŠ¼ì— ë¦¬ìŠ¤ë„ˆ ë“±ë¡
+        for (int i = 0; i < DropboxSlotButtons.Length; i++)
+        {
+            int index = i;
+            Button button = DropboxSlotButtons[i];
+            button.onClick.AddListener(delegate {
+                DropBoxSlotClick(index, button);
+            });
+        }
+
+        dropBoxPanelObj = transform.Find("DropBoxPanel").gameObject;
+        dropBoxPanelObj.SetActive(false);
+    }
+
+    private void OnOffDorpBoxUI()
+    {
+        if(isOnDropBoxPanel == true)
+        {
+            dropBoxPanelObj?.SetActive(false);
+            isOnDropBoxPanel = false;
+        }
+        else
+        {
+            dropBoxPanelObj?.SetActive(true);
+            isOnDropBoxPanel = true;
+        }
+    }
+
+    private void DropBoxSlotClick(int inIndex, Button inDropBoxIndex)
+    {
+        Debug.Log($"[{inIndex}]ë²ˆ ìŠ¬ë¡¯ í´ë¦­ë¨");
+        Debug.Log("í´ë¦­í•œ ì˜¤ë¸Œì íŠ¸ ì´ë¦„: " + inDropBoxIndex.gameObject.name);
     }
 }
