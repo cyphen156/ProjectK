@@ -1,11 +1,7 @@
 using System;
 using System.Collections.Generic;
-using System.Data.Common;
 using System.Linq;
 using UnityEngine;
-using UnityEngine.InputSystem;
-using static GameManager;
-using static UnityEditor.Experimental.GraphView.GraphView;
 
 public class GameManager : MonoBehaviour
 {
@@ -16,32 +12,32 @@ public class GameManager : MonoBehaviour
         Play,
         End
     }
-
-    public static GameManager instance;
+    
+    public static GameManager Instance { get; private set; }
 
     [Header("GamePlayTime")]
-    [SerializeField] 
-    private float PlayTime;
+    [SerializeField] private float PlayTime;
     private float maxPlayTime;
     private float currentTime;
     private float timeAccumulator;
     public static event Action<float> GamePlayTimeChange;
 
     [Header("PlayerCount")]
-    private readonly List<PlayerController> players = new List<PlayerController>();
+    private readonly Dictionary<PlayerController, PlayerState> players = new Dictionary<PlayerController, PlayerState>();
 
     public static event Action<int> PlayerCountChange;
 
     [Header("GameState")]
-    private GameState currentGameState;
+    [SerializeField] private GameState currentGameState;
     private string gameWinner;  
     public static event Action<string> GameEnd;
 
+    #region Unity Methods
     private void Awake()
     {
-        if (instance == null)
+        if (Instance == null)
         {
-            instance = this;
+            Instance = this;
             DontDestroyOnLoad(gameObject);
         }
 
@@ -57,38 +53,6 @@ public class GameManager : MonoBehaviour
     private void OnEnable()
     {
         ResetGame();
-    }
-
-    // 게임 종료 UI 띄우기
-    private void ResetGame()
-    {
-        // 플레이 타임 초기화
-        currentTime = maxPlayTime;
-        timeAccumulator = 0f;
-
-        // 플레이어 수 초기화
-        players.Clear();
-        PlayerCountChange?.Invoke(players.Count);
-        
-        // 승자 초기화
-        gameWinner = null;
-
-        // 게임 상태 초기화
-        currentGameState = GameState.Ready;
-    }
-
-    // 게임 종료 UI 띄우기
-    private void EndGame()
-    {
-        gameWinner = null;
-        GameEnd?.Invoke(gameWinner);
-        currentGameState = GameState.End;
-    }
-    private void EndGame(PlayerController inWinner)
-    {
-        gameWinner = inWinner.name;
-        GameEnd?.Invoke(gameWinner);
-        currentGameState = GameState.End;
     }
 
     private void Update()
@@ -121,27 +85,77 @@ public class GameManager : MonoBehaviour
             }
         }
 
-
         // 게임 종료 시
         else if(currentGameState == GameState.End)
         {
             // 종료 상태일때도 아무것도 안할거임   
         }
     }
+    #endregion
 
-    public void RegisterAlivePlayer(PlayerController inPlayerController)
+    // 게임 종료 UI 띄우기
+    private void ResetGame()
     {
-        if (!players.Contains(inPlayerController))
+        // 플레이 타임 초기화
+        currentTime = maxPlayTime;
+        timeAccumulator = 0f;
+
+        // 플레이어 수 초기화
+        players.Clear();
+        PlayerCountChange?.Invoke(players.Count);
+
+        // 승자 초기화
+        gameWinner = null;
+
+        // 게임 상태 초기화
+        currentGameState = GameState.Ready;
+    }
+
+    // 게임 종료 UI 띄우기
+    private void EndGame()
+    {
+        gameWinner = null;
+        GameEnd?.Invoke(gameWinner);
+        currentGameState = GameState.End;
+    }
+    private void EndGame(PlayerController inWinner)
+    {
+        gameWinner = inWinner.name;
+        GameEnd?.Invoke(gameWinner);
+        currentGameState = GameState.End;
+    }
+    public void RegisterAlivePlayer(PlayerController inPlayerController, PlayerState inPlayerStat)
+    {
+        if (!players.ContainsKey(inPlayerController))
         {
-            players.Add(inPlayerController);
+            players.Add(inPlayerController, inPlayerStat);
+            // 만약 로컬 플레이어라면 인풋 매니저에 리시버로 등록
+            //if (inPlayerController == IsLocalPlayer())
+            {
+                InputManager.Instance.RegisterLocalPlayer(inPlayerController as IPlayerInputReceiver);
+            }
             PlayerCountChange?.Invoke(players.Count);
+            Debug.Log("");
+        }
+    }
+    public void UpdatePlayerState(PlayerController inPlayerController, PlayerState inState)
+    {
+        if (players.ContainsKey(inPlayerController))
+        {
+            players[inPlayerController] = inState;
+
+            if (inState == PlayerState.Die)
+            {
+                PlayerCountChange?.Invoke(GetAlivePlayerCount());
+                CheckGameOver();
+            }
         }
     }
 
     // -> 플레이어 사망시 인보크를 통해 호출로 변경 예정
     public void UnregisterAlivePlayer(PlayerController inPlayerController)
     {
-        if (!players.Contains(inPlayerController))
+        if (!players.ContainsKey(inPlayerController))
         {
             Debug.LogError("PlayerController is not registered");
             return;
@@ -150,14 +164,6 @@ public class GameManager : MonoBehaviour
         {
             players.Remove(inPlayerController);
             PlayerCountChange?.Invoke(players.Count);
-            if (players.Count == 1)
-            {
-                EndGame(players[0]);
-            }
-            else if (players.Count == 0)
-            {
-                EndGame();
-            }
         }
     }
 
@@ -167,5 +173,50 @@ public class GameManager : MonoBehaviour
         // 게임 시작
         currentGameState = GameState.Play;
         GamePlayTimeChange?.Invoke(currentTime);
+    }
+
+    public int GetAlivePlayerCount()
+    {
+        return players.Count(pair => pair.Value != PlayerState.Die);
+    }
+
+    private void CheckGameOver()
+    {
+        int aliveCount = 0;
+        PlayerController lastAlive = null;
+
+        foreach (var pair in players)
+        {
+            if (pair.Value != PlayerState.Die)
+            {
+                aliveCount++;
+                lastAlive = pair.Key;
+
+                if (aliveCount > 1)
+                {
+                    return;
+                }
+            }
+        }
+
+        if (aliveCount == 1)
+        {
+            EndGame(lastAlive);
+        }
+        else if (aliveCount == 0)
+        {
+            EndGame();
+        }
+    }
+    public bool IsPlayerDie(PlayerController inPlayer)
+    {
+        if (players.TryGetValue(inPlayer, out var state))
+        {
+            if (state != PlayerState.Die)
+            {
+                return false;
+            }
+        }
+        return true;
     }
 }
