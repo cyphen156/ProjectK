@@ -6,7 +6,7 @@ public interface IPlayerInputReceiver
     void InputMove(MoveType inMoveType, float inInputHorizontal, float inInputVertical);
     void InputAttack();
     void InputReload();
-    void RotateCharacterOnMousePosition(Vector3 inDirection);
+    void InputMousePosition(Vector3 inMousePosition);
     void InteractDropBox();
     void Dodge();
     void IsAim();
@@ -36,6 +36,9 @@ public class PlayerController : MonoBehaviour, IPlayerInputReceiver
     private float runSpeed; // 뛰는 속도
     private PlayerMove playerMove; // 플레이어 무브 클래스
     private Gun playerGun;
+    public Vector3 mouseWorldPosition { get; private set; }
+
+    private Vector3 lookDirection;
 
     [Header("PlayerAnimation")]
     private PlayerAnimation playerAnimation;
@@ -49,11 +52,12 @@ public class PlayerController : MonoBehaviour, IPlayerInputReceiver
         slowSpeed = 3.0f;
         runSpeed = 8.0f;
         currentMoveSpeed = defaultSpeed;
+        mouseWorldPosition = Vector3.zero;
+        lookDirection = Vector3.forward;
         playerMove = GetComponent<PlayerMove>();
         playerAnimation = GetComponent<PlayerAnimation>();
         currentPlayerState = PlayerState.Idle;
     }
-
 
     private void Start()
     {
@@ -64,6 +68,12 @@ public class PlayerController : MonoBehaviour, IPlayerInputReceiver
     private void Update()
     {
         AniConrtrol();
+        lookDirection = CalculateDirectionFromMouseWorldPosition();
+        //if (currentPlayerState == PlayerState.Dodge)
+        //{
+        //    lookDirection = new Vector3(inInputHorizontal, 0, inInputVertical);
+        //}
+        playerMove.RotateCharacter(lookDirection);
     }
     #endregion
 
@@ -104,15 +114,12 @@ public class PlayerController : MonoBehaviour, IPlayerInputReceiver
 
         playerMove.Move(inInputHorizontal * Time.deltaTime * currentMoveSpeed, inInputVertical * Time.deltaTime * currentMoveSpeed);
     }
-    public void RotateCharacterOnMousePosition(Vector3 inMouseWorldPosition)
+
+    public void InputMousePosition(Vector3 inMousePosition)
     {
-        Vector3 currentPosition = transform.position;
-        Vector3 direction = inMouseWorldPosition - currentPosition;
-        direction.y = 0f;
-
-        transform.LookAt(transform.position + direction);
+        mouseWorldPosition = inMousePosition;
     }
-
+    
     public void InteractDropBox()
     {
 
@@ -135,5 +142,13 @@ public class PlayerController : MonoBehaviour, IPlayerInputReceiver
     private void AniConrtrol()
     {
         playerAnimation.AnimationConrtrol(currentPlayerState);
+    }
+
+    private Vector3 CalculateDirectionFromMouseWorldPosition()
+    {
+        Vector3 currentPosition = transform.position;
+        Vector3 direction = mouseWorldPosition - currentPosition;
+        direction.y = 0f;
+        return direction;
     }
 }

@@ -10,9 +10,11 @@ public class InputManager : MonoBehaviour
 {
     public static InputManager Instance { get; private set; }
 
+    public static event Action<PlayerController> OnLocalPlayerRegistered;
     private IPlayerInputReceiver localPlayerController;
     private PlayerState localPlayerState;
     private InGameUIManager inGameUIManager;
+
     public enum InputReceiver
     {
         None,
@@ -66,15 +68,16 @@ public class InputManager : MonoBehaviour
         {
             HandlePlayerInput();
         }
-
-        
     }
     #endregion
 
     public void RegisterLocalPlayer(IPlayerInputReceiver inPlayer)
     {
         localPlayerController = inPlayer;
-
+        if (inPlayer is PlayerController controller)
+        {
+            OnLocalPlayerRegistered?.Invoke(controller);
+        }
         currentReceiver = InputReceiver.All;
     }
     public void RegisterUIManager(InGameUIManager inManager)
@@ -97,9 +100,10 @@ public class InputManager : MonoBehaviour
 
     private void HandlePlayerInput()
     {
-        // 회전 처리 (마우스 방향)
-        Vector3 lookDir = GetMouseWorldPosition();
-        localPlayerController.RotateCharacterOnMousePosition(lookDir);
+        // 마우스 월드 좌표 처리
+        Vector3 mouseWorldPosition = GetMouseWorldPosition();
+        localPlayerController.InputMousePosition(mouseWorldPosition);
+        //localPlayerController.RotateCharacter(mouseWorldPosition);
 
         // 이동 처리
         float h = Input.GetAxisRaw("Horizontal");
