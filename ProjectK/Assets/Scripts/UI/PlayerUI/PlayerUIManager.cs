@@ -3,14 +3,29 @@ using UnityEngine.UI;
 
 public class PlayerUIManager : MonoBehaviour
 {
+    private PlayerController playerController;
     public PlayerStat playerStat;
-
     [SerializeField] private Transform crosshairTransform;
     private Slider hpSlider;
     private Slider staminaSlider;
 
+    private void OnEnable()
+    {
+        InputManager.OnLocalPlayerRegistered += SetPlayerController;
+    }
+
+    private void OnDisable()
+    {
+        InputManager.OnLocalPlayerRegistered -= SetPlayerController;
+    }
+
+    private void SetPlayerController(PlayerController controller)
+    {
+        playerController = controller;
+    }
     private void Start()
     {
+        playerStat = playerController.GetComponent<PlayerStat>();
         crosshairTransform = transform.Find("Crosshair");
         hpSlider = transform.Find("PlayerHUDPanel/HpSlider").GetComponent<Slider>();
         staminaSlider = transform.Find("PlayerHUDPanel/StaminaSlider").GetComponent<Slider>();
@@ -31,6 +46,6 @@ public class PlayerUIManager : MonoBehaviour
 
     void Update()
     {
-        crosshairTransform.position = Input.mousePosition;
+        crosshairTransform.position = Camera.main.WorldToScreenPoint(playerController.mouseWorldPosition);
     }
 }
