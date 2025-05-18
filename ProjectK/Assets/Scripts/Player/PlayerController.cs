@@ -1,6 +1,16 @@
 using System;
 using UnityEngine;
 
+public interface IPlayerInputReceiver
+{
+    void InputMove(MoveType inMoveType, float inInputHorizontal, float inInputVertical);
+    void InputAttack();
+    void InputReload();
+    void RotateCharacterOnMousePosition(Vector3 inDirection);
+    void InteractDropBox();
+    void Dodge();
+    void IsAim();
+}
 public enum PlayerState
 {
     Idle,
@@ -10,26 +20,33 @@ public enum PlayerState
     Reload,
     Die
 }
+public enum MoveType
+{
+    Walk,
+    Run,
+    Slow
+}
 
-public class PlayerController : MonoBehaviour
+public class PlayerController : MonoBehaviour, IPlayerInputReceiver
 {
     [Header("PlayerMovement")]
     [SerializeField] private float currentMoveSpeed; // 현재 움직임 속도
     private float defaultSpeed; // 기본 걷는 속도
+    private float slowSpeed; // 느리게 걷는 속도
     private float runSpeed; // 뛰는 속도
     private PlayerMove playerMove; // 플레이어 무브 클래스
-    private float inputHorizontal; // AD 인풋 값
-    private float inputVertical; // WS 인풋 값
-    private Vector3 mousePosition;
     private Gun playerGun;
 
     [Header("PlayerAnimation")]
     private PlayerAnimation playerAnimation;
-    [SerializeField] private PlayerState currentPlayerState; // 현재 플레이어의 상태
+    public static event Action<PlayerController, PlayerState> OnPlayerStateChanged;
+    [SerializeField] private PlayerState currentPlayerState;
 
+    #region Unity Methods
     private void Awake()
     {
         defaultSpeed = 5.0f;
+        slowSpeed = 3.0f;
         runSpeed = 8.0f;
         currentMoveSpeed = defaultSpeed;
         playerMove = GetComponent<PlayerMove>();
@@ -37,49 +54,35 @@ public class PlayerController : MonoBehaviour
         currentPlayerState = PlayerState.Idle;
     }
 
+
     private void Start()
     {
         playerGun = GetComponentInChildren<Gun>();
-        mousePosition = new Vector3(0, 0, 0);
+        GameManager.Instance.RegisterAlivePlayer(this, currentPlayerState);
     }
 
     private void Update()
     {
-        InputMove();
-        InputAttack(); // 테스트용
-        InputReload(); // 테스트용
         AniConrtrol();
-        RotateCharacterOnMousePosition();
+    }
+    #endregion
+
+    #region Input Methods
+    public void InputReload()
+    {
+        currentPlayerState = PlayerState.Reload;
+        playerGun.Reload();
     }
 
-    private void InputReload()
+    public void InputAttack()
     {
-        if (Input.GetKeyDown(KeyCode.R))
-        {
-            currentPlayerState = PlayerState.Reload;
-            playerGun.Reload();
-        }
+        currentPlayerState = PlayerState.Attack;
+        playerGun.Fire(transform.forward);
     }
 
-    private void InputAttack()
+    public void InputMove(MoveType inMoveType, float inInputHorizontal, float inInputVertical)
     {
-        if (Input.GetKeyDown(KeyCode.Mouse0))
-        {
-            currentPlayerState = PlayerState.Attack;
-
-            playerGun.Fire(transform.forward);
-        }
-    }
-
-    /// <summary>
-    /// 움직임 관련 인풋 함수
-    /// </summary>
-    private void InputMove()
-    {
-        inputHorizontal = Input.GetAxis("Horizontal");
-        inputVertical = Input.GetAxis("Vertical");
-
-        if (inputHorizontal == 0 && inputVertical == 0)
+        if (inInputHorizontal == 0 && inInputVertical == 0)
         {
             currentPlayerState = PlayerState.Idle;
             return;
@@ -90,13 +93,41 @@ public class PlayerController : MonoBehaviour
         }
 
         currentMoveSpeed = defaultSpeed; // 기본 움직임 속도
-        if (Input.GetKey(KeyCode.LeftShift)) // 달리기
+        if (inMoveType == MoveType.Slow)
+        {
+            currentMoveSpeed = slowSpeed;
+        }
+        else if (inMoveType == MoveType.Run)
         {
             currentMoveSpeed = runSpeed;
         }
 
-        playerMove.Move(inputHorizontal * Time.deltaTime * currentMoveSpeed, inputVertical * Time.deltaTime * currentMoveSpeed);
+        playerMove.Move(inInputHorizontal * Time.deltaTime * currentMoveSpeed, inInputVertical * Time.deltaTime * currentMoveSpeed);
     }
+    public void RotateCharacterOnMousePosition(Vector3 inMouseWorldPosition)
+    {
+        Vector3 currentPosition = transform.position;
+        Vector3 direction = inMouseWorldPosition - currentPosition;
+        direction.y = 0f;
+
+        transform.LookAt(transform.position + direction);
+    }
+
+    public void InteractDropBox()
+    {
+
+    }
+
+    public void Dodge()
+    {
+
+    }
+
+    public void IsAim()
+    {
+
+    }
+    #endregion
 
     /// <summary>
     /// 현재 플레이어 상태를 애니메이션 스크립트에 넘기는 함수
@@ -104,16 +135,5 @@ public class PlayerController : MonoBehaviour
     private void AniConrtrol()
     {
         playerAnimation.AnimationConrtrol(currentPlayerState);
-    }
-
-    private void RotateCharacterOnMousePosition()
-    {
-        mousePosition = Input.mousePosition;
-        mousePosition.z = Camera.main.transform.position.y; // 혹은 캐릭터까지의 거리
-
-        Vector3 MouseWorldPosition = Camera.main.ScreenToWorldPoint(mousePosition);
-        MouseWorldPosition.y = 0f;
-
-        transform.LookAt(MouseWorldPosition);
     }
 }
