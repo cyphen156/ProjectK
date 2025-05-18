@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
+using UnityEngine.SocialPlatforms;
 
 public class GameManager : MonoBehaviour
 {
@@ -32,6 +33,8 @@ public class GameManager : MonoBehaviour
     private string gameWinner;  
     public static event Action<string> GameEnd;
 
+    public static event Action<PlayerController, PlayerState> LocalPlayerState;
+
     #region Unity Methods
     private void Awake()
     {
@@ -60,7 +63,6 @@ public class GameManager : MonoBehaviour
         // 게임 레디 상태
         if (currentGameState == GameState.Ready)
         {
-            // 레디 상태일 때는 아무것도 안할거임
             return;
         }
         
@@ -129,22 +131,25 @@ public class GameManager : MonoBehaviour
         if (!players.ContainsKey(inPlayerController))
         {
             players.Add(inPlayerController, inPlayerStat);
-            // 만약 로컬 플레이어라면 인풋 매니저에 리시버로 등록
-            //if (inPlayerController == IsLocalPlayer())
+            //if (isLocal)
             {
-                InputManager.Instance.RegisterLocalPlayer(inPlayerController as IPlayerInputReceiver);
+                LocalPlayerState?.Invoke(inPlayerController, inPlayerStat);
             }
             PlayerCountChange?.Invoke(players.Count);
-            Debug.Log("");
         }
     }
-    public void UpdatePlayerState(PlayerController inPlayerController, PlayerState inState)
+    public void UpdatePlayerState(PlayerController inPlayerController, PlayerState inPlayerStat)
     {
         if (players.ContainsKey(inPlayerController))
         {
-            players[inPlayerController] = inState;
+            players[inPlayerController] = inPlayerStat;
 
-            if (inState == PlayerState.Die)
+            //if (isLocal)
+            {
+                LocalPlayerState?.Invoke(inPlayerController, inPlayerStat);
+            }
+
+            if (inPlayerStat == PlayerState.Die)
             {
                 PlayerCountChange?.Invoke(GetAlivePlayerCount());
                 CheckGameOver();
@@ -173,6 +178,7 @@ public class GameManager : MonoBehaviour
         // 게임 시작
         currentGameState = GameState.Play;
         GamePlayTimeChange?.Invoke(currentTime);
+        PlayerCountChange?.Invoke(players.Count);
     }
 
     public int GetAlivePlayerCount()
@@ -207,16 +213,5 @@ public class GameManager : MonoBehaviour
         {
             EndGame();
         }
-    }
-    public bool IsPlayerDie(PlayerController inPlayer)
-    {
-        if (players.TryGetValue(inPlayer, out var state))
-        {
-            if (state != PlayerState.Die)
-            {
-                return false;
-            }
-        }
-        return true;
     }
 }

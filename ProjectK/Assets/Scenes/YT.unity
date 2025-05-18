@@ -257,7 +257,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 12899d77d89705344a24ae00f7fdd4d5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
---- !u!1001 &436872019
+  currentReceiver: 0
+--- !u!1001 &652310360
 PrefabInstance:
   m_ObjectHideFlags: 0
   serializedVersion: 2
@@ -671,7 +672,7 @@ SceneRoots:
   m_Roots:
   - {fileID: 961739753}
   - {fileID: 203844589}
-  - {fileID: 436872019}
   - {fileID: 585590225888026355}
-  - {fileID: 1869346613}
   - {fileID: 4848131313433028071}
+  - {fileID: 1869346613}
+  - {fileID: 652310360}

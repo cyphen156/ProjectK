@@ -11,6 +11,7 @@ public class InputManager : MonoBehaviour
     public static InputManager Instance { get; private set; }
 
     private IPlayerInputReceiver localPlayerController;
+    private PlayerState localPlayerState;
     private InGameUIManager inGameUIManager;
     public enum InputReceiver
     {
@@ -19,7 +20,7 @@ public class InputManager : MonoBehaviour
         InGameUIOnly,
         All
     }
-
+    [SerializeField]
     private InputReceiver currentReceiver;
 
     #region
@@ -37,14 +38,26 @@ public class InputManager : MonoBehaviour
         currentReceiver = InputReceiver.All;
     }
 
-    private void Start()
+    private void OnEnable()
     {
+        GameManager.LocalPlayerState += UpdateLocalPlayerStateChanged;
+    }
 
+    private void OnDisable()
+    {
+        GameManager.LocalPlayerState -= UpdateLocalPlayerStateChanged;
     }
 
     private void Update()
     {
-        if (currentReceiver == InputReceiver.None || localPlayerController == null)
+        if (currentReceiver == InputReceiver.None)
+        {
+            return;
+        }
+
+
+        if (localPlayerState == PlayerState.Die)
+            //|| currentPlayerState == PlayerState.Dodge
         {
             return;
         }
@@ -91,8 +104,24 @@ public class InputManager : MonoBehaviour
         // 이동 처리
         float h = Input.GetAxisRaw("Horizontal");
         float v = Input.GetAxisRaw("Vertical");
+        MoveType moveType = MoveType.Walk;
+        bool isAim = false;
 
-        localPlayerController.InputMove(h, v);
+        // 달리기
+        if (Input.GetKey(KeyCode.LeftShift))
+        {
+            moveType = MoveType.Run;
+        }
+        // 조준시
+        else if (Input.GetKey(KeyCode.Mouse1))
+        {
+            isAim = true;
+            moveType = MoveType.Slow;
+            localPlayerController.IsAim();
+        }
+
+        // 이동
+        localPlayerController.InputMove(moveType, h, v);
 
         // 공격
         if (Input.GetKeyDown(KeyCode.Mouse0))
@@ -105,5 +134,25 @@ public class InputManager : MonoBehaviour
         {
             localPlayerController.InputReload();
         }
+
+        // 드롭박스 상호작용
+        if (Input.GetKeyDown(KeyCode.F))
+        {
+            localPlayerController.InteractDropBox();
+        }
+
+        // 구르기
+        if (Input.GetKeyDown(KeyCode.LeftControl))
+        {
+            localPlayerController.Dodge();
+        }
+    }
+    private void UpdateLocalPlayerStateChanged(PlayerController inPlayerController, PlayerState inLocalPlayerState)
+    {
+        if (localPlayerController == null)
+        {
+            RegisterLocalPlayer(inPlayerController);
+        }
+        localPlayerState = inLocalPlayerState;
     }
 }
