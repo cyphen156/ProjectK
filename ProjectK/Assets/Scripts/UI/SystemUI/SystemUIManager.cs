@@ -39,7 +39,7 @@ public class SystemUIManager : MonoBehaviour
         minutes = inCurrentTime / 60;
         seconds = inCurrentTime % 60;
 
-        GameLifeTimeText.text = $"{minutes} : {seconds}";
+        GameLifeTimeText.text = $"{(int)minutes} : {(int)seconds}";
     }
 
     private void UpdateRestPlayer(int inCurrentPlayer)
