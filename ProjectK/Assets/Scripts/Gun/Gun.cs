@@ -14,7 +14,11 @@ public class Gun : MonoBehaviour
     [SerializeField] private Bullet bulletPrefab;
     [SerializeField] private Transform fireTransform;
 
+    public Animator animator;
+
     public static event Action<Vector3> OnFire;
+
+    private GunState currentGunState;
     private bool isReloading;
     private float defaultReloadTime; //기본 탄창 채우는 시간
     private float equiptReloadTime; //스텟 적용
@@ -53,6 +57,7 @@ public class Gun : MonoBehaviour
         isRating = false;
         isReloading = false;
         isStateLock = false;
+        currentGunState = GunState.None;
         ResetEquiptValue();
     }
 
@@ -65,13 +70,11 @@ public class Gun : MonoBehaviour
     
     private void FindTransform()
     {
-        //총알 생성될 위치 
         fireTransform = transform.Find("fireTransform");
     }
 
     public void Fire(Vector3 inDirection)
     {
-       // Debug.Log("총 발사 요청");
         if (isReloading == true || isRating == true )
         {
             return;
@@ -99,7 +102,6 @@ public class Gun : MonoBehaviour
     {
         if(isReloading == true || IsFullBullet() == true)
         {
-            //장전 중이거나 풀탄창이면 리로드 안함
             return;
         }
         isReloading = true;
@@ -109,7 +111,6 @@ public class Gun : MonoBehaviour
     public void EquiptItems(ItemBase[] inEquiptItems)
     {
         ResetEquiptValue();
-        //착용 중인 아이템 적용
         for (int i = 0; i < inEquiptItems.Length; i++)
         {
             AttachEquiptment(inEquiptItems[i]);
@@ -203,7 +204,6 @@ public class Gun : MonoBehaviour
 
     private void CountRateTime()
     {
-        //장전중이거나, 연사대기가 아니면 종료
         if(isReloading == true || isRating == false)
         {
             return;
@@ -220,32 +220,43 @@ public class Gun : MonoBehaviour
         isRating = false;
     }
 
-    //public void ChangeState(GunState inGunState)
-    //{
-    //    switch (inGunState)
-    //    {
-    //        case GunState.Attack:
-    //            SetAnimatorBool(currentPlayerState, true);
-    //            break;
-    //        case GunState.Reload:
-    //            if (isStateLock)
-    //            {
-    //                return;
-    //            }
-    //            SetAnimatorTrigger(currentPlayerState);
-    //            StartCoroutine(ChangeStateCoroutine(currentPlayerState, 2f));
-    //            break;
-    //        case GunState.Aim:
-    //            break;
-
-    //    }
-    //}
+    public void ChangeGunState(GunState inGunState)
+    {
+        if (currentGunState != inGunState)
+        {
+            switch (inGunState)
+            {
+                case GunState.Attack:
+                    SetGunAnimatorBool(inGunState, true);
+                    break;
+                case GunState.Reload:
+                    if (isStateLock)
+                    {
+                        return;
+                    }
+                    SetGunAnimatorTrigger(inGunState);
+                    StartCoroutine(ChangeGunStateCoroutine(currentGunState, 2f));
+                    break;
+                case GunState.Aim:
+                    break;
+            }
+        }
+    }
 
     public IEnumerator ChangeGunStateCoroutine(GunState inState, float inDelay)
     {
         isStateLock = true;
         yield return new WaitForSeconds(inDelay);
         isStateLock = false;
+    }
+    public void SetGunAnimatorTrigger(GunState inState)
+    {
+        animator.SetTrigger(inState.ToString());
+    }
+
+    public void SetGunAnimatorBool(GunState inState, bool inBoolState)
+    {
+        animator.SetBool(inState.ToString(), inBoolState);
     }
     private void CalRateTime()
     {

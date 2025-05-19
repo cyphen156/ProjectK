@@ -1,14 +1,11 @@
 using System.Collections;
 using UnityEngine;
 
-/// <summary>
-/// Idle,Walk,Run,Attack,Reload,Aim,Die
-/// </summary>
 public enum PlayerState 
 { 
     Idle, 
     Walk,
-    Run,
+    Dodge,
     Die 
 }
 
@@ -29,17 +26,15 @@ public class PlayerStateMachine : MonoBehaviour
     {
         if (currentPlayerState != state)
         {
+            PlayerState previousPlayerState = currentPlayerState;
             currentPlayerState = state;
 
             switch (currentPlayerState)
             {
                 case PlayerState.Idle:
-                    SetPlayerAnimatorTrigger(currentPlayerState);
+                    SetPlayerAnimatorBool(previousPlayerState, false);
                     break;
                 case PlayerState.Walk:
-                    SetPlayerAnimatorBool(currentPlayerState, true);
-                    break;
-                case PlayerState.Run:
                     SetPlayerAnimatorBool(currentPlayerState, true);
                     break;
                 case PlayerState.Die:

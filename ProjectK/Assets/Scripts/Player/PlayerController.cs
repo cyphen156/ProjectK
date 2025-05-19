@@ -33,7 +33,7 @@ public class PlayerController : MonoBehaviour, IPlayerInputReceiver, ITakeDamage
     private Gun playerGun;
     private GunState currentGunState;
     public Vector3 mouseWorldPosition { get; private set; }
-
+    public MoveType currentMoveType;
     [Header("PlayerSight")]
     private PlayerSight playerSight;
 
@@ -63,6 +63,8 @@ public class PlayerController : MonoBehaviour, IPlayerInputReceiver, ITakeDamage
         mouseWorldPosition = Vector3.zero;
         lookDirection = Vector3.forward;
         playerMove = GetComponent<PlayerMove>();
+        currentMoveType = MoveType.Walk;
+
         playerStateMachine = GetComponent<PlayerStateMachine>();
         currentPlayerState = PlayerState.Idle;
         playerSight = GetComponent<PlayerSight>();
@@ -114,7 +116,7 @@ public class PlayerController : MonoBehaviour, IPlayerInputReceiver, ITakeDamage
     {
         if (inInputHorizontal == 0 && inInputVertical == 0)
         {
-            currentPlayerState = PlayerState.Idle;
+            currentPlayerState = playerStateMachine.ChangePlayerState(PlayerState.Idle);
             return;
         }
         else
@@ -178,9 +180,9 @@ public class PlayerController : MonoBehaviour, IPlayerInputReceiver, ITakeDamage
         float previousSize = currentCrosshairSize;
         float targetCrosshairSize;
         // 상태에 따라 목표 크기 설정
-        switch (currentPlayerState)
+        switch (currentMoveType)
         {
-            case PlayerState.Run:
+            case MoveType.Run:
                 targetCrosshairSize = maxCrosshairSize;
                 break;
             default:
@@ -198,7 +200,7 @@ public class PlayerController : MonoBehaviour, IPlayerInputReceiver, ITakeDamage
         }
         currentCrosshairSize = Mathf.Lerp(currentCrosshairSize, targetCrosshairSize, Time.deltaTime * crosshairLerpSpeed);
 
-        if ((currentPlayerState == PlayerState.Run && currentCrosshairSize > targetCrosshairSize) ||
+        if ((currentMoveType == MoveType.Run && currentCrosshairSize > targetCrosshairSize) ||
             (currentGunState == GunState.Aim && currentCrosshairSize < targetCrosshairSize) ||
             (currentPlayerState == PlayerState.Idle && Mathf.Abs(currentCrosshairSize - targetCrosshairSize) < 0.01f))
         {
