@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 
 public class PlayerStat : MonoBehaviour
@@ -6,6 +7,8 @@ public class PlayerStat : MonoBehaviour
     [SerializeField] private float hp;
     private float maxStemina;
     [SerializeField] private float stamina;
+
+    public static event Action OnDie;
 
     private void Awake()
     {
@@ -32,9 +35,10 @@ public class PlayerStat : MonoBehaviour
 
         if(hp <= 0)
         {
-            // 죽음 관련
+            OnDie?.Invoke();
+            return;
         }
 
-        Debug.Log("남은 HP: " + hp);
+        Logger.Info("남은 HP: " + hp);
     }
 }

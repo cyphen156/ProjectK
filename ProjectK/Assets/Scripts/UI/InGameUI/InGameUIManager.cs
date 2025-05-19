@@ -17,14 +17,16 @@ public class InGameUIManager : MonoBehaviour
 
     private void Start()
     {
+        PlayerController.OnChangeHpUI += UpdateHpIngameUI;
+
         hpSlider = transform.Find("InGameHpSlider").GetComponent<Slider>();
         hpSlider.maxValue = 100f;
         hpSliderRect = hpSlider.GetComponent<RectTransform>();
 
         if (playerStat != null)
         {
-            hpSlider.value = playerStat.GetHP();
             targetPlayerTransform = playerStat.transform;
+            playerStat.gameObject.GetComponent<PlayerController>().UpdateHpUI();
         }
     }
 
@@ -39,5 +41,19 @@ public class InGameUIManager : MonoBehaviour
         Vector3 worldPosition = targetPlayerTransform.position + offset;
         Vector3 screenPosition = Camera.main.WorldToScreenPoint(worldPosition);
         hpSliderRect.position = screenPosition;
+    }
+
+    private void UpdateHpIngameUI(float inHp)
+    {
+        hpSlider.value = inHp;
+
+        if(hpSlider.value <= 0)
+        {
+            hpSlider.fillRect.GetComponent<Image>().color = Color.clear;
+        }
+        else
+        {
+            hpSlider.fillRect.GetComponent<Image>().color = Color.red;
+        }
     }
 }
