@@ -56,6 +56,7 @@ public class PlayerController : MonoBehaviour, IPlayerInputReceiver
     private PlayerAnimation playerAnimation;
     public static event Action<PlayerController, PlayerState> OnPlayerStateChanged;
     [SerializeField] private PlayerState currentPlayerState;
+    PlayerStat playerStat;
 
     #region Unity Methods
     private void Awake()
@@ -70,6 +71,7 @@ public class PlayerController : MonoBehaviour, IPlayerInputReceiver
         playerAnimation = GetComponent<PlayerAnimation>();
         currentPlayerState = PlayerState.Idle;
         playerSight = GetComponent<PlayerSight>();
+        playerStat = GetComponent<PlayerStat>();
 
         defaultCrosshairSize = 30f;
         currentCrosshairSize = defaultCrosshairSize;
@@ -204,5 +206,10 @@ public class PlayerController : MonoBehaviour, IPlayerInputReceiver
         {
             OnCrosshairSizeChanged?.Invoke(currentCrosshairSize);
         }
+    }
+
+    public void TakeDamage(float inBulletDamage)
+    {
+        playerStat.ApplyHp(-inBulletDamage);
     }
 }
