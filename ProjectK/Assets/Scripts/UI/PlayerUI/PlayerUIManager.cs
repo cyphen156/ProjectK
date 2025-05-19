@@ -91,21 +91,7 @@ public class PlayerUIManager : MonoBehaviour
         dropBoxPanelObj.SetActive(false);
     }
 
-    private void OnOffDorpBoxUI()
-    {
-        if(isOnDropBoxPanel == true)
-        {
-            dropBoxPanelObj?.SetActive(false);
-            isOnDropBoxPanel = false;
-        }
-        else
-        {
-            dropBoxPanelObj?.SetActive(true);
-            isOnDropBoxPanel = true;
-        }
-    }
-
-    private void OnOpenDropBox(DropBox inDropBox, PlayerController inPlayer)
+    private void OnOpenDropBox(DropBox inDropBox)
     {
         openedDropBox = inDropBox;
         dropBoxPanelObj.SetActive(true);
@@ -145,6 +131,6 @@ public class PlayerUIManager : MonoBehaviour
     {
         Debug.Log($"[{inIndex}]번 슬롯 클릭됨");
         Debug.Log("클릭한 오브젝트 이름: " + inDropBoxIndex.gameObject.name);
-        openedDropBox.SelectItem(inIndex, null);
+        openedDropBox.SelectItem(inIndex);
     }
 }
