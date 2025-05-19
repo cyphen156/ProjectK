@@ -1,5 +1,6 @@
 ﻿
 using System.Collections.Generic;
+using System.IO;
 using UnityEngine;
 
 
@@ -26,10 +27,19 @@ public class MasterDataManager :MonoBehaviour
     private void MakeMasterData()
     {
         masterItemDictionary = new();
-        ItemBase compensator = new ItemBase(1121, ItemMainType.AttachMent, ItemSubType.Muzzle, ItemUseType.Equipt, "보정기", Stat.Focus, 30);
-        masterItemDictionary.Add(compensator.id, compensator);
-        ItemBase treeBox = new ItemBase(2472, ItemMainType.Expendables, ItemSubType.Deploy, ItemUseType.Deploy, "나무상자", Stat.Hp, 100);
-        masterItemDictionary.Add(treeBox.id, treeBox);
+        string[] lines = File.ReadAllLines("Assets/fileData.csv");
+        foreach (string line in lines)
+        {
+            string[] values = line.Split(',');
+            if (values[0][0] == '#')
+            {
+                continue;
+            }
+          
+            ItemBase parseItem = new ItemBase(values);
+            //Debug.Log($"파싱한데이터 {parseItem.name} _ {parseItem.subType} _ {parseItem.stat}");
+            masterItemDictionary.Add(parseItem.id, parseItem);
+        }
     }
 
     public Dictionary<int, ItemBase> GetMasterDataDic()
