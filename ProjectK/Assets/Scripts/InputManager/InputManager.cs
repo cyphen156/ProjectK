@@ -128,9 +128,14 @@ public class InputManager : MonoBehaviour
         localPlayerController.InputMove(moveType, h, v);
 
         // 공격
-        if (Input.GetKeyDown(KeyCode.Mouse0))
+        if (Input.GetKey(KeyCode.Mouse0))
         {
             localPlayerController.InputAttack();
+        }
+
+        if (Input.GetKeyUp(KeyCode.Mouse0))
+        {
+            localPlayerController.StopAttack();
         }
 
         // 재장전

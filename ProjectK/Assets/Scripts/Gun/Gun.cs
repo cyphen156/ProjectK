@@ -1,8 +1,14 @@
 using System;
+using System.Collections;
 using UnityEngine;
 
-
-
+public enum GunState
+{
+    None,
+    Attack,
+    Reload,
+    Aim
+}
 public class Gun : MonoBehaviour
 {
     [SerializeField] private Bullet bulletPrefab;
@@ -17,7 +23,6 @@ public class Gun : MonoBehaviour
     private int defaultBulletCount; //기본 총알 수
     private int equiptBulletCount; //스텟 적용
     private int restBulletCount; //남은 총알 수
-
     private int defaultRps; //스텟 적용
     private int equiptRps; //1초당 총알 발사 갯수
     
@@ -28,6 +33,7 @@ public class Gun : MonoBehaviour
     private float defaultFocusRegion; //탄 밀집도 : 클수록 퍼진다.
     private float equiptFocusRegion;
 
+    private bool isStateLock;
 
     private void Awake()
     {
@@ -44,6 +50,7 @@ public class Gun : MonoBehaviour
   
         isRating = false;
         isReloading = false;
+        isStateLock = false;
         ResetEquiptValue();
     }
 
@@ -204,10 +211,36 @@ public class Gun : MonoBehaviour
         isRating = false;
     }
 
+    //public void ChangeState(GunState inGunState)
+    //{
+    //    switch (inGunState)
+    //    {
+    //        case GunState.Attack:
+    //            SetAnimatorBool(currentPlayerState, true);
+    //            break;
+    //        case GunState.Reload:
+    //            if (isStateLock)
+    //            {
+    //                return;
+    //            }
+    //            SetAnimatorTrigger(currentPlayerState);
+    //            StartCoroutine(ChangeStateCoroutine(currentPlayerState, 2f));
+    //            break;
+    //        case GunState.Aim:
+    //            break;
+
+    //    }
+    //}
+
+    public IEnumerator ChangeGunStateCoroutine(GunState inState, float inDelay)
+    {
+        isStateLock = true;
+        yield return new WaitForSeconds(inDelay);
+        isStateLock = false;
+    }
     private void CalRateTime()
     {
         rateTime = 1f /equiptRps; //연사속도
     }
 
-  
 }
