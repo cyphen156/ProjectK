@@ -69,9 +69,7 @@ public class Gun : MonoBehaviour
         {
             return;
         }
-        //  Debug.Log("รั น฿ป็");
-        Debug.Log(inDirection);
-        Bullet bullet = Instantiate(bulletPrefab, fireTransform.position, Quaternion.identity);
+        Bullet bullet = Instantiate(bulletPrefab, fireTransform.position, Quaternion.LookRotation(inDirection));
         bullet.SetDirection(inDirection);
 
         if(OnFire != null)
