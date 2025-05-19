@@ -57,6 +57,8 @@ public class PlayerController : MonoBehaviour, IPlayerInputReceiver, ITakeDamage
     public static event Action<PlayerController, PlayerState> OnPlayerStateChanged;
     [SerializeField] private PlayerState currentPlayerState;
     PlayerStat playerStat;
+    private BoxDetector boxDetector;
+    private PlayerInventory playerInventory;
 
     #region Unity Methods
     private void Awake()
@@ -72,6 +74,8 @@ public class PlayerController : MonoBehaviour, IPlayerInputReceiver, ITakeDamage
         currentPlayerState = PlayerState.Idle;
         playerSight = GetComponent<PlayerSight>();
         playerStat = GetComponent<PlayerStat>();
+        playerInventory = GetComponent<PlayerInventory>();
+        boxDetector = GetComponentInChildren<BoxDetector>();
 
         defaultCrosshairSize = 30f;
         currentCrosshairSize = defaultCrosshairSize;
@@ -147,7 +151,12 @@ public class PlayerController : MonoBehaviour, IPlayerInputReceiver, ITakeDamage
     
     public void InteractDropBox()
     {
-
+        DropBox box = boxDetector.GetNearestBox();
+        if(box == null)
+        {
+            return;
+        }
+        box.OpenBox(PickItem);
     }
 
     public void Dodge()
@@ -211,5 +220,12 @@ public class PlayerController : MonoBehaviour, IPlayerInputReceiver, ITakeDamage
     public void TakeDamage(float inBulletDamage)
     {
         playerStat.ApplyHp(-inBulletDamage);
+    }
+
+    //아이템픽하는거
+    public ItemBase PickItem(ItemBase inPickItem)
+    {
+      //  Debug.Log("아이템 픽 " + inPickItem.name);
+       return playerInventory.PickItem(inPickItem); //있던 슬롯에서 교체될것은 반환
     }
 }
