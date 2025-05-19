@@ -25,4 +25,16 @@ public class PlayerStat : MonoBehaviour
     {
         return stamina;
     }
+
+    public void ApplyHp(float inApplyHpValue)
+    {
+        hp += inApplyHpValue;
+
+        if(hp <= 0)
+        {
+            // 죽음 관련
+        }
+
+        Debug.Log("남은 HP: " + hp);
+    }
 }

@@ -43,9 +43,12 @@ public class Bullet : MonoBehaviour
         }
     }
 
-    private void Damage()
+    private void OnTriggerEnter(Collider other)
     {
-        
+        ITakeDamage takeDamageObj = other.GetComponent<ITakeDamage>();
+        if (takeDamageObj != null)
+        {
+            takeDamageObj.TakeDamage(damage);
+        }
     }
-
 }
