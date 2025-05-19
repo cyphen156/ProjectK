@@ -45,6 +45,8 @@ public class PlayerController : MonoBehaviour, IPlayerInputReceiver
     public static event Action<PlayerController, PlayerState> OnPlayerStateChanged;
     [SerializeField] private PlayerState currentPlayerState;
 
+    PlayerStat playerStat;
+
     #region Unity Methods
     private void Awake()
     {
@@ -57,6 +59,7 @@ public class PlayerController : MonoBehaviour, IPlayerInputReceiver
         playerMove = GetComponent<PlayerMove>();
         playerAnimation = GetComponent<PlayerAnimation>();
         currentPlayerState = PlayerState.Idle;
+        playerStat = GetComponent<PlayerStat>();
     }
 
     private void Start()
@@ -150,5 +153,10 @@ public class PlayerController : MonoBehaviour, IPlayerInputReceiver
         Vector3 direction = mouseWorldPosition - currentPosition;
         direction.y = 0f;
         return direction;
+    }
+
+    public void TakeDamage(float inBulletDamage)
+    {
+        playerStat.ApplyHp(-inBulletDamage);
     }
 }
