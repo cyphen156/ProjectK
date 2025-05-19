@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -34,7 +35,9 @@ public class PlayerUIManager : MonoBehaviour
     }
     private void Start()
     {
-        playerStat = playerController.GetComponent<PlayerStat>();
+        DropBox.OnOpenBox += OnOpenDropBox;
+        DropBox.OnCloseBox += OnCloseDropBox;
+
         crosshairTransform = transform.Find("Crosshair");
 
         StartSettingHUDUI();
@@ -94,6 +97,21 @@ public class PlayerUIManager : MonoBehaviour
             dropBoxPanelObj?.SetActive(true);
             isOnDropBoxPanel = true;
         }
+    }
+
+    private void OnOpenDropBox(DropBox inDropBox, PlayerController inPlayer)
+    {
+        dropBoxPanelObj.SetActive(true);
+        List<ItemBase> itemList = inDropBox.GetBoxItemList();
+        for (int i = 0; i < itemList.Count; i++)
+        {
+
+        }
+    }
+
+    private void OnCloseDropBox()
+    {
+        dropBoxPanelObj.SetActive(false);
     }
 
     private void DropBoxSlotClick(int inIndex, Button inDropBoxIndex)
