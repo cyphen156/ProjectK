@@ -12,6 +12,7 @@ public class DropBox : MonoBehaviour
     public static event Action<DropBox> OnOpenBox;
     public static event Action OnCloseBox;
     public static event Action<DropBox> OnChangeBox;
+    private Func<ItemBase, ItemBase> itemPickCallBack;
 
     private void Awake()
     {
@@ -65,17 +66,16 @@ public class DropBox : MonoBehaviour
         }
     }
 
-    Func<ItemBase, ItemBase> itemPickCallBack; 
     public void OpenBox(Func<ItemBase, ItemBase> inItemPickCallBack)
     {
-        Debug.Log("박스를 열었다.");
+        //Debug.Log("박스를 열었다.");
         OnOpenBox.Invoke(this);
-        inItemPickCallBack = itemPickCallBack;
+         itemPickCallBack = inItemPickCallBack;
     }
 
     public void CloseBox()
     {
-        Debug.Log("박스를 닫았다.");
+        //Debug.Log("박스를 닫았다.");
         OnCloseBox.Invoke();
         itemPickCallBack = null;
     }
@@ -97,8 +97,9 @@ public class DropBox : MonoBehaviour
         {
             returnItem = itemPickCallBack(haveItems[inSlotIndex]);
         }
-        
-        if (returnItem == null)
+
+        //Debug.Log( "반환된거 " + returnItem.itemType + " " +returnItem.name);
+        if (returnItem == null || returnItem.itemType == ItemMainType.None)
         {
             haveItems.RemoveAt(inSlotIndex);
         }
