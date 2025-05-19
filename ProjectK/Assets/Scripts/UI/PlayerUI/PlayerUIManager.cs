@@ -10,15 +10,17 @@ public class PlayerUIManager : MonoBehaviour
     [SerializeField] private Transform crosshairTransform;
     [SerializeField] private DropBoxSlot[] DropboxSlots;
     [SerializeField] private Button[] DropboxSlotButtons;
-
+    
     private Slider hpSlider;
     private Slider staminaSlider;
     private GameObject dropBoxPanelObj;
+    private DropBox openedDropBox;
     private bool isOnDropBoxPanel;
 
     private void Awake()
     {
         isOnDropBoxPanel = false;
+        openedDropBox = null;
         DropboxSlots = GetComponentsInChildren<DropBoxSlot>();
     }
 
@@ -40,6 +42,7 @@ public class PlayerUIManager : MonoBehaviour
     {
         DropBox.OnOpenBox += OnOpenDropBox;
         DropBox.OnCloseBox += OnCloseDropBox;
+        DropBox.OnChangeBox += OnChangeDropBox;
 
         crosshairTransform = transform.Find("Crosshair");
 
@@ -104,31 +107,44 @@ public class PlayerUIManager : MonoBehaviour
 
     private void OnOpenDropBox(DropBox inDropBox, PlayerController inPlayer)
     {
+        openedDropBox = inDropBox;
         dropBoxPanelObj.SetActive(true);
-        List<ItemBase> haveItemList = inDropBox.GetBoxItemList();
-        for (int i = 0; i < haveItemList.Count; i++)
-        {
-            DropboxSlots[i].SetSlot(haveItemList[i]);
-        }
-        for(int i = haveItemList.Count; i < DropboxSlots.Length; i++)
-        {
-            DropboxSlots[i].Reset();
-        }
+        SetDropBoxUI();
     }
 
-    private void OnChangeDropBox()
+    private void OnChangeDropBox(DropBox inChangedBox)
     {
-        
+        if(openedDropBox == false)
+        {
+            return;
+        }
+       
+        SetDropBoxUI();
     }
 
     private void OnCloseDropBox()
     {
+        openedDropBox = null;
         dropBoxPanelObj.SetActive(false);
+    }
+
+    private void SetDropBoxUI()
+    {
+        List<ItemBase> haveItemList = openedDropBox.GetBoxItemList();
+        for (int i = 0; i < haveItemList.Count; i++)
+        {
+            DropboxSlots[i].SetSlot(haveItemList[i]);
+        }
+        for (int i = haveItemList.Count; i < DropboxSlots.Length; i++)
+        {
+            DropboxSlots[i].Reset();
+        }
     }
 
     private void DropBoxSlotClick(int inIndex, Button inDropBoxIndex)
     {
         Debug.Log($"[{inIndex}]번 슬롯 클릭됨");
         Debug.Log("클릭한 오브젝트 이름: " + inDropBoxIndex.gameObject.name);
+        openedDropBox.SelectItem(inIndex, null);
     }
 }
