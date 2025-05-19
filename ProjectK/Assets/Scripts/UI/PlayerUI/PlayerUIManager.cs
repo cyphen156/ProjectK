@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -15,11 +16,10 @@ public class PlayerUIManager : MonoBehaviour
     private Slider staminaSlider;
     private GameObject dropBoxPanelObj;
     private DropBox openedDropBox;
-    private bool isOnDropBoxPanel;
+    private TextMeshProUGUI ammoText;
 
     private void Awake()
     {
-        isOnDropBoxPanel = false;
         openedDropBox = null;
         DropboxSlots = GetComponentsInChildren<DropBoxSlot>();
     }
@@ -38,13 +38,14 @@ public class PlayerUIManager : MonoBehaviour
     {
         playerController = controller;
     }
+
     private void Start()
     {
         //DropBox.OnOpenBox += OnOpenDropBox;
         DropBox.OnCloseBox += OnCloseDropBox;
         DropBox.OnChangeBox += OnChangeDropBox;
-
-        crosshairTransform = transform.Find("Crosshair");
+        PlayerController.OnCrosshairSizeChanged += UpdateCrosshairUISize;
+        Gun.OnChageAmmoUI += UpdateAmmoUI;
 
         StartSettingHUDUI();
 
@@ -56,25 +57,7 @@ public class PlayerUIManager : MonoBehaviour
         crosshairTransform.position = Camera.main.WorldToScreenPoint(playerController.mouseWorldPosition);
     }
 
-    private void StartSettingHUDUI()
-    {
-        hpSlider = transform.Find("PlayerHUDPanel/HpSlider").GetComponent<Slider>();
-        staminaSlider = transform.Find("PlayerHUDPanel/StaminaSlider").GetComponent<Slider>();
-
-        // hp바, 스테미나바 초기화
-        hpSlider.maxValue = 100f;
-        staminaSlider.maxValue = 100f;
-        if (playerStat != null)
-        {
-            hpSlider.value = playerStat.GetHP();
-            staminaSlider.value = playerStat.GetStamina();
-        }
-        else
-        {
-            Debug.LogError("playerStat을 변수에 넣었는지 인스펙터에서 확인 필요!");
-        }
-    }
-
+    #region 드롭 박스 관련
     private void StartSettingDropBoxUI()
     {
         // 버튼에 리스너 등록
@@ -133,4 +116,40 @@ public class PlayerUIManager : MonoBehaviour
         Debug.Log("클릭한 오브젝트 이름: " + inDropBoxIndex.gameObject.name);
         openedDropBox.SelectItem(inIndex);
     }
+    #endregion
+
+    #region Hud UI 관련
+    private void StartSettingHUDUI()
+    { 
+        crosshairTransform = transform.Find("Crosshair");
+        ammoText = transform.Find("Crosshair/Ammo").GetComponent<TextMeshProUGUI>();
+        hpSlider = transform.Find("PlayerHUDPanel/HpSlider").GetComponent<Slider>();
+        staminaSlider = transform.Find("PlayerHUDPanel/StaminaSlider").GetComponent<Slider>();
+
+        // hp바, 스테미나바 초기화
+        hpSlider.maxValue = 100f;
+        staminaSlider.maxValue = 100f;
+        if (playerStat != null)
+        {
+            hpSlider.value = playerStat.GetHP();
+            staminaSlider.value = playerStat.GetStamina();
+        }
+        else
+        {
+            Debug.LogError("playerStat을 변수에 넣었는지 인스펙터에서 확인 필요!");
+        }
+    }
+
+    private void UpdateAmmoUI(int inCurrentAmmo)
+    {
+        ammoText.text = inCurrentAmmo.ToString();
+    }
+
+    private void UpdateCrosshairUISize(float inCurrentCrosshairSize)
+    {
+        RectTransform rectTransform = crosshairTransform.gameObject.GetComponent<RectTransform>();
+        rectTransform.sizeDelta = new Vector2(inCurrentCrosshairSize, inCurrentCrosshairSize);
+    }
+
+    #endregion
 }

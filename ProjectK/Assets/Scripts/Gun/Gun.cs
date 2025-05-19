@@ -33,7 +33,9 @@ public class Gun : MonoBehaviour
     private float defaultFocusRegion; //탄 밀집도 : 클수록 퍼진다.
     private float equiptFocusRegion;
 
+    public static event Action<int> OnChageAmmoUI;
     private bool isStateLock;
+
 
     private void Awake()
     {
@@ -43,7 +45,7 @@ public class Gun : MonoBehaviour
         defaultRps = 15;
         restRateTime = 0f;
 
-        defaultBulletCount = 15;
+        defaultBulletCount = 30;
         restBulletCount = defaultBulletCount;
 
         defaultFocusRegion = 1f; //조준 반경
@@ -57,6 +59,8 @@ public class Gun : MonoBehaviour
     private void Start()
     {
         FindTransform();
+
+        OnChageAmmoUI?.Invoke(restBulletCount);
     }
     
     private void FindTransform()
@@ -87,6 +91,8 @@ public class Gun : MonoBehaviour
         isRating = true;
         restRateTime = rateTime;
         restBulletCount -= 1;
+
+        OnChageAmmoUI?.Invoke(restBulletCount);
     }
 
     public void Reload()
@@ -188,6 +194,9 @@ public class Gun : MonoBehaviour
         {
             isReloading = false;
             restBulletCount = equiptBulletCount;
+
+            OnChageAmmoUI?.Invoke(restBulletCount);
+
             DoneRateTime();
         }
     }

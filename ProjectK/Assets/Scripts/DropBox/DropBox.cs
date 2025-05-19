@@ -9,7 +9,7 @@ public class DropBox : MonoBehaviour
     private float startChance;
     private float stackRate; //찬스가 중첩 될수록 변하는 비율
     private int maxRollCount;
-    public static event Action<DropBox, PlayerController> OnOpenBox;
+    public static event Action<DropBox> OnOpenBox;
     public static event Action OnCloseBox;
     public static event Action<DropBox> OnChangeBox;
 
@@ -67,7 +67,7 @@ public class DropBox : MonoBehaviour
     public void OpenBox(PlayerController inOpenCharactor)
     {
         Debug.Log("박스를 열었다.");
-        OnOpenBox.Invoke(this, inOpenCharactor);
+        OnOpenBox.Invoke(this);
     }
 
     public void CloseBox()
@@ -81,14 +81,14 @@ public class DropBox : MonoBehaviour
         return haveItems;
     }
 
-    public void SelectItem(int inSlotIndex, PlayerInventory inPlayerInventory)
+    public void SelectItem(int inSlotIndex)
     {
         if (haveItems.Count <= inSlotIndex)
         {
             return;
         }
 
-        ItemBase returnItem = inPlayerInventory.PickItem(haveItems[inSlotIndex]); //
+        ItemBase returnItem = null;
         if (returnItem == null)
         {
             haveItems.RemoveAt(inSlotIndex);
