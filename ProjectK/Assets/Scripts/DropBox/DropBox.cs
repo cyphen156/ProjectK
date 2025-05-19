@@ -12,6 +12,7 @@ public class DropBox : MonoBehaviour
     public static event Action<DropBox> OnOpenBox;
     public static event Action OnCloseBox;
     public static event Action<DropBox> OnChangeBox;
+    private Func<ItemBase, ItemBase> itemPickCallBack;
 
     private void Awake()
     {
@@ -46,8 +47,9 @@ public class DropBox : MonoBehaviour
                 //아이템 뽑기 실패 했으면 종료
                 break;
             }
-            int mainTypeNum = UnityEngine.Random.Range(1, 3);
+            int mainTypeNum = UnityEngine.Random.Range(1, 3); //메인아이템 부착물이냐 소모품이냐 50%
             ItemMainType mainType = (ItemMainType)mainTypeNum;
+            
             ItemBase rollItem = MasterDataManager.Instance.DropBox.RollDropBox(mainType);
             if (rollItem == null)
             {
@@ -64,16 +66,18 @@ public class DropBox : MonoBehaviour
         }
     }
 
-    public void OpenBox(PlayerController inOpenCharactor)
+    public void OpenBox(Func<ItemBase, ItemBase> inItemPickCallBack)
     {
-        Debug.Log("박스를 열었다.");
+        //Debug.Log("박스를 열었다.");
         OnOpenBox.Invoke(this);
+         itemPickCallBack = inItemPickCallBack;
     }
 
     public void CloseBox()
     {
-        Debug.Log("박스를 닫았다.");
+        //Debug.Log("박스를 닫았다.");
         OnCloseBox.Invoke();
+        itemPickCallBack = null;
     }
 
     public List<ItemBase> GetBoxItemList()
@@ -89,7 +93,13 @@ public class DropBox : MonoBehaviour
         }
 
         ItemBase returnItem = null;
-        if (returnItem == null)
+        if(itemPickCallBack != null)
+        {
+            returnItem = itemPickCallBack(haveItems[inSlotIndex]);
+        }
+
+        //Debug.Log( "반환된거 " + returnItem.itemType + " " +returnItem.name);
+        if (returnItem == null || returnItem.itemType == ItemMainType.None)
         {
             haveItems.RemoveAt(inSlotIndex);
         }
