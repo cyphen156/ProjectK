@@ -18,6 +18,7 @@ public enum PlayerState
     Run,
     Attack,
     Reload,
+    Aim,
     Die
 }
 public enum MoveType
@@ -30,6 +31,7 @@ public enum MoveType
 public class PlayerController : MonoBehaviour, IPlayerInputReceiver
 {
     [Header("PlayerMovement")]
+    private Vector3 lookDirection;
     [SerializeField] private float currentMoveSpeed; // 현재 움직임 속도
     private float defaultSpeed; // 기본 걷는 속도
     private float slowSpeed; // 느리게 걷는 속도
@@ -38,7 +40,17 @@ public class PlayerController : MonoBehaviour, IPlayerInputReceiver
     private Gun playerGun;
     public Vector3 mouseWorldPosition { get; private set; }
 
-    private Vector3 lookDirection;
+    [Header("PlayerSight")]
+    private PlayerSight playerSight;
+
+    [Header("Crosshair")]
+    [SerializeField] private float defaultCrosshairSize;
+    [SerializeField] private float currentCrosshairSize;
+    [SerializeField] private float gunCrosshairSize;
+    [SerializeField] private float minCrosshairSize;
+    [SerializeField] private float maxCrosshairSize;
+    [SerializeField] private float crosshairLerpSpeed;
+    public static event Action<float> OnCrosshairSizeChanged;
 
     [Header("PlayerAnimation")]
     private PlayerAnimation playerAnimation;
@@ -57,6 +69,14 @@ public class PlayerController : MonoBehaviour, IPlayerInputReceiver
         playerMove = GetComponent<PlayerMove>();
         playerAnimation = GetComponent<PlayerAnimation>();
         currentPlayerState = PlayerState.Idle;
+        playerSight = GetComponent<PlayerSight>();
+
+        defaultCrosshairSize = 30f;
+        currentCrosshairSize = defaultCrosshairSize;
+        gunCrosshairSize = 0f;
+        crosshairLerpSpeed = 10f;
+        minCrosshairSize = defaultCrosshairSize - gunCrosshairSize;
+        maxCrosshairSize = defaultCrosshairSize + gunCrosshairSize;
     }
 
     private void Start()
@@ -74,7 +94,9 @@ public class PlayerController : MonoBehaviour, IPlayerInputReceiver
         //    lookDirection = new Vector3(inInputHorizontal, 0, inInputVertical);
         //}
         playerMove.RotateCharacter(lookDirection);
+        UpdateCrosshairSize();
     }
+
     #endregion
 
     #region Input Methods
@@ -87,7 +109,8 @@ public class PlayerController : MonoBehaviour, IPlayerInputReceiver
     public void InputAttack()
     {
         currentPlayerState = PlayerState.Attack;
-        playerGun.Fire(transform.forward);
+        Vector3 direction = playerSight.GetRandomSpreadDirection();
+        playerGun.Fire(direction);
     }
 
     public void InputMove(MoveType inMoveType, float inInputHorizontal, float inInputVertical)
@@ -99,10 +122,10 @@ public class PlayerController : MonoBehaviour, IPlayerInputReceiver
         }
         else
         {
-            currentPlayerState = PlayerState.Walk; // 움직이는 애니메이션 // 추후 뛰기 추가 예정
+            currentPlayerState = PlayerState.Walk; // 움직이는 애니메이션
+            currentMoveSpeed = defaultSpeed; // 기본 움직임 속도
         }
 
-        currentMoveSpeed = defaultSpeed; // 기본 움직임 속도
         if (inMoveType == MoveType.Slow)
         {
             currentMoveSpeed = slowSpeed;
@@ -132,7 +155,7 @@ public class PlayerController : MonoBehaviour, IPlayerInputReceiver
 
     public void IsAim()
     {
-
+        currentPlayerState = PlayerState.Aim;
     }
     #endregion
 
@@ -150,5 +173,36 @@ public class PlayerController : MonoBehaviour, IPlayerInputReceiver
         Vector3 direction = mouseWorldPosition - currentPosition;
         direction.y = 0f;
         return direction;
+    }
+
+    private void UpdateCrosshairSize()
+    {
+        float previousSize = currentCrosshairSize;
+        float targetCrosshairSize;
+        // 상태에 따라 목표 크기 설정
+        switch (currentPlayerState)
+        {
+            case PlayerState.Run:
+                targetCrosshairSize = maxCrosshairSize;
+                break;
+            case PlayerState.Aim:
+                targetCrosshairSize = minCrosshairSize;
+                break;
+            default:
+                targetCrosshairSize = defaultCrosshairSize;
+                break;
+        }
+        currentCrosshairSize = Mathf.Lerp(currentCrosshairSize, targetCrosshairSize, Time.deltaTime * crosshairLerpSpeed);
+
+        if ((currentPlayerState == PlayerState.Run && currentCrosshairSize > targetCrosshairSize) ||
+            (currentPlayerState == PlayerState.Aim && currentCrosshairSize < targetCrosshairSize) ||
+            (currentPlayerState == PlayerState.Idle && Mathf.Abs(currentCrosshairSize - targetCrosshairSize) < 0.01f))
+        {
+            currentCrosshairSize = targetCrosshairSize;
+        }
+        if (Mathf.Abs(currentCrosshairSize - previousSize) > 0.01f)
+        {
+            OnCrosshairSizeChanged?.Invoke(currentCrosshairSize);
+        }
     }
 }

@@ -34,7 +34,6 @@ public class PlayerUIManager : MonoBehaviour
     }
     private void Start()
     {
-        playerStat = playerController.GetComponent<PlayerStat>();
         crosshairTransform = transform.Find("Crosshair");
 
         StartSettingHUDUI();

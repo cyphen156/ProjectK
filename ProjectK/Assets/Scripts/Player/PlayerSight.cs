@@ -40,7 +40,7 @@ public class PlayerSight : MonoBehaviour
     [Header("Angle")]
     [SerializeField] private float baseViewAngle;
     [SerializeField] private float activeViewAngle;
-    [SerializeField] private float PlayerSpreadAngle;
+    [SerializeField] private float crossHairRadius;
 
     [Header("Distance")]
     [SerializeField] private float viewDistance;
@@ -64,7 +64,6 @@ public class PlayerSight : MonoBehaviour
         baseViewAngle = 45f;
         activeViewAngle = baseViewAngle;
         viewDistance = 10f;
-        PlayerSpreadAngle = 0f;
 
         meshResolution = 3f;
         edgeResolveIterations = 4;
@@ -72,6 +71,17 @@ public class PlayerSight : MonoBehaviour
 
         visibleTargets = new List<Transform>();
     }
+    private void OnEnable()
+    {
+        PlayerController.OnCrosshairSizeChanged += UpdateCrosshairRadius;
+    }
+
+    private void OnDisable()
+    {
+        PlayerController.OnCrosshairSizeChanged -= UpdateCrosshairRadius;
+    }
+
+    
     private void Start()
     {
         viewMesh = new Mesh();
@@ -223,5 +233,24 @@ public class PlayerSight : MonoBehaviour
         }
 
         return new EdgeInfo(minPoint, maxPoint);
+    }
+
+    public Vector3 GetRandomSpreadDirection()
+    {
+        float spreadAngleRad = Mathf.Atan(crossHairRadius / viewDistance);
+        float spreadAngleDeg = spreadAngleRad * Mathf.Rad2Deg;
+
+        float baseAngle = Mathf.Atan2(transform.forward.x, transform.forward.z) * Mathf.Rad2Deg;
+        float randomAngle = UnityEngine.Random.Range(
+            baseAngle - spreadAngleDeg,
+            baseAngle + spreadAngleDeg
+        );
+
+        Vector3 direction = DirectionFromAngle(randomAngle, true);
+        return direction.normalized;
+    }
+    private void UpdateCrosshairRadius(float inCrosshairRadius)
+    {
+        crossHairRadius = inCrosshairRadius;
     }
 }
