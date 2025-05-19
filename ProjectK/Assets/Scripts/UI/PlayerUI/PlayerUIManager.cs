@@ -8,7 +8,9 @@ public class PlayerUIManager : MonoBehaviour
     private PlayerController playerController;
     public PlayerStat playerStat;
     [SerializeField] private Transform crosshairTransform;
+    [SerializeField] private DropBoxSlot[] DropboxSlots;
     [SerializeField] private Button[] DropboxSlotButtons;
+
     private Slider hpSlider;
     private Slider staminaSlider;
     private GameObject dropBoxPanelObj;
@@ -17,6 +19,7 @@ public class PlayerUIManager : MonoBehaviour
     private void Awake()
     {
         isOnDropBoxPanel = false;
+        DropboxSlots = GetComponentsInChildren<DropBoxSlot>();
     }
 
     private void OnEnable()
@@ -102,11 +105,20 @@ public class PlayerUIManager : MonoBehaviour
     private void OnOpenDropBox(DropBox inDropBox, PlayerController inPlayer)
     {
         dropBoxPanelObj.SetActive(true);
-        List<ItemBase> itemList = inDropBox.GetBoxItemList();
-        for (int i = 0; i < itemList.Count; i++)
+        List<ItemBase> haveItemList = inDropBox.GetBoxItemList();
+        for (int i = 0; i < haveItemList.Count; i++)
         {
-
+            DropboxSlots[i].SetSlot(haveItemList[i]);
         }
+        for(int i = haveItemList.Count; i < DropboxSlots.Length; i++)
+        {
+            DropboxSlots[i].Reset();
+        }
+    }
+
+    private void OnChangeDropBox()
+    {
+        
     }
 
     private void OnCloseDropBox()
