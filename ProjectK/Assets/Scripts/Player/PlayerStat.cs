@@ -8,8 +8,6 @@ public class PlayerStat : MonoBehaviour
     private float maxStemina;
     [SerializeField] private float stamina;
 
-    public static event Action OnDie;
-
     private void Awake()
     {
         maxHp = 100;
@@ -33,12 +31,22 @@ public class PlayerStat : MonoBehaviour
     {
         hp += inApplyHpValue;
 
-        if(hp <= 0)
+        if(CheckDie() == true)
         {
-            OnDie?.Invoke();
             return;
         }
 
         Logger.Info("남은 HP: " + hp);
+    }
+
+    public bool CheckDie()
+    {
+        if (hp <= 0)
+        {
+            Logger.Info("플레이어가 죽음");
+            return true;
+        }
+
+        return false;
     }
 }

@@ -91,8 +91,6 @@ public class PlayerController : MonoBehaviour, IPlayerInputReceiver, ITakeDamage
     {
         playerGun = GetComponentInChildren<Gun>();
         GameManager.Instance.RegisterAlivePlayer(this, currentPlayerState);
-
-        PlayerStat.OnDie += Die;
     }
 
     private void Update()
@@ -224,6 +222,7 @@ public class PlayerController : MonoBehaviour, IPlayerInputReceiver, ITakeDamage
     public void TakeDamage(float inBulletDamage)
     {
         playerStat.ApplyHp(-inBulletDamage);
+        playerStat.CheckDie();
         UpdateHpUI();
     }
 
@@ -231,11 +230,6 @@ public class PlayerController : MonoBehaviour, IPlayerInputReceiver, ITakeDamage
     {
         float hp = playerStat.GetHP();
         OnChangeHpUI?.Invoke(hp);
-    }
-
-    public void Die()
-    {
-        Logger.Info("플레이어가 죽음");
     }
 
     //아이템픽하는거
