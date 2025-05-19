@@ -9,7 +9,7 @@ public class DropBox : MonoBehaviour
     private float startChance;
     private float stackRate; //찬스가 중첩 될수록 변하는 비율
     private int maxRollCount;
-    public static event Action<DropBox, PlayerController> OnOpenBox;
+    public static event Action<DropBox> OnOpenBox;
     public static event Action OnCloseBox;
     public static event Action<DropBox> OnChangeBox;
 
@@ -46,8 +46,9 @@ public class DropBox : MonoBehaviour
                 //아이템 뽑기 실패 했으면 종료
                 break;
             }
-            int mainTypeNum = UnityEngine.Random.Range(1, 3);
+            int mainTypeNum = UnityEngine.Random.Range(1, 3); //메인아이템 부착물이냐 소모품이냐 50%
             ItemMainType mainType = (ItemMainType)mainTypeNum;
+            
             ItemBase rollItem = MasterDataManager.Instance.DropBox.RollDropBox(mainType);
             if (rollItem == null)
             {
@@ -64,16 +65,19 @@ public class DropBox : MonoBehaviour
         }
     }
 
-    public void OpenBox(PlayerController inOpenCharactor)
+    Func<ItemBase> itemPickCallBack; 
+    public void OpenBox(Func<ItemBase> inItemPickCallBack)
     {
         Debug.Log("박스를 열었다.");
-        OnOpenBox.Invoke(this, inOpenCharactor);
+        OnOpenBox.Invoke(this);
+        inItemPickCallBack = itemPickCallBack;
     }
 
     public void CloseBox()
     {
         Debug.Log("박스를 닫았다.");
         OnCloseBox.Invoke();
+        itemPickCallBack = null;
     }
 
     public List<ItemBase> GetBoxItemList()
@@ -81,14 +85,19 @@ public class DropBox : MonoBehaviour
         return haveItems;
     }
 
-    public void SelectItem(int inSlotIndex, PlayerInventory inPlayerInventory)
+    public void SelectItem(int inSlotIndex)
     {
         if (haveItems.Count <= inSlotIndex)
         {
             return;
         }
 
-        ItemBase returnItem = inPlayerInventory.PickItem(haveItems[inSlotIndex]); //
+        ItemBase returnItem = null;
+        if(itemPickCallBack != null)
+        {
+            returnItem = itemPickCallBack();
+        }
+        
         if (returnItem == null)
         {
             haveItems.RemoveAt(inSlotIndex);
