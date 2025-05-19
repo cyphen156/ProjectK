@@ -1,6 +1,5 @@
 ﻿using System;
 
-
 public enum ItemMainType
 {
     None,
@@ -65,20 +64,37 @@ public class ItemBase
     }
 
     //마스터 데이터 생성용
-    public ItemBase(int inId, ItemMainType inItemType, ItemSubType inSubType, ItemUseType inUseType, string inName, Stat inStat, int inPower, bool inIsBuff = false, float inLifeTime = 0f, float inDamageRange = 0f, float inThrowMaxReach = 0f)
+    public ItemBase(string[] intParseData)
     {
-        id = inId;
-        itemType = inItemType;
-        subType = inSubType;
-        useType = inUseType;
-        name = inName;
-        stat = inStat;
-        power = inPower;
-        isBuff = inIsBuff;
-        lifeTime = inLifeTime;
-        damageRange = inDamageRange;
-        throwMaxReach = inThrowMaxReach;
-        amount = 0;
+        int pidIdx = 0;
+        int mainTypeIdx = pidIdx + 1;
+        int nameIdx = mainTypeIdx + 1;
+        int useTypeIdx = nameIdx + 1;
+        int subTypeIdx = useTypeIdx + 1;
+        int statIdx = subTypeIdx + 1;
+        int powerIdx = statIdx + 1;
+        int isBuffIdx = powerIdx + 1;
+        int lifeTimeIdx = isBuffIdx + 1;
+        int damageRangeIdx = lifeTimeIdx + 1;
+        int throwIdx = damageRangeIdx + 1;
+
+        id = int.Parse(intParseData[pidIdx]);
+        itemType = (ItemMainType)Enum.Parse(typeof(ItemMainType), intParseData[mainTypeIdx]);
+        name = intParseData[nameIdx];
+        useType = ParseEnum<ItemUseType>(intParseData[useTypeIdx]);
+        subType = ParseEnum<ItemSubType>(intParseData[subTypeIdx]);
+        stat = ParseEnum<Stat>(intParseData[statIdx]);
+        power = int.Parse(intParseData[powerIdx]);
+        isBuff = (int.Parse(intParseData[isBuffIdx]) != 0);
+        lifeTime = float.Parse(intParseData[lifeTimeIdx]);
+        damageRange = float.Parse(intParseData[damageRangeIdx]);
+        throwMaxReach = float.Parse(intParseData[throwIdx]);
+    }
+
+    private T ParseEnum<T>(string inEnumStr) where T : Enum
+    {
+        T parseEnum = (T)Enum.Parse(typeof(T), inEnumStr);
+        return parseEnum;
     }
 
     //깊은복사

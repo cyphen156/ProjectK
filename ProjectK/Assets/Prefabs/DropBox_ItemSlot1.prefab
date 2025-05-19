@@ -86,6 +86,7 @@ GameObject:
   - component: {fileID: 272064951316076784}
   - component: {fileID: 5805632663814486471}
   - component: {fileID: 6408048452884555048}
+  - component: {fileID: 5781720581784592810}
   m_Layer: 5
   m_Name: DropBox_ItemSlot1
   m_TagString: Untagged
@@ -153,6 +154,33 @@ MonoBehaviour:
   m_FillOrigin: 0
   m_UseSpriteMesh: 0
   m_PixelsPerUnitMultiplier: 1
+--- !u!114 &5781720581784592810
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1526661206308170812}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ca50d22194255c94eb66ad7c470ad76a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  slotItem:
+    id: 0
+    itemType: 0
+    subType: 0
+    useType: 0
+    name: 
+    stat: 0
+    power: 0
+    isBuff: 0
+    lifeTime: 0
+    damageRange: 0
+    throwMaxReach: 0
+    amount: 0
+  itemImage: {fileID: 2214637545401383222}
+  itemAmountText: {fileID: 9057559468671747584}
 --- !u!1 &3688202451142853479
 GameObject:
   m_ObjectHideFlags: 0

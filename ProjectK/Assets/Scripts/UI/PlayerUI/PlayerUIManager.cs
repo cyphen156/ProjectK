@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -7,7 +8,9 @@ public class PlayerUIManager : MonoBehaviour
     private PlayerController playerController;
     public PlayerStat playerStat;
     [SerializeField] private Transform crosshairTransform;
+    [SerializeField] private DropBoxSlot[] DropboxSlots;
     [SerializeField] private Button[] DropboxSlotButtons;
+
     private Slider hpSlider;
     private Slider staminaSlider;
     private GameObject dropBoxPanelObj;
@@ -16,6 +19,7 @@ public class PlayerUIManager : MonoBehaviour
     private void Awake()
     {
         isOnDropBoxPanel = false;
+        DropboxSlots = GetComponentsInChildren<DropBoxSlot>();
     }
 
     private void OnEnable()
@@ -34,6 +38,9 @@ public class PlayerUIManager : MonoBehaviour
     }
     private void Start()
     {
+        DropBox.OnOpenBox += OnOpenDropBox;
+        DropBox.OnCloseBox += OnCloseDropBox;
+
         crosshairTransform = transform.Find("Crosshair");
 
         StartSettingHUDUI();
@@ -93,6 +100,30 @@ public class PlayerUIManager : MonoBehaviour
             dropBoxPanelObj?.SetActive(true);
             isOnDropBoxPanel = true;
         }
+    }
+
+    private void OnOpenDropBox(DropBox inDropBox, PlayerController inPlayer)
+    {
+        dropBoxPanelObj.SetActive(true);
+        List<ItemBase> haveItemList = inDropBox.GetBoxItemList();
+        for (int i = 0; i < haveItemList.Count; i++)
+        {
+            DropboxSlots[i].SetSlot(haveItemList[i]);
+        }
+        for(int i = haveItemList.Count; i < DropboxSlots.Length; i++)
+        {
+            DropboxSlots[i].Reset();
+        }
+    }
+
+    private void OnChangeDropBox()
+    {
+        
+    }
+
+    private void OnCloseDropBox()
+    {
+        dropBoxPanelObj.SetActive(false);
     }
 
     private void DropBoxSlotClick(int inIndex, Button inDropBoxIndex)
