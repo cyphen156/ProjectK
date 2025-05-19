@@ -41,6 +41,7 @@ public class PlayerController : MonoBehaviour, IPlayerInputReceiver, ITakeDamage
     [SerializeField] private float defaultCrosshairSize;
     [SerializeField] private float currentCrosshairSize;
     [SerializeField] private float gunCrosshairSize;
+    [SerializeField] private float crosshairspreadRadius;
     [SerializeField] private float minCrosshairSize;
     [SerializeField] private float maxCrosshairSize;
     [SerializeField] private float crosshairLerpSpeed;
@@ -78,6 +79,7 @@ public class PlayerController : MonoBehaviour, IPlayerInputReceiver, ITakeDamage
         defaultCrosshairSize = 30f;
         currentCrosshairSize = defaultCrosshairSize;
         gunCrosshairSize = 0f;
+        crosshairspreadRadius = 10f;
         crosshairLerpSpeed = 10f;
         minCrosshairSize = defaultCrosshairSize - gunCrosshairSize;
         maxCrosshairSize = defaultCrosshairSize + gunCrosshairSize;
@@ -187,34 +189,30 @@ public class PlayerController : MonoBehaviour, IPlayerInputReceiver, ITakeDamage
     private void UpdateCrosshairSize()
     {
         float previousSize = currentCrosshairSize;
-        float targetCrosshairSize;
+        float targetCrosshairSize = defaultCrosshairSize;
         // 상태에 따라 목표 크기 설정
-        switch (currentMoveType)
+        if (currentMoveType == MoveType.Run)
+    {
+            targetCrosshairSize += crosshairspreadRadius;
+    }
+
+        if (currentGunState == GunState.Aim)
         {
-            case MoveType.Run:
-                targetCrosshairSize = maxCrosshairSize;
-                break;
-            default:
-                targetCrosshairSize = defaultCrosshairSize;
-                break;
+            targetCrosshairSize -= crosshairspreadRadius;
         }
-        switch (currentGunState)
+        
+        if (playerGun != null)
         {
-            case GunState.Aim:
-                targetCrosshairSize = minCrosshairSize;
-                break;
-            default:
-                targetCrosshairSize = defaultCrosshairSize;
-                break;
+            targetCrosshairSize += playerGun.equiptFocusRegion;
         }
+
         currentCrosshairSize = Mathf.Lerp(currentCrosshairSize, targetCrosshairSize, Time.deltaTime * crosshairLerpSpeed);
 
-        if ((currentMoveType == MoveType.Run && currentCrosshairSize > targetCrosshairSize) ||
-            (currentGunState == GunState.Aim && currentCrosshairSize < targetCrosshairSize) ||
-            (currentPlayerState == PlayerState.Idle && Mathf.Abs(currentCrosshairSize - targetCrosshairSize) < 0.01f))
+        if (Mathf.Abs(currentCrosshairSize - targetCrosshairSize) < 0.01f)
         {
             currentCrosshairSize = targetCrosshairSize;
         }
+
         if (Mathf.Abs(currentCrosshairSize - previousSize) > 0.01f)
         {
             OnCrosshairSizeChanged?.Invoke(currentCrosshairSize);

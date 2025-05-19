@@ -35,7 +35,7 @@ public class Gun : MonoBehaviour
     private float restRateTime;
 
     private float defaultFocusRegion; //탄 밀집도 : 클수록 퍼진다.
-    private float equiptFocusRegion;
+    public float equiptFocusRegion;
 
     public static event Action<int> OnChageAmmoUI;
     private bool isStateLock;

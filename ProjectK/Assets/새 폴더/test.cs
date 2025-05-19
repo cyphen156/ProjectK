@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 
 [RequireComponent(typeof(MeshFilter), typeof(MeshRenderer))]
-public class PlayerSight : MonoBehaviour
+public class Test : MonoBehaviour
 {
     public struct ViewCastInfo
     {
@@ -36,12 +36,11 @@ public class PlayerSight : MonoBehaviour
     [Header("Radious")]
     [SerializeField] private float baseViewRadius;
     [SerializeField] private float activeViewRadius;
-    [SerializeField] private float crosshairRadius;
 
     [Header("Angle")]
     [SerializeField] private float baseViewAngle;
     [SerializeField] private float activeViewAngle;
-    [SerializeField] private float crosshairAngle;
+    [SerializeField] private float crossHairRadius;
 
     [Header("Distance")]
     [SerializeField] private float viewDistance;
@@ -82,6 +81,7 @@ public class PlayerSight : MonoBehaviour
         PlayerController.OnCrosshairSizeChanged -= UpdateCrosshairRadius;
     }
 
+    
     private void Start()
     {
         viewMesh = new Mesh();
@@ -92,7 +92,7 @@ public class PlayerSight : MonoBehaviour
         StartCoroutine(FindTargetsWithDelay(0.2f));
     }
 
-    private void LateUpdate()
+    private void Update()
     {
         DrawFieldOfView();
     }
@@ -104,7 +104,7 @@ public class PlayerSight : MonoBehaviour
         RaycastHit hit;
         if (Physics.Raycast(transform.position, direction, out hit, activeViewRadius, obstacleMask))
         {
-            return new ViewCastInfo(true, hit.point, hit.distance, inGlobalAngle);
+            return new ViewCastInfo(true, hit.point, inGlobalAngle, hit.distance);
         }
         else
         {
@@ -120,7 +120,7 @@ public class PlayerSight : MonoBehaviour
         }
     }
 
-    // ¹æÇâ º¤ÅÍ ¾ò¾î¿À±â
+    // ë°©í–¥ ë²¡í„° ì–»ì–´ì˜¤ê¸°
     public Vector3 DirectionFromAngle(float inAngle, bool isGlobal)
     {
         if (!isGlobal)
@@ -161,8 +161,7 @@ public class PlayerSight : MonoBehaviour
         for (int i = 0; i <= stepCount; ++i)
         {
             float baseAngle = Mathf.Atan2(transform.forward.x, transform.forward.z) * Mathf.Rad2Deg;
-            //float angle = baseAngle - activeViewAngle / 2 + angleStep * i;
-            float angle = transform.eulerAngles.y - activeViewAngle / 2 + angleStep * i;
+            float angle = baseAngle - activeViewAngle / 2f + angleStep * i;
             ViewCastInfo newViewCast = ViewCast(angle);
 
             if (i > 0)
@@ -192,7 +191,7 @@ public class PlayerSight : MonoBehaviour
         vertices[0] = Vector3.zero;
         for (int i = 0; i < vertexCount - 1; ++i)
         {
-            vertices[i + 1] = transform.InverseTransformPoint(viewPoints[i] + Vector3.forward * 0.01f);
+            vertices[i + 1] = transform.InverseTransformPoint(viewPoints[i]);
 
             if (i < vertexCount - 2)
             {
@@ -221,7 +220,7 @@ public class PlayerSight : MonoBehaviour
             ViewCastInfo newViewCast = ViewCast(angle);
 
             bool edgeDistanceThresholdExceeded = Mathf.Abs(minViewCast.distance - newViewCast.distance) > edgeDistanceThreshold;
-            if (newViewCast.hit == minViewCast.hit && !edgeDistanceThresholdExceeded)
+            if (newViewCast.hit == minViewCast.hit)
             {
                 minAngle = angle;
                 minPoint = newViewCast.point;
@@ -238,17 +237,20 @@ public class PlayerSight : MonoBehaviour
 
     public Vector3 GetRandomSpreadDirection()
     {
-        float forwardAngle = Mathf.Atan2(transform.forward.x, transform.forward.z) * Mathf.Rad2Deg;
-        float spreadAngle = Random.Range(-crosshairAngle, crosshairAngle);
+        float spreadAngleRad = Mathf.Atan(crossHairRadius / viewDistance);
+        float spreadAngleDeg = spreadAngleRad * Mathf.Rad2Deg;
 
-        float finalAngle = forwardAngle + spreadAngle;
-        return DirectionFromAngle(finalAngle, true).normalized;
+        float baseAngle = Mathf.Atan2(transform.forward.x, transform.forward.z) * Mathf.Rad2Deg;
+        float randomAngle = UnityEngine.Random.Range(
+            baseAngle - spreadAngleDeg,
+            baseAngle + spreadAngleDeg
+        );
+
+        Vector3 direction = DirectionFromAngle(randomAngle, true);
+        return direction.normalized;
     }
-
     private void UpdateCrosshairRadius(float inCrosshairRadius)
     {
-        crosshairRadius = inCrosshairRadius;
-        float spreadAngleRad = Mathf.Atan(crosshairRadius / viewDistance);
-        crosshairAngle = spreadAngleRad * Mathf.Rad2Deg / 50f;
+        crossHairRadius = inCrosshairRadius;
     }
 }
