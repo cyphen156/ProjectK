@@ -55,7 +55,8 @@ public class DropBoxTable
         if(rollTableDictionary.TryGetValue(rollSubType, out List<int> idList))
         {
             int itemID = idList[random.Next(0, idList.Count)];
-            rollItem = MasterDataManager.Instance.GetMasterItemData(itemID);
+            rollItem = new ItemBase(MasterDataManager.Instance.GetMasterItemData(itemID));
+            rollItem.amount = 1;
         }
         return rollItem;
     }
