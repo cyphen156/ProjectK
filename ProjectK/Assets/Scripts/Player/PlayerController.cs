@@ -28,7 +28,7 @@ public enum MoveType
     Slow
 }
 
-public class PlayerController : MonoBehaviour, IPlayerInputReceiver
+public class PlayerController : MonoBehaviour, IPlayerInputReceiver, ITakeDamage
 {
     [Header("PlayerMovement")]
     private Vector3 lookDirection;
