@@ -65,8 +65,8 @@ public class DropBox : MonoBehaviour
         }
     }
 
-    Func<ItemBase> itemPickCallBack; 
-    public void OpenBox(Func<ItemBase> inItemPickCallBack)
+    Func<ItemBase, ItemBase> itemPickCallBack; 
+    public void OpenBox(Func<ItemBase, ItemBase> inItemPickCallBack)
     {
         Debug.Log("박스를 열었다.");
         OnOpenBox.Invoke(this);
@@ -95,7 +95,7 @@ public class DropBox : MonoBehaviour
         ItemBase returnItem = null;
         if(itemPickCallBack != null)
         {
-            returnItem = itemPickCallBack();
+            returnItem = itemPickCallBack(haveItems[inSlotIndex]);
         }
         
         if (returnItem == null)
