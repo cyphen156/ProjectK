@@ -179,11 +179,6 @@ public class PlayerController : MonoBehaviour, IPlayerInputReceiver, ITakeDamage
         currentMoveType = MoveType.Slow;
     }
 
-    public void StopAttack()
-    {
-
-    }
-
     #endregion
 
     /// <summary>

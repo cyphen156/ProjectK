@@ -134,11 +134,6 @@ public class InputManager : MonoBehaviour
             localPlayerController.InputAttack();
         }
 
-        if (Input.GetKeyUp(KeyCode.Mouse0))
-        {
-            localPlayerController.StopAttack();
-        }
-
         // ¿Á¿Â¿¸
         if (Input.GetKeyDown(KeyCode.R))
         {
