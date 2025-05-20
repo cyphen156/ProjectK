@@ -243,7 +243,12 @@ public class PlayerController : MonoBehaviour, IPlayerInputReceiver, ITakeDamage
     //아이템픽하는거
     public ItemBase PickItem(ItemBase inPickItem)
     {
-      //  Debug.Log("아이템 픽 " + inPickItem.name);
-       return playerInventory.PickItem(inPickItem); //있던 슬롯에서 교체될것은 반환
+        //인벤토리 적용
+        ItemBase previousItem = playerInventory.TryAddOrReturnPreviousItem(inPickItem);
+        if(inPickItem.itemType == ItemMainType.AttachMent)
+        {
+            playerGun.EquiptItems(playerInventory.GetGunItmes());
+        }
+        return previousItem; //있던 슬롯에서 교체될것은 반환
     }
 }
