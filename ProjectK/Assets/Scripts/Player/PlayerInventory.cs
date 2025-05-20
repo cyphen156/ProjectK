@@ -36,11 +36,11 @@ public class PlayerInventory : MonoBehaviour
             {
                 ItemBase copy = new ItemBase(pair.Value);
                 ItemBase newItem = new ItemBase(copy, 1);
-                PickItem(newItem);
+                TryAddOrReturnPreviousItem(newItem);
             }
         }
     }
-    public ItemBase PickItem(ItemBase inItem)
+    public ItemBase TryAddOrReturnPreviousItem(ItemBase inItem)
     {
         ItemBase returnItem = null;
 
