@@ -1,5 +1,6 @@
 using System.Collections;
 using UnityEngine;
+using UnityEngine.InputSystem.LowLevel;
 
 public enum PlayerState 
 { 
@@ -27,7 +28,9 @@ public class PlayerStateMachine : MonoBehaviour
         if (currentPlayerState != state)
         {
             PlayerState previousPlayerState = currentPlayerState;
+
             currentPlayerState = state;
+            Logger.Warning($"PlayerStateChanged :{previousPlayerState} -> {currentPlayerState}");
 
             switch (currentPlayerState)
             {

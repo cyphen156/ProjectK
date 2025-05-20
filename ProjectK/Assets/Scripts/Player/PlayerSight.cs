@@ -249,6 +249,6 @@ public class PlayerSight : MonoBehaviour
     {
         crosshairRadius = inCrosshairRadius;
         float spreadAngleRad = Mathf.Atan(crosshairRadius / viewDistance);
-        crosshairAngle = spreadAngleRad * Mathf.Rad2Deg / 50f;
+        crosshairAngle = spreadAngleRad * Mathf.Rad2Deg / 10;
     }
 }

@@ -121,8 +121,9 @@ public class InputManager : MonoBehaviour
         {
             isAim = true;
             moveType = MoveType.Slow;
-            localPlayerController.IsAim();
         }
+
+        localPlayerController.IsAim(isAim);
 
         // ¿Ãµø
         localPlayerController.InputMove(moveType, h, v);

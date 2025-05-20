@@ -6,8 +6,7 @@ public enum GunState
 {
     None,
     Attack,
-    Reload,
-    Aim
+    Reload
 }
 public class Gun : MonoBehaviour
 {
@@ -18,7 +17,7 @@ public class Gun : MonoBehaviour
 
     public static event Action<Vector3> OnFire;
 
-    private GunState currentGunState;
+    public GunState CurrentGunState { get; private set; }
     private bool isReloading;
     private float defaultReloadTime; //기본 탄창 채우는 시간
     private float equiptReloadTime; //스텟 적용
@@ -29,7 +28,7 @@ public class Gun : MonoBehaviour
     private int restBulletCount; //남은 총알 수
     private int defaultRps; //스텟 적용
     private int equiptRps; //1초당 총알 발사 갯수
-    
+
     private bool isRating; //연사속도대기
     private float rateTime;
     private float restRateTime;
@@ -39,7 +38,6 @@ public class Gun : MonoBehaviour
 
     public static event Action<int> OnChageAmmoUI;
     private bool isStateLock;
-
 
     private void Awake()
     {
@@ -53,11 +51,10 @@ public class Gun : MonoBehaviour
         restBulletCount = defaultBulletCount;
 
         defaultFocusRegion = 1f; //조준 반경
-  
         isRating = false;
         isReloading = false;
         isStateLock = false;
-        currentGunState = GunState.None;
+        CurrentGunState = GunState.None;
         ResetEquiptValue();
     }
 
@@ -67,7 +64,7 @@ public class Gun : MonoBehaviour
 
         OnChageAmmoUI?.Invoke(restBulletCount);
     }
-    
+
     private void FindTransform()
     {
         fireTransform = transform.Find("fireTransform");
@@ -75,18 +72,18 @@ public class Gun : MonoBehaviour
 
     public void Fire(Vector3 inDirection)
     {
-        if (isReloading == true || isRating == true )
+        if (isReloading == true || isRating == true)
         {
             return;
         }
-        if(HaveBullet() == false)
+        if (HaveBullet() == false)
         {
             return;
         }
         Bullet bullet = Instantiate(bulletPrefab, fireTransform.position, Quaternion.LookRotation(inDirection));
         bullet.SetDirection(inDirection);
 
-        if(OnFire != null)
+        if (OnFire != null)
         {
             OnFire.Invoke(transform.position);
         }
@@ -100,7 +97,7 @@ public class Gun : MonoBehaviour
 
     public void Reload()
     {
-        if(isReloading == true || IsFullBullet() == true)
+        if (isReloading == true || IsFullBullet() == true)
         {
             return;
         }
@@ -129,13 +126,13 @@ public class Gun : MonoBehaviour
 
     private void AttachEquiptment(ItemBase inEquiptItem)
     {
-        if(inEquiptItem == null || inEquiptItem.itemType == ItemMainType.None)
+        if (inEquiptItem == null || inEquiptItem.itemType == ItemMainType.None)
         {
             return;
         }
 
         ItemMainType mainType = inEquiptItem.itemType;
-        if(mainType != ItemMainType.AttachMent)
+        if (mainType != ItemMainType.AttachMent)
         {
             Debug.LogError("장착물이 아닙니다.");
             return;
@@ -172,7 +169,7 @@ public class Gun : MonoBehaviour
 
     private bool HaveBullet()
     {
-        if(restBulletCount <= 0)
+        if (restBulletCount <= 0)
         {
             return false;
         }
@@ -186,12 +183,12 @@ public class Gun : MonoBehaviour
 
     private void CountReloadTime()
     {
-        if(isReloading == false)
+        if (isReloading == false)
         {
             return;
         }
         restReloadTime -= Time.deltaTime;
-        if(restReloadTime <= 0)
+        if (restReloadTime <= 0)
         {
             isReloading = false;
             restBulletCount = equiptBulletCount;
@@ -204,12 +201,12 @@ public class Gun : MonoBehaviour
 
     private void CountRateTime()
     {
-        if(isReloading == true || isRating == false)
+        if (isReloading == true || isRating == false)
         {
             return;
         }
         restRateTime -= Time.deltaTime;
-        if(restRateTime <= 0)
+        if (restRateTime <= 0)
         {
             DoneRateTime();
         }
@@ -222,22 +219,28 @@ public class Gun : MonoBehaviour
 
     public void ChangeGunState(GunState inGunState)
     {
-        if (currentGunState != inGunState)
+        if (CurrentGunState != inGunState)
         {
+            Logger.Warning($"gunstateChanged :{CurrentGunState} -> {inGunState}");
+            CurrentGunState = inGunState;
             switch (inGunState)
             {
+                case GunState.None:
+                    break;
                 case GunState.Attack:
-                    SetGunAnimatorBool(inGunState, true);
+                    SetGunAnimatorTrigger(inGunState);
                     break;
                 case GunState.Reload:
                     if (isStateLock)
                     {
                         return;
                     }
+                    Reload();
                     SetGunAnimatorTrigger(inGunState);
-                    StartCoroutine(ChangeGunStateCoroutine(currentGunState, 2f));
+                    StartCoroutine(ChangeGunStateCoroutine(CurrentGunState, 2f));
                     break;
-                case GunState.Aim:
+                default:
+                    Logger.Log("FatalErreo :: Tried State Change is Not Allowed");
                     break;
             }
         }
