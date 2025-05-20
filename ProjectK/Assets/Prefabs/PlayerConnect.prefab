@@ -6322,7 +6322,6 @@ GameObject:
   - component: {fileID: 2892335502158358685}
   - component: {fileID: 3658165830591098702}
   - component: {fileID: 1985154216063682338}
-  - component: {fileID: 8169009259003397913}
   - component: {fileID: 3985101123388067015}
   - component: {fileID: 1577680350268647617}
   m_Layer: 0
@@ -6426,6 +6425,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   currentMoveSpeed: 5
+  currentMoveType: 0
   defaultCrosshairSize: 0
   currentCrosshairSize: 0
   gunCrosshairSize: 0
@@ -6536,28 +6536,6 @@ MeshRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_AdditionalVertexStreams: {fileID: 0}
---- !u!114 &8169009259003397913
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 8160031286155752097}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 5a2ee65969c251746b5f7f38e156ef01, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  baseViewRadius: 0
-  activeViewRadius: 0
-  baseViewAngle: 0
-  activeViewAngle: 0
-  crossHairRadius: 0
-  viewDistance: 0
-  meshResolution: 0
-  edgeResolveIterations: 0
-  edgeDistanceThreshold: 0
-  meshFilter: {fileID: 0}
 --- !u!54 &3985101123388067015
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -7863,6 +7841,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   bulletPrefab: {fileID: 3856218466273477182, guid: 76b6b7aea98400d4a87fed5d5b9a514c, type: 3}
   fireTransform: {fileID: 4381891015771052091}
+  animator: {fileID: 0}
 --- !u!1 &9215973777355365759
 GameObject:
   m_ObjectHideFlags: 0

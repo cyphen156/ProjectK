@@ -10,18 +10,10 @@ public interface IPlayerInputReceiver
     void InputMousePosition(Vector3 inMousePosition);
     void InteractDropBox();
     void Dodge();
-    void IsAim();
+    void IsAim(bool isAim);
+    void StopAttack();
 }
-public enum PlayerState
-{
-    Idle,
-    Walk,
-    Run,
-    Attack,
-    Reload,
-    Aim,
-    Die
-}
+
 public enum MoveType
 {
     Walk,
@@ -31,6 +23,7 @@ public enum MoveType
 
 public class PlayerController : MonoBehaviour, IPlayerInputReceiver, ITakeDamage
 {
+    #region variable Scope
     [Header("PlayerMovement")]
     private Vector3 lookDirection;
     [SerializeField] private float currentMoveSpeed; // 현재 움직임 속도
@@ -39,8 +32,9 @@ public class PlayerController : MonoBehaviour, IPlayerInputReceiver, ITakeDamage
     private float runSpeed; // 뛰는 속도
     private PlayerMove playerMove; // 플레이어 무브 클래스
     private Gun playerGun;
+    private bool isAimed;
     public Vector3 mouseWorldPosition { get; private set; }
-
+    public MoveType currentMoveType;
     [Header("PlayerSight")]
     private PlayerSight playerSight;
 
@@ -48,18 +42,20 @@ public class PlayerController : MonoBehaviour, IPlayerInputReceiver, ITakeDamage
     [SerializeField] private float defaultCrosshairSize;
     [SerializeField] private float currentCrosshairSize;
     [SerializeField] private float gunCrosshairSize;
+    [SerializeField] private float crosshairspreadRadius;
     [SerializeField] private float minCrosshairSize;
     [SerializeField] private float maxCrosshairSize;
     [SerializeField] private float crosshairLerpSpeed;
     public static event Action<float> OnCrosshairSizeChanged;
 
-    [Header("PlayerAnimation")]
-    private PlayerAnimation playerAnimation;
+    [Header("PlayerStateMachine")]
+    private PlayerStateMachine playerStateMachine;
     public static event Action<PlayerController, PlayerState> OnPlayerStateChanged;
     [SerializeField] private PlayerState currentPlayerState;
     private PlayerStat playerStat;
     private BoxDetector boxDetector;
     private PlayerInventory playerInventory;
+    #endregion
 
     public static event Action<float> OnChangeHpUI;
 
@@ -73,17 +69,17 @@ public class PlayerController : MonoBehaviour, IPlayerInputReceiver, ITakeDamage
         mouseWorldPosition = Vector3.zero;
         lookDirection = Vector3.forward;
         playerMove = GetComponent<PlayerMove>();
-        playerAnimation = GetComponent<PlayerAnimation>();
         currentPlayerState = PlayerState.Idle;
         playerSight = GetComponent<PlayerSight>();
         playerStat =  new PlayerStat();
         playerInventory = GetComponent<PlayerInventory>();
         boxDetector = GetComponentInChildren<BoxDetector>();
-
+        playerStateMachine = GetComponent<PlayerStateMachine>();
         defaultCrosshairSize = 30f;
         currentCrosshairSize = defaultCrosshairSize;
         gunCrosshairSize = 0f;
-        crosshairLerpSpeed = 10f;
+        crosshairspreadRadius = 10f;
+        crosshairLerpSpeed = 5f;
         minCrosshairSize = defaultCrosshairSize - gunCrosshairSize;
         maxCrosshairSize = defaultCrosshairSize + gunCrosshairSize;
     }
@@ -103,7 +99,6 @@ public class PlayerController : MonoBehaviour, IPlayerInputReceiver, ITakeDamage
 
     private void Update()
     {
-        AniConrtrol();
         lookDirection = CalculateDirectionFromMouseWorldPosition();
         //if (currentPlayerState == PlayerState.Dodge)
         //{
@@ -118,13 +113,12 @@ public class PlayerController : MonoBehaviour, IPlayerInputReceiver, ITakeDamage
     #region Input Methods
     public void InputReload()
     {
-        currentPlayerState = PlayerState.Reload;
-        playerGun.Reload();
+        playerGun.ChangeGunState(GunState.Reload);
     }
 
     public void InputAttack()
     {
-        currentPlayerState = PlayerState.Attack;
+        playerGun.ChangeGunState(GunState.Attack);
         Vector3 direction = playerSight.GetRandomSpreadDirection();
         playerGun.Fire(direction);
     }
@@ -133,7 +127,7 @@ public class PlayerController : MonoBehaviour, IPlayerInputReceiver, ITakeDamage
     {
         if (inInputHorizontal == 0 && inInputVertical == 0)
         {
-            currentPlayerState = PlayerState.Idle;
+            currentPlayerState = playerStateMachine.ChangePlayerState(PlayerState.Idle);
             return;
         }
         else
@@ -149,8 +143,13 @@ public class PlayerController : MonoBehaviour, IPlayerInputReceiver, ITakeDamage
         else if (inMoveType == MoveType.Run)
         {
             currentMoveSpeed = runSpeed;
+            currentMoveType = MoveType.Run;
         }
-
+        else
+        {
+            currentMoveType = MoveType.Walk;
+        }
+        currentPlayerState = playerStateMachine.ChangePlayerState(PlayerState.Walk);
         playerMove.Move(inInputHorizontal * Time.deltaTime * currentMoveSpeed, inInputVertical * Time.deltaTime * currentMoveSpeed);
     }
 
@@ -174,20 +173,17 @@ public class PlayerController : MonoBehaviour, IPlayerInputReceiver, ITakeDamage
 
     }
 
-    public void IsAim()
+    public void IsAim(bool isAim)
     {
-        currentPlayerState = PlayerState.Aim;
+        isAimed = isAim;
+        currentMoveType = MoveType.Slow;
     }
+
     #endregion
 
     /// <summary>
     /// 현재 플레이어 상태를 애니메이션 스크립트에 넘기는 함수
     /// </summary>
-    private void AniConrtrol()
-    {
-        playerAnimation.AnimationConrtrol(currentPlayerState);
-    }
-
     private Vector3 CalculateDirectionFromMouseWorldPosition()
     {
         Vector3 currentPosition = transform.position;
@@ -199,32 +195,35 @@ public class PlayerController : MonoBehaviour, IPlayerInputReceiver, ITakeDamage
     private void UpdateCrosshairSize()
     {
         float previousSize = currentCrosshairSize;
-        float targetCrosshairSize;
+        float targetCrosshairSize = defaultCrosshairSize;
         // 상태에 따라 목표 크기 설정
-        switch (currentPlayerState)
-        {
-            case PlayerState.Run:
-                targetCrosshairSize = maxCrosshairSize;
-                break;
-            case PlayerState.Aim:
-                targetCrosshairSize = minCrosshairSize;
-                break;
-            default:
-                targetCrosshairSize = defaultCrosshairSize;
-                break;
+        if (currentMoveType == MoveType.Run)
+        {   
+            targetCrosshairSize += crosshairspreadRadius;
         }
+        
+        if (playerGun != null)
+        {
+            targetCrosshairSize += playerGun.equiptFocusRegion;
+
+            if (isAimed)
+            {
+                targetCrosshairSize -= crosshairspreadRadius;
+            }
+
+        }
+
         currentCrosshairSize = Mathf.Lerp(currentCrosshairSize, targetCrosshairSize, Time.deltaTime * crosshairLerpSpeed);
 
-        if ((currentPlayerState == PlayerState.Run && currentCrosshairSize > targetCrosshairSize) ||
-            (currentPlayerState == PlayerState.Aim && currentCrosshairSize < targetCrosshairSize) ||
-            (currentPlayerState == PlayerState.Idle && Mathf.Abs(currentCrosshairSize - targetCrosshairSize) < 0.01f))
+        if (Mathf.Abs(currentCrosshairSize - targetCrosshairSize) < 0.01f)
         {
             currentCrosshairSize = targetCrosshairSize;
         }
-        if (Mathf.Abs(currentCrosshairSize - previousSize) > 0.01f)
-        {
+
+        //if (Mathf.Abs(currentCrosshairSize - previousSize) > 0.01f)
+        //{
             OnCrosshairSizeChanged?.Invoke(currentCrosshairSize);
-        }
+        //}
     }
 
     public void TakeDamage(float inBulletDamage)

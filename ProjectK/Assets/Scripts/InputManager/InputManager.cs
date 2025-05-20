@@ -121,14 +121,15 @@ public class InputManager : MonoBehaviour
         {
             isAim = true;
             moveType = MoveType.Slow;
-            localPlayerController.IsAim();
         }
+
+        localPlayerController.IsAim(isAim);
 
         // 이동
         localPlayerController.InputMove(moveType, h, v);
 
         // 공격
-        if (Input.GetKeyDown(KeyCode.Mouse0))
+        if (Input.GetKey(KeyCode.Mouse0))
         {
             localPlayerController.InputAttack();
         }

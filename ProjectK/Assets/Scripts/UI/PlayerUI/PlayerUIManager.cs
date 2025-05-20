@@ -16,11 +16,13 @@ public class PlayerUIManager : MonoBehaviour
     private GameObject dropBoxPanelObj;
     private DropBox openedDropBox;
     private TextMeshProUGUI ammoText;
+    private RectTransform rectTransform;
 
     private void Awake()
     {
         openedDropBox = null;
         DropboxSlots = GetComponentsInChildren<DropBoxSlot>();
+        rectTransform = crosshairTransform.gameObject.GetComponent<RectTransform>();
     }
 
     private void OnEnable()
@@ -40,7 +42,6 @@ public class PlayerUIManager : MonoBehaviour
 
     private void Start()
     {
-        DropBox.OnOpenBox += OnOpenDropBox;
         DropBox.OnCloseBox += OnCloseDropBox;
         DropBox.OnChangeBox += OnChangeDropBox;
         PlayerController.OnCrosshairSizeChanged += UpdateCrosshairUISize;
@@ -152,8 +153,7 @@ public class PlayerUIManager : MonoBehaviour
 
     private void UpdateCrosshairUISize(float inCurrentCrosshairSize)
     {
-        RectTransform rectTransform = crosshairTransform.gameObject.GetComponent<RectTransform>();
-        rectTransform.sizeDelta = new Vector2(inCurrentCrosshairSize, inCurrentCrosshairSize);
+        rectTransform.sizeDelta = new Vector2(5 * inCurrentCrosshairSize, 5 * inCurrentCrosshairSize);
     }
 
     #endregion
