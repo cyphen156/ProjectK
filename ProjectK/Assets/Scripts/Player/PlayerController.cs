@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using UnityEngine;
 
 public interface IPlayerInputReceiver
@@ -56,9 +57,11 @@ public class PlayerController : MonoBehaviour, IPlayerInputReceiver, ITakeDamage
     private PlayerAnimation playerAnimation;
     public static event Action<PlayerController, PlayerState> OnPlayerStateChanged;
     [SerializeField] private PlayerState currentPlayerState;
-    PlayerStat playerStat;
+    private PlayerStat playerStat;
     private BoxDetector boxDetector;
     private PlayerInventory playerInventory;
+
+    public static event Action<float> OnChangeHpUI;
 
     #region Unity Methods
     private void Awake()
@@ -73,7 +76,7 @@ public class PlayerController : MonoBehaviour, IPlayerInputReceiver, ITakeDamage
         playerAnimation = GetComponent<PlayerAnimation>();
         currentPlayerState = PlayerState.Idle;
         playerSight = GetComponent<PlayerSight>();
-        playerStat = GetComponent<PlayerStat>();
+        playerStat =  new PlayerStat();
         playerInventory = GetComponent<PlayerInventory>();
         boxDetector = GetComponentInChildren<BoxDetector>();
 
@@ -89,6 +92,13 @@ public class PlayerController : MonoBehaviour, IPlayerInputReceiver, ITakeDamage
     {
         playerGun = GetComponentInChildren<Gun>();
         GameManager.Instance.RegisterAlivePlayer(this, currentPlayerState);
+        StartCoroutine(Init());
+    }
+
+    private IEnumerator Init()
+    {
+        yield return null;
+        OnChangeHpUI?.Invoke(playerStat.GetHP());
     }
 
     private void Update()
@@ -220,6 +230,14 @@ public class PlayerController : MonoBehaviour, IPlayerInputReceiver, ITakeDamage
     public void TakeDamage(float inBulletDamage)
     {
         playerStat.ApplyHp(-inBulletDamage);
+        float hp = playerStat.GetHP();
+
+        OnChangeHpUI?.Invoke(hp);
+        if (hp <= 0)
+        {
+            Logger.Info("플레이어가 죽음");
+            return;
+        }
     }
 
     //아이템픽하는거
