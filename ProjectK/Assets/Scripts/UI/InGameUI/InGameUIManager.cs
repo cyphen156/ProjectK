@@ -3,7 +3,7 @@ using UnityEngine.UI;
 
 public class InGameUIManager : MonoBehaviour
 {
-    public PlayerStat playerStat;
+    public PlayerController playerController;
     private Slider hpSlider;
     private RectTransform hpSliderRect;
 
@@ -17,14 +17,15 @@ public class InGameUIManager : MonoBehaviour
 
     private void Start()
     {
+        PlayerController.OnChangeHpUI += UpdateHpIngameUI;
+
         hpSlider = transform.Find("InGameHpSlider").GetComponent<Slider>();
         hpSlider.maxValue = 100f;
         hpSliderRect = hpSlider.GetComponent<RectTransform>();
 
-        if (playerStat != null)
+        if (playerController != null)
         {
-            hpSlider.value = playerStat.GetHP();
-            targetPlayerTransform = playerStat.transform;
+            targetPlayerTransform = playerController.transform;
         }
     }
 
@@ -39,5 +40,19 @@ public class InGameUIManager : MonoBehaviour
         Vector3 worldPosition = targetPlayerTransform.position + offset;
         Vector3 screenPosition = Camera.main.WorldToScreenPoint(worldPosition);
         hpSliderRect.position = screenPosition;
+    }
+
+    private void UpdateHpIngameUI(float inHp)
+    {
+        hpSlider.value = inHp;
+
+        if(hpSlider.value <= 0)
+        {
+            hpSlider.fillRect.GetComponent<Image>().color = Color.clear;
+        }
+        else
+        {
+            hpSlider.fillRect.GetComponent<Image>().color = Color.red;
+        }
     }
 }
