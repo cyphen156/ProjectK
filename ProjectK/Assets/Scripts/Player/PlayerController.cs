@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using UnityEngine;
 
 public interface IPlayerInputReceiver
@@ -90,7 +91,14 @@ public class PlayerController : MonoBehaviour, IPlayerInputReceiver, ITakeDamage
     private void Start()
     {
         playerGun = GetComponentInChildren<Gun>();
+        StartCoroutine(Init());
+    }
+
+    private IEnumerator Init()
+    {
+        yield return null;
         GameManager.Instance.RegisterAlivePlayer(this, currentPlayerState);
+        OnChangeHpUI?.Invoke(playerStat.GetHP());
     }
 
     private void Update()
@@ -222,14 +230,14 @@ public class PlayerController : MonoBehaviour, IPlayerInputReceiver, ITakeDamage
     public void TakeDamage(float inBulletDamage)
     {
         playerStat.ApplyHp(-inBulletDamage);
-        playerStat.CheckDie();
-        UpdateHpUI();
-    }
-
-    public void UpdateHpUI()
-    {
         float hp = playerStat.GetHP();
+
         OnChangeHpUI?.Invoke(hp);
+        if (hp <= 0)
+        {
+            Logger.Info("플레이어가 죽음");
+            return;
+        }
     }
 
     //아이템픽하는거

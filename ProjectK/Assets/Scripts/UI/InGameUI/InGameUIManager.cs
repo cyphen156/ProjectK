@@ -26,7 +26,6 @@ public class InGameUIManager : MonoBehaviour
         if (playerStat != null)
         {
             targetPlayerTransform = playerStat.transform;
-            playerStat.gameObject.GetComponent<PlayerController>().UpdateHpUI();
         }
     }
 

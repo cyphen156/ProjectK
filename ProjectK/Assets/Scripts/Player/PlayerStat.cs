@@ -31,22 +31,15 @@ public class PlayerStat : MonoBehaviour
     {
         hp += inApplyHpValue;
 
-        if(CheckDie() == true)
+        if(hp > maxHp)
         {
-            return;
+            hp = maxHp;
+        }
+        else if(hp < 0)
+        {
+            hp = 0;
         }
 
         Logger.Info("남은 HP: " + hp);
-    }
-
-    public bool CheckDie()
-    {
-        if (hp <= 0)
-        {
-            Logger.Info("플레이어가 죽음");
-            return true;
-        }
-
-        return false;
     }
 }

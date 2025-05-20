@@ -132,7 +132,6 @@ public class PlayerUIManager : MonoBehaviour
         staminaSlider.maxValue = 100f;
         if (playerStat != null)
         {
-            playerController.UpdateHpUI();
             staminaSlider.value = playerStat.GetStamina();
         }
         else
