@@ -57,7 +57,7 @@ public class PlayerController : MonoBehaviour, IPlayerInputReceiver, ITakeDamage
     private PlayerAnimation playerAnimation;
     public static event Action<PlayerController, PlayerState> OnPlayerStateChanged;
     [SerializeField] private PlayerState currentPlayerState;
-    PlayerStat playerStat;
+    private PlayerStat playerStat;
     private BoxDetector boxDetector;
     private PlayerInventory playerInventory;
 
@@ -76,7 +76,7 @@ public class PlayerController : MonoBehaviour, IPlayerInputReceiver, ITakeDamage
         playerAnimation = GetComponent<PlayerAnimation>();
         currentPlayerState = PlayerState.Idle;
         playerSight = GetComponent<PlayerSight>();
-        playerStat = GetComponent<PlayerStat>();
+        playerStat =  new PlayerStat();
         playerInventory = GetComponent<PlayerInventory>();
         boxDetector = GetComponentInChildren<BoxDetector>();
 
@@ -91,13 +91,13 @@ public class PlayerController : MonoBehaviour, IPlayerInputReceiver, ITakeDamage
     private void Start()
     {
         playerGun = GetComponentInChildren<Gun>();
+        GameManager.Instance.RegisterAlivePlayer(this, currentPlayerState);
         StartCoroutine(Init());
     }
 
     private IEnumerator Init()
     {
         yield return null;
-        GameManager.Instance.RegisterAlivePlayer(this, currentPlayerState);
         OnChangeHpUI?.Invoke(playerStat.GetHP());
     }
 

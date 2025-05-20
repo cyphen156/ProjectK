@@ -7,7 +7,6 @@ using UnityEngine.UI;
 public class PlayerUIManager : MonoBehaviour
 {
     private PlayerController playerController;
-    public PlayerStat playerStat;
     [SerializeField] private Transform crosshairTransform;
     [SerializeField] private DropBoxSlot[] DropboxSlots;
     [SerializeField] private Button[] DropboxSlotButtons;
@@ -130,14 +129,6 @@ public class PlayerUIManager : MonoBehaviour
         // hp바, 스테미나바 초기화
         hpSlider.maxValue = 100f;
         staminaSlider.maxValue = 100f;
-        if (playerStat != null)
-        {
-            staminaSlider.value = playerStat.GetStamina();
-        }
-        else
-        {
-            Logger.Error("playerStat을 변수에 넣었는지 인스펙터에서 확인 필요!");
-        }
     }
 
     private void UpdateAmmoUI(int inCurrentAmmo)

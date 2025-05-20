@@ -3,7 +3,7 @@ using UnityEngine.UI;
 
 public class InGameUIManager : MonoBehaviour
 {
-    public PlayerStat playerStat;
+    public PlayerController playerController;
     private Slider hpSlider;
     private RectTransform hpSliderRect;
 
@@ -23,9 +23,9 @@ public class InGameUIManager : MonoBehaviour
         hpSlider.maxValue = 100f;
         hpSliderRect = hpSlider.GetComponent<RectTransform>();
 
-        if (playerStat != null)
+        if (playerController != null)
         {
-            targetPlayerTransform = playerStat.transform;
+            targetPlayerTransform = playerController.transform;
         }
     }
 

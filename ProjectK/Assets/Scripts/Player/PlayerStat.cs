@@ -1,15 +1,14 @@
 using System;
-using UnityEngine;
 
-public class PlayerStat : MonoBehaviour
+public class PlayerStat
 {
     private float maxHp;
-    [SerializeField] private float hp;
+    private float hp;
     private float maxStemina;
-    [SerializeField] private float stamina;
+    private float stamina;
 
-    private void Awake()
-    {
+    public PlayerStat()
+    { 
         maxHp = 100;
         hp = maxHp;
 
