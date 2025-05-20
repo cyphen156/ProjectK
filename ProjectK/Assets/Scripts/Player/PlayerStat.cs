@@ -1,14 +1,14 @@
-using UnityEngine;
+using System;
 
-public class PlayerStat : MonoBehaviour
+public class PlayerStat
 {
     private float maxHp;
-    [SerializeField] private float hp;
+    private float hp;
     private float maxStemina;
-    [SerializeField] private float stamina;
+    private float stamina;
 
-    private void Awake()
-    {
+    public PlayerStat()
+    { 
         maxHp = 100;
         hp = maxHp;
 
@@ -30,11 +30,15 @@ public class PlayerStat : MonoBehaviour
     {
         hp += inApplyHpValue;
 
-        if(hp <= 0)
+        if(hp > maxHp)
         {
-            // 죽음 관련
+            hp = maxHp;
+        }
+        else if(hp < 0)
+        {
+            hp = 0;
         }
 
-        Debug.Log("남은 HP: " + hp);
+        Logger.Info("남은 HP: " + hp);
     }
 }

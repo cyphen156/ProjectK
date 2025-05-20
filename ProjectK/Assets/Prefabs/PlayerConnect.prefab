@@ -6320,7 +6320,6 @@ GameObject:
   - component: {fileID: 8847328568699138083}
   - component: {fileID: 2745973890671376165}
   - component: {fileID: 2892335502158358685}
-  - component: {fileID: 3479593415885844583}
   - component: {fileID: 3658165830591098702}
   - component: {fileID: 1985154216063682338}
   - component: {fileID: 3985101123388067015}
@@ -6484,20 +6483,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   gunItems: []
   consumeItems: []
---- !u!114 &3479593415885844583
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 8160031286155752097}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: a975b83e0157d1643ba49f28b7409616, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  hp: 0
-  stamina: 0
 --- !u!33 &3658165830591098702
 MeshFilter:
   m_ObjectHideFlags: 0

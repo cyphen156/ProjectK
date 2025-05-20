@@ -7,7 +7,6 @@ using UnityEngine.UI;
 public class PlayerUIManager : MonoBehaviour
 {
     private PlayerController playerController;
-    public PlayerStat playerStat;
     [SerializeField] private Transform crosshairTransform;
     [SerializeField] private DropBoxSlot[] DropboxSlots;
     [SerializeField] private Button[] DropboxSlotButtons;
@@ -44,6 +43,7 @@ public class PlayerUIManager : MonoBehaviour
         DropBox.OnCloseBox += OnCloseDropBox;
         DropBox.OnChangeBox += OnChangeDropBox;
         PlayerController.OnCrosshairSizeChanged += UpdateCrosshairUISize;
+        PlayerController.OnChangeHpUI += UpdateHpUI;
         Gun.OnChageAmmoUI += UpdateAmmoUI;
 
         StartSettingHUDUI();
@@ -128,20 +128,25 @@ public class PlayerUIManager : MonoBehaviour
         // hp바, 스테미나바 초기화
         hpSlider.maxValue = 100f;
         staminaSlider.maxValue = 100f;
-        if (playerStat != null)
-        {
-            hpSlider.value = playerStat.GetHP();
-            staminaSlider.value = playerStat.GetStamina();
-        }
-        else
-        {
-            Debug.LogError("playerStat을 변수에 넣었는지 인스펙터에서 확인 필요!");
-        }
     }
 
     private void UpdateAmmoUI(int inCurrentAmmo)
     {
         ammoText.text = inCurrentAmmo.ToString();
+    }
+
+    private void UpdateHpUI(float inHp)
+    {
+        hpSlider.value = inHp;
+
+        if (hpSlider.value <= 0)
+        {
+            hpSlider.fillRect.GetComponent<Image>().color = Color.clear;
+        }
+        else
+        {
+            hpSlider.fillRect.GetComponent<Image>().color = Color.red;
+        }
     }
 
     private void UpdateCrosshairUISize(float inCurrentCrosshairSize)

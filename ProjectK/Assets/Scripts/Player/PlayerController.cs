@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using UnityEngine;
 
 public interface IPlayerInputReceiver
@@ -51,10 +52,12 @@ public class PlayerController : MonoBehaviour, IPlayerInputReceiver, ITakeDamage
     private PlayerStateMachine playerStateMachine;
     public static event Action<PlayerController, PlayerState> OnPlayerStateChanged;
     [SerializeField] private PlayerState currentPlayerState;
-    PlayerStat playerStat;
+    private PlayerStat playerStat;
     private BoxDetector boxDetector;
     private PlayerInventory playerInventory;
     #endregion
+
+    public static event Action<float> OnChangeHpUI;
 
     #region Unity Methods
     private void Awake()
@@ -66,11 +69,10 @@ public class PlayerController : MonoBehaviour, IPlayerInputReceiver, ITakeDamage
         mouseWorldPosition = Vector3.zero;
         lookDirection = Vector3.forward;
         playerMove = GetComponent<PlayerMove>();
-        currentMoveType = MoveType.Walk;
-
-        playerStateMachine = GetComponent<PlayerStateMachine>();
+        playerAnimation = GetComponent<PlayerAnimation>();
         currentPlayerState = PlayerState.Idle;
         playerSight = GetComponent<PlayerSight>();
+        playerStat =  new PlayerStat();
         playerStat = GetComponent<PlayerStat>();
         currentGunState = GunState.None;
         playerInventory = GetComponent<PlayerInventory>();
@@ -89,6 +91,13 @@ public class PlayerController : MonoBehaviour, IPlayerInputReceiver, ITakeDamage
     {
         playerGun = GetComponentInChildren<Gun>();
         GameManager.Instance.RegisterAlivePlayer(this, currentPlayerState);
+        StartCoroutine(Init());
+    }
+
+    private IEnumerator Init()
+    {
+        yield return null;
+        OnChangeHpUI?.Invoke(playerStat.GetHP());
     }
 
     private void Update()
@@ -222,6 +231,14 @@ public class PlayerController : MonoBehaviour, IPlayerInputReceiver, ITakeDamage
     public void TakeDamage(float inBulletDamage)
     {
         playerStat.ApplyHp(-inBulletDamage);
+        float hp = playerStat.GetHP();
+
+        OnChangeHpUI?.Invoke(hp);
+        if (hp <= 0)
+        {
+            Logger.Info("플레이어가 죽음");
+            return;
+        }
     }
 
     //아이템픽하는거
