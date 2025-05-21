@@ -1,3 +1,4 @@
+using System.Collections;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -15,8 +16,9 @@ public class InGameUIManager : MonoBehaviour
         offset = new Vector3(0, 3f, 0);
     }
 
-    private void Start()
+    private IEnumerator Start()
     {
+        yield return null;
         PlayerController.OnChangeHpUI += UpdateHpIngameUI;
 
         hpSlider = transform.Find("InGameHpSlider").GetComponent<Slider>();
