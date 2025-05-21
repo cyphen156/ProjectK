@@ -126,12 +126,12 @@ public class GameManager : MonoBehaviour
         GameEnd?.Invoke(gameWinner);
         currentGameState = GameState.End;
     }
-    public void RegisterAlivePlayer(PlayerController inPlayerController, PlayerState inPlayerStat)
+    public void RegisterAlivePlayer(PlayerController inPlayerController, PlayerState inPlayerStat, bool inIsOwner = true)
     {
         if (!players.ContainsKey(inPlayerController))
         {
             players.Add(inPlayerController, inPlayerStat);
-            //if (isLocal)
+            if (inIsOwner) //심볼이 Multi 면 오너값이 제대로 들어옴
             {
                 LocalPlayerState?.Invoke(inPlayerController, inPlayerStat);
             }
