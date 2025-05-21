@@ -4649,7 +4649,7 @@ SphereCollider:
     serializedVersion: 2
     m_Bits: 0
   m_LayerOverridePriority: 0
-  m_IsTrigger: 0
+  m_IsTrigger: 1
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 3
@@ -6324,6 +6324,7 @@ GameObject:
   - component: {fileID: 1985154216063682338}
   - component: {fileID: 3985101123388067015}
   - component: {fileID: 1577680350268647617}
+  - component: {fileID: 6848329541684908149}
   m_Layer: 0
   m_Name: PlayerConnect
   m_TagString: Untagged
@@ -6429,6 +6430,7 @@ MonoBehaviour:
   defaultCrosshairSize: 0
   currentCrosshairSize: 0
   gunCrosshairSize: 0
+  crosshairspreadRadius: 0
   minCrosshairSize: 0
   maxCrosshairSize: 0
   crosshairLerpSpeed: 0
@@ -6586,6 +6588,29 @@ CapsuleCollider:
   m_Height: 2
   m_Direction: 1
   m_Center: {x: 0, y: 1, z: 0}
+--- !u!114 &6848329541684908149
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8160031286155752097}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5a2ee65969c251746b5f7f38e156ef01, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  baseViewRadius: 0
+  activeViewRadius: 0
+  crosshairRadius: 0
+  baseViewAngle: 0
+  activeViewAngle: 0
+  crosshairAngle: 0
+  viewDistance: 0
+  meshResolution: 0
+  edgeResolveIterations: 0
+  edgeDistanceThreshold: 0
+  meshFilter: {fileID: 0}
 --- !u!1 &8168254297558941174
 GameObject:
   m_ObjectHideFlags: 0
@@ -7841,7 +7866,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   bulletPrefab: {fileID: 3856218466273477182, guid: 76b6b7aea98400d4a87fed5d5b9a514c, type: 3}
   fireTransform: {fileID: 4381891015771052091}
-  animator: {fileID: 0}
+  animator: {fileID: 1198002568489924210}
+  equiptFocusRegion: 0
 --- !u!1 &9215973777355365759
 GameObject:
   m_ObjectHideFlags: 0
