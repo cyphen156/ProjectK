@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using UnityEngine;
+using Unity.Netcode;
 
 public interface IPlayerInputReceiver
 {
@@ -20,7 +21,7 @@ public enum MoveType
     Slow
 }
 
-public class PlayerController : MonoBehaviour, IPlayerInputReceiver, ITakeDamage
+public class PlayerController : NetworkBehaviour, IPlayerInputReceiver, ITakeDamage
 {
     #region variable Scope
     [Header("PlayerMovement")]
@@ -86,7 +87,12 @@ public class PlayerController : MonoBehaviour, IPlayerInputReceiver, ITakeDamage
     private void Start()
     {
         playerGun = GetComponentInChildren<Gun>();
-        GameManager.Instance.RegisterAlivePlayer(this, currentPlayerState);
+#if MULTI
+        GameManager.Instance.RegisterAlivePlayer(this, currentPlayerState, IsOwner);
+#else    
+    GameManager.Instance.RegisterAlivePlayer(this, currentPlayerState);
+#endif
+
         StartCoroutine(Init());
     }
 
@@ -107,7 +113,7 @@ public class PlayerController : MonoBehaviour, IPlayerInputReceiver, ITakeDamage
         UpdateCrosshairSize();
     }
 
-    #endregion
+#endregion
 
     #region Input Methods
     public void InputReload()
