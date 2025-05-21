@@ -12,7 +12,6 @@ public interface IPlayerInputReceiver
     void InteractDropBox();
     void Dodge();
     void IsAim(bool isAim);
-    
 }
 
 public enum MoveType
