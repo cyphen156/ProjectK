@@ -1,24 +1,35 @@
+using System;
 using TMPro;
 using UnityEngine;
 
 public class SystemUIManager : MonoBehaviour
 {
+    [Header("GameLifeTime")]
     private TextMeshProUGUI GameLifeTimeText;
     private float minutes;
     private float seconds;
 
+    [Header("RestPlayerText")]
     private TextMeshProUGUI RestPlayerText;
+
+    [Header("GameEndPanel")]
+    private GameObject gameEndPanel;
+    private TextMeshProUGUI winnerInfoText;
 
     private void Awake()
     {
         minutes = 0f;
         seconds = 0f;
+
+        GameLifeTimeText = transform.Find("GameLifeTimeBackground/GameLifeTimeText").GetComponentInParent<TextMeshProUGUI>();
+        RestPlayerText = transform.Find("RestPlayerBackground/RestPlayerText").GetComponentInParent<TextMeshProUGUI>();
+        gameEndPanel = GameObject.Find("GameEndPanel");
+        winnerInfoText = gameEndPanel.GetComponentInChildren<TextMeshProUGUI>();
     }
 
     private void Start()
     {
-        GameLifeTimeText = transform.Find("GameLifeTimeBackground/GameLifeTimeText").GetComponentInParent<TextMeshProUGUI>();
-        RestPlayerText = transform.Find("RestPlayerBackground/RestPlayerText").GetComponentInParent<TextMeshProUGUI>();
+        
 
         if(RestPlayerText == null)
         {
@@ -32,7 +43,10 @@ public class SystemUIManager : MonoBehaviour
 
         GameManager.GamePlayTimeChange += UpdateGameLifeTime;
         GameManager.PlayerCountChange += UpdateRestPlayer;
+        GameManager.GameEnd += UpdateLastPlayer;
     }
+
+    
 
     private void UpdateGameLifeTime(float inCurrentTime)
     {
@@ -45,5 +59,14 @@ public class SystemUIManager : MonoBehaviour
     private void UpdateRestPlayer(int inCurrentPlayer)
     {
         RestPlayerText.text = $" Rest : {inCurrentPlayer}";
+    }
+
+    private void UpdateLastPlayer(string obj)
+    {
+        if (obj != null)
+        {
+            winnerInfoText.text = "Winner is " + obj;
+
+        }
     }
 }
