@@ -1,5 +1,6 @@
 using System;
 using System.Collections;
+using Unity.Cinemachine;
 using UnityEngine;
 
 public interface IPlayerInputReceiver
@@ -11,7 +12,7 @@ public interface IPlayerInputReceiver
     void InteractDropBox();
     void Dodge();
     void IsAim(bool isAim);
-    void StopAttack();
+    
 }
 
 public enum MoveType
@@ -58,6 +59,10 @@ public class PlayerController : MonoBehaviour, IPlayerInputReceiver, ITakeDamage
     #endregion
 
     public static event Action<float> OnChangeHpUI;
+
+    private float lastInputHorizontal = 0f;
+    private float lastInputVertical = 0f;
+
 
     #region Unity Methods
     private void Awake()
@@ -125,6 +130,9 @@ public class PlayerController : MonoBehaviour, IPlayerInputReceiver, ITakeDamage
 
     public void InputMove(MoveType inMoveType, float inInputHorizontal, float inInputVertical)
     {
+        lastInputHorizontal = inInputHorizontal;
+        lastInputVertical = inInputVertical;
+        
         if (inInputHorizontal == 0 && inInputVertical == 0)
         {
             currentPlayerState = playerStateMachine.ChangePlayerState(PlayerState.Idle);
@@ -170,7 +178,18 @@ public class PlayerController : MonoBehaviour, IPlayerInputReceiver, ITakeDamage
 
     public void Dodge()
     {
-
+        //1. 구르기 애니메이션 재생
+        currentPlayerState = playerStateMachine.ChangePlayerState(PlayerState.Dodge);
+        //2. 구르기 방향 결정
+        Vector3 dodgeDirection = new Vector3(lastInputHorizontal, 0, lastInputVertical).normalized;
+        if(dodgeDirection == Vector3.zero)
+        {
+            dodgeDirection = transform.forward; // 입력이 없으면 정면
+        }
+        float dodgeDistance = 5.0f; // 구르기 거리
+        //playerMove.Move(dodgeDirection.x * dodgeDistance, dodgeDirection.z * dodgeDistance);
+        //4. 방향도 맞춰주고 싶으면
+        playerMove.RotateCharacter(dodgeDirection);
     }
 
     public void IsAim(bool isAim)
