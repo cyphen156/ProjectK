@@ -56,6 +56,7 @@ public class PlayerController : NetworkBehaviour, IPlayerInputReceiver, ITakeDam
     private PlayerStateMachine playerStateMachine;
     public static event Action<PlayerController, PlayerState> OnPlayerStateChanged;
     [SerializeField] private PlayerState currentPlayerState;
+    private NetworkVariable<PlayerState> netCurrentPlayerState; 
     private PlayerStat playerStat;
     private BoxDetector boxDetector;
     private PlayerInventory playerInventory;
@@ -80,7 +81,7 @@ public class PlayerController : NetworkBehaviour, IPlayerInputReceiver, ITakeDam
         playerMove = GetComponent<PlayerMove>();
         currentPlayerState = PlayerState.Idle;
         playerSight = GetComponent<PlayerSight>();
-        playerStat =  new PlayerStat();
+        playerStat = new PlayerStat();
         playerInventory = GetComponent<PlayerInventory>();
         boxDetector = GetComponentInChildren<BoxDetector>();
         playerStateMachine = GetComponent<PlayerStateMachine>();
@@ -89,13 +90,16 @@ public class PlayerController : NetworkBehaviour, IPlayerInputReceiver, ITakeDam
         gunCrosshairSize = 0f;
         crosshairspreadRadius = 10f;
         crosshairLerpSpeed = 5f;
+
+        netCurrentPlayerState = new NetworkVariable<PlayerState>(PlayerState.Idle);
+        
     }
 
     private void Start()
     {
         playerGun = GetComponentInChildren<Gun>();
 #if MULTI
-        GameManager.Instance.RegisterAlivePlayer(this, currentPlayerState, IsOwner);
+        GameManager.Instance.RegisterAlivePlayer(this, netCurrentPlayerState.Value, IsOwner);
 #else    
     GameManager.Instance.RegisterAlivePlayer(this, currentPlayerState);
 #endif
@@ -120,20 +124,36 @@ public class PlayerController : NetworkBehaviour, IPlayerInputReceiver, ITakeDam
         UpdateCrosshairSize();
     }
 
-#endregion
+    #endregion
 
     #region Input Methods
     public void InputReload()
     {
+#if MULTI
+        ChangeGunStateServerRpc(GunState.Reload);
+#else
         playerGun.ChangeGunState(GunState.Reload);
+#endif
     }
 
     public void InputAttack()
     {
+#if MULTI
+        ChangeGunStateServerRpc(GunState.Attack);
+#else
         playerGun.ChangeGunState(GunState.Attack);
+#endif
         Vector3 direction = playerSight.GetRandomSpreadDirection();
         playerGun.Fire(direction);
     }
+
+
+    [ServerRpc]
+    private void ChangeGunStateServerRpc(GunState inState)
+    {
+        playerGun.ChangeGunState(inState);
+    }
+
 
     public void InputMove(MoveType inMoveType, float inInputHorizontal, float inInputVertical)
     {
@@ -142,13 +162,13 @@ public class PlayerController : NetworkBehaviour, IPlayerInputReceiver, ITakeDam
         
         if (inInputHorizontal == 0 && inInputVertical == 0)
         {
-            currentPlayerState = playerStateMachine.ChangePlayerState(PlayerState.Idle);
+#if MULTI
+            ChangeStateServerRpc(PlayerState.Idle, NetworkManager.Singleton.LocalClientId);
+            Debug.Log(GetComponent<NetworkObject>().OwnerClientId + " " + netCurrentPlayerState.Value.ToString());
+#else
+  currentPlayerState = playerStateMachine.ChangePlayerState(PlayerState.Idle);
+#endif
             return;
-        }
-        else
-        {
-            currentPlayerState = PlayerState.Walk; // 움직이는 애니메이션
-            currentMoveSpeed = defaultSpeed; // 기본 움직임 속도
         }
 
         if (inMoveType == MoveType.Slow)
@@ -162,15 +182,29 @@ public class PlayerController : NetworkBehaviour, IPlayerInputReceiver, ITakeDam
         }
         else
         {
+            currentMoveSpeed = defaultSpeed; // 기본 움직임 속도
             currentMoveType = MoveType.Walk;
         }
-        currentPlayerState = playerStateMachine.ChangePlayerState(PlayerState.Walk);
+#if MULTI
+        ChangeStateServerRpc(PlayerState.Walk, NetworkManager.Singleton.LocalClientId);
+       // Debug.Log(GetComponent<NetworkObject>().OwnerClientId + " " + netCurrentPlayerState.Value.ToString());
+#else
+  currentPlayerState = playerStateMachine.ChangePlayerState(PlayerState.Walk);
+#endif
+        // inState
+
         playerMove.Move(inInputHorizontal * Time.deltaTime * currentMoveSpeed, inInputVertical * Time.deltaTime * currentMoveSpeed);
+    }
+
+    [ServerRpc]
+    private void ChangeStateServerRpc(PlayerState inState, ulong inId)
+    {
+        netCurrentPlayerState.Value = playerStateMachine.ChangePlayerState(inState);
     }
 
     public void InputMousePosition(Vector3 inMousePosition)
     {
-        mouseWorldPosition = inMousePosition; 
+        mouseWorldPosition = inMousePosition;
         OnMousePositionUpdated?.Invoke(mouseWorldPosition);
 
     }
@@ -178,7 +212,7 @@ public class PlayerController : NetworkBehaviour, IPlayerInputReceiver, ITakeDam
     public void InteractDropBox()
     {
         DropBox box = boxDetector.GetNearestBox();
-        if(box == null)
+        if (box == null)
         {
             return;
         }
@@ -226,10 +260,10 @@ public class PlayerController : NetworkBehaviour, IPlayerInputReceiver, ITakeDam
         float targetCrosshairSize = defaultCrosshairSize;
         // 상태에 따라 목표 크기 설정
         if (currentMoveType == MoveType.Run)
-        {   
+        {
             targetCrosshairSize += crosshairspreadRadius;
         }
-        
+
         if (playerGun != null)
         {
             targetCrosshairSize += playerGun.equiptFocusRegion;
@@ -250,7 +284,7 @@ public class PlayerController : NetworkBehaviour, IPlayerInputReceiver, ITakeDam
 
         //if (Mathf.Abs(currentCrosshairSize - previousSize) > 0.01f)
         //{
-            OnCrosshairSizeChanged?.Invoke(currentCrosshairSize);
+        OnCrosshairSizeChanged?.Invoke(currentCrosshairSize);
         //}
     }
 
@@ -272,7 +306,7 @@ public class PlayerController : NetworkBehaviour, IPlayerInputReceiver, ITakeDam
     {
         //인벤토리 적용
         ItemBase previousItem = playerInventory.TryAddOrReturnPreviousItem(inPickItem);
-        if(inPickItem.itemType == ItemMainType.AttachMent)
+        if (inPickItem.itemType == ItemMainType.AttachMent)
         {
             playerGun.EquiptItems(playerInventory.GetGunItmes());
         }
