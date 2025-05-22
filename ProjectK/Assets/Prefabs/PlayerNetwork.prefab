@@ -3324,7 +3324,7 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: -1.1928139, y: 0.000000029802322, z: -3.4347968}
-  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_LocalScale: {x: 3, y: 3, z: 3}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 6212401131321483555}
@@ -3434,13 +3434,12 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   ShowTopMostFoldoutHeaderGroup: 1
   currentMoveSpeed: 5
+  mouseWorldPosition: {x: 0, y: 0, z: 0}
   currentMoveType: 0
   defaultCrosshairSize: 0
   currentCrosshairSize: 0
   gunCrosshairSize: 0
   crosshairspreadRadius: 0
-  minCrosshairSize: 0
-  maxCrosshairSize: 0
   crosshairLerpSpeed: 0
   currentPlayerState: 0
 --- !u!114 &3535864916125701533
@@ -3479,6 +3478,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 35c8bce9b9efc0440b090be86d8cebad, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  ShowTopMostFoldoutHeaderGroup: 1
 --- !u!114 &164123121001906435
 MonoBehaviour:
   m_ObjectHideFlags: 0

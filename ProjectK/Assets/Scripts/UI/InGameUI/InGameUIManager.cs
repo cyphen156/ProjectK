@@ -16,26 +16,32 @@ public class InGameUIManager : MonoBehaviour
         offset = new Vector3(0, 3f, 0);
     }
 
-    private IEnumerator Start()
+    private void Start()
     {
-        yield return null;
         PlayerController.OnChangeHpUI += UpdateHpIngameUI;
+        InputManager.OnLocalPlayerRegistered += SetPlayerController;
 
         hpSlider = transform.Find("InGameHpSlider").GetComponent<Slider>();
         hpSlider.maxValue = 100f;
         hpSliderRect = hpSlider.GetComponent<RectTransform>();
+    }
+
+    private void Update()
+    {
+        if (playerController != null)
+        {
+            TrackingPlayer();
+        }
+    }
+    private void SetPlayerController(PlayerController inPlayerController)
+    {
+        playerController = inPlayerController;
 
         if (playerController != null)
         {
             targetPlayerTransform = playerController.transform;
         }
     }
-
-    private void Update()
-    {
-        TrackingPlayer();
-    }
-
     private void TrackingPlayer()
     {
         // 월드 위치 + offset을 화면 좌표로 변환

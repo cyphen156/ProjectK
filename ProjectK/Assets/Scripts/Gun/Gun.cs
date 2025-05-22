@@ -44,7 +44,7 @@ public class Gun : MonoBehaviour
         defaultReloadTime = 2f;
         restReloadTime = 0f;
 
-        defaultRps = 15;
+        defaultRps = 4;
         restRateTime = 0f;
 
         defaultBulletCount = 30;

@@ -53,12 +53,16 @@ public class PlayerUIManager : MonoBehaviour
 
     private void Update()
     {
-        crosshairTransform.position = Camera.main.WorldToScreenPoint(playerController.mouseWorldPosition);
+        if (playerController == null)
+        {
+            return;
+        }
     }
 
     private void SetPlayerController(PlayerController controller)
     {
         playerController = controller;
+        PlayerController.OnMousePositionUpdated += UpdateMouseWorldPosition;
     }
     #region 드롭 박스 관련
     private void StartSettingDropBoxUI()
@@ -158,5 +162,9 @@ public class PlayerUIManager : MonoBehaviour
         rectTransform.sizeDelta = new Vector2(5 * inCurrentCrosshairSize, 5 * inCurrentCrosshairSize);
     }
 
+    private void UpdateMouseWorldPosition(Vector3 mouseWorldPosition)
+    {
+        crosshairTransform.position = Camera.main.WorldToScreenPoint(mouseWorldPosition);
+    }
     #endregion
 }
