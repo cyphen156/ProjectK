@@ -42,6 +42,9 @@ public class PlayerStateMachine : MonoBehaviour
                 case PlayerState.Die:
                     SetPlayerAnimatorTrigger(currentPlayerState);
                     break;
+                case PlayerState.Dodge:
+                    SetPlayerAnimatorTrigger(currentPlayerState);
+                    break;
                 default:
                     Logger.Log("FatalErreo :: Tried State Change is Not Allowed");
                     break;
