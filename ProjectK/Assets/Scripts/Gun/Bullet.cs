@@ -1,6 +1,7 @@
+using Unity.Netcode;
 using UnityEngine;
 
-public class Bullet : MonoBehaviour
+public class Bullet : NetworkBehaviour
 {
     private float defaultLifeTime;
     private float lifeTime;
@@ -45,11 +46,17 @@ public class Bullet : MonoBehaviour
 
     private void OnTriggerEnter(Collider other)
     {
-        ITakeDamage takeDamageObj = other.GetComponent<ITakeDamage>();
-        if (takeDamageObj != null)
+        if (IsHost)
         {
-            takeDamageObj.TakeDamage(damage);
-            Destroy(gameObject);
+            ITakeDamage takeDamageObj = other.GetComponent<ITakeDamage>();
+            //체력을 동기화하면 다른 클라이언트의 체력도 동기화가 된다. 
+            //원하는건 그 타겟을 넘기고 싶은거 - 넷 오브젝트가 있을 것
+            if (takeDamageObj != null)
+            {
+                takeDamageObj.TakeDamage(damage);
+                gameObject.GetComponent<NetworkObject>().Despawn();
+            }
         }
     }
+
 }
