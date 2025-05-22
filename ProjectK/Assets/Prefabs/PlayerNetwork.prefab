@@ -3307,6 +3307,7 @@ GameObject:
   - component: {fileID: 6431630111662407450}
   - component: {fileID: 5374218789534762188}
   - component: {fileID: 3677778490498653785}
+  - component: {fileID: 7310673698954467135}
   m_Layer: 0
   m_Name: PlayerNetwork
   m_TagString: Untagged
@@ -3434,13 +3435,12 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   ShowTopMostFoldoutHeaderGroup: 1
   currentMoveSpeed: 5
+  mouseWorldPosition: {x: 0, y: 0, z: 0}
   currentMoveType: 0
   defaultCrosshairSize: 0
   currentCrosshairSize: 0
   gunCrosshairSize: 0
   crosshairspreadRadius: 0
-  minCrosshairSize: 0
-  maxCrosshairSize: 0
   crosshairLerpSpeed: 0
   currentPlayerState: 0
 --- !u!114 &3535864916125701533
@@ -3479,6 +3479,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 35c8bce9b9efc0440b090be86d8cebad, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  ShowTopMostFoldoutHeaderGroup: 1
 --- !u!114 &164123121001906435
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -3619,6 +3620,28 @@ MonoBehaviour:
   edgeResolveIterations: 0
   edgeDistanceThreshold: 0
   meshFilter: {fileID: 0}
+--- !u!114 &7310673698954467135
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4448961612262264809}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e8d0727d5ae3244e3b569694d3912374, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  ShowTopMostFoldoutHeaderGroup: 1
+  TransitionStateInfoList:
+  - IsCrossFadeExit: 0
+    Layer: 1
+    OriginatingState: 1813181734
+    DestinationState: 1485882831
+    TransitionDuration: 0.25
+    TriggerNameHash: 1080829965
+    TransitionIndex: 0
+  m_Animator: {fileID: 1306832650774252149}
 --- !u!1 &4725423115538000080
 GameObject:
   m_ObjectHideFlags: 0
