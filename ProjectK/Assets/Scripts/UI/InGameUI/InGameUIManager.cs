@@ -28,7 +28,7 @@ public class InGameUIManager : MonoBehaviour
 
     private void Update()
     {
-        if (playerController != null)
+        //if (playerController != null)
         {
             TrackingPlayer();
         }

@@ -53,10 +53,10 @@ public class InputManager : MonoBehaviour
 
     private void Update()
     {
-        if (localPlayerController == null)
-        {
-            return;
-        }
+        //if (localPlayerController == null)
+        //{
+        //    return;
+        //}
 
         if (currentReceiver == InputReceiver.None)
         {
