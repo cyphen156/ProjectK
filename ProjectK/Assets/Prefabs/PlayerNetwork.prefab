@@ -3682,6 +3682,13 @@ MonoBehaviour:
   ShowTopMostFoldoutHeaderGroup: 1
   TransitionStateInfoList:
   - IsCrossFadeExit: 0
+    Layer: 0
+    OriginatingState: 1485882831
+    DestinationState: 1514205634
+    TransitionDuration: 0
+    TriggerNameHash: 1353639306
+    TransitionIndex: 1
+  - IsCrossFadeExit: 0
     Layer: 1
     OriginatingState: 1813181734
     DestinationState: 1485882831
@@ -4074,9 +4081,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1de5d13001fa69349888083aca9219e8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  bulletPrefab: {fileID: 3856218466273477182, guid: 76b6b7aea98400d4a87fed5d5b9a514c, type: 3}
+  bulletPrefab: {fileID: 3856218466273477182, guid: f2023d941c3fb5d4ea57ef3798903264, type: 3}
   fireTransform: {fileID: 6077695778586580738}
   animator: {fileID: 1306832650774252149}
+  canShoot: 1
   equiptFocusRegion: 0
 --- !u!1 &5483145955893772492
 GameObject:
