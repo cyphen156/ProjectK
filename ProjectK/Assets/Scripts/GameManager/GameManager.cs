@@ -1,19 +1,18 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
-using UnityEngine.SocialPlatforms;
+public enum GameState
+{
+    None,
+    Ready,
+    Play,
+    End
+}
 
 public class GameManager : MonoBehaviour
 {
-    public enum GameState
-    {
-        None,
-        Ready,
-        Play,
-        End
-    }
-    
     public static GameManager Instance { get; private set; }
 
     [Header("GamePlayTime")]
@@ -24,14 +23,16 @@ public class GameManager : MonoBehaviour
     public static event Action<float> GamePlayTimeChange;
 
     [Header("PlayerCount")]
+    private const uint INVALID_PLAYER_NUMBER = 99999999;
     private readonly Dictionary<PlayerController, PlayerState> players = new Dictionary<PlayerController, PlayerState>();
 
     public static event Action<int> PlayerCountChange;
 
     [Header("GameState")]
     [SerializeField] private GameState currentGameState;
-    private string gameWinner;  
-    public static event Action<string> GameEnd;
+    private uint gameWinner;  
+    public static event Action<uint> OnWinnerChanged;
+    public static event Action<GameState> OnGameStateChanged;
 
     public static event Action<PlayerController, PlayerState> LocalPlayerState;
 
@@ -107,24 +108,34 @@ public class GameManager : MonoBehaviour
         PlayerCountChange?.Invoke(players.Count);
 
         // 승자 초기화
-        gameWinner = null;
+        gameWinner = INVALID_PLAYER_NUMBER;
 
         // 게임 상태 초기화
         currentGameState = GameState.Ready;
+        OnGameStateChanged?.Invoke(currentGameState);
     }
 
     // 게임 종료 UI 띄우기
     private void EndGame()
     {
-        gameWinner = null;
-        GameEnd?.Invoke(gameWinner);
+        OnWinnerChanged?.Invoke(gameWinner);
         currentGameState = GameState.End;
+        OnGameStateChanged?.Invoke(currentGameState);
     }
     private void EndGame(PlayerController inWinner)
     {
-        gameWinner = inWinner.name;
-        GameEnd?.Invoke(gameWinner);
+        gameWinner = inWinner.GetNetworkNumber();
+        OnWinnerChanged?.Invoke(gameWinner);
         currentGameState = GameState.End;
+        OnGameStateChanged?.Invoke(currentGameState);
+
+        GameEnd(10f);
+    }
+
+    private IEnumerator GameEnd(float inTime)
+    {
+        yield return new WaitForSeconds(inTime);
+        ResetGame();
     }
     public void RegisterAlivePlayer(PlayerController inPlayerController, PlayerState inPlayerStat, bool inIsOwner = true)
     {
@@ -176,9 +187,12 @@ public class GameManager : MonoBehaviour
     public void StartGame()
     {
         // 게임 시작
-        currentGameState = GameState.Play;
         GamePlayTimeChange?.Invoke(currentTime);
         PlayerCountChange?.Invoke(players.Count);
+        AllocatePlayerNomber();
+        currentGameState = GameState.Play;
+        OnGameStateChanged?.Invoke(currentGameState);
+
     }
 
     public int GetAlivePlayerCount()
@@ -212,6 +226,14 @@ public class GameManager : MonoBehaviour
         else if (aliveCount == 0)
         {
             EndGame();
+        }
+    }
+    private void AllocatePlayerNomber()
+    {
+        uint number = 1;
+        foreach (var player in players.Keys.OrderBy(p => p.OwnerClientId))
+        {
+            player.SetNetworkNumber(number++);
         }
     }
 }

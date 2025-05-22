@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
@@ -35,10 +36,7 @@ public class PlayerUIManager : MonoBehaviour
         InputManager.OnLocalPlayerRegistered -= SetPlayerController;
     }
 
-    private void SetPlayerController(PlayerController controller)
-    {
-        playerController = controller;
-    }
+   
 
     private void Start()
     {
@@ -58,6 +56,10 @@ public class PlayerUIManager : MonoBehaviour
         crosshairTransform.position = Camera.main.WorldToScreenPoint(playerController.mouseWorldPosition);
     }
 
+    private void SetPlayerController(PlayerController controller)
+    {
+        playerController = controller;
+    }
     #region 드롭 박스 관련
     private void StartSettingDropBoxUI()
     {

@@ -1,5 +1,7 @@
 using System;
+using System.Collections;
 using TMPro;
+using Unity.VisualScripting;
 using UnityEngine;
 
 public class SystemUIManager : MonoBehaviour
@@ -29,9 +31,8 @@ public class SystemUIManager : MonoBehaviour
 
     private void Start()
     {
-        
 
-        if(RestPlayerText == null)
+        if (RestPlayerText == null)
         {
             Debug.LogError("RestPlayerText∞° Null¿”");
         }
@@ -43,7 +44,9 @@ public class SystemUIManager : MonoBehaviour
 
         GameManager.GamePlayTimeChange += UpdateGameLifeTime;
         GameManager.PlayerCountChange += UpdateRestPlayer;
-        GameManager.GameEnd += UpdateLastPlayer;
+        GameManager.OnWinnerChanged += UpdateLastPlayer;
+        GameManager.OnGameStateChanged += UpdateGameState; 
+        gameEndPanel.SetActive(false);
     }
 
     
@@ -61,12 +64,27 @@ public class SystemUIManager : MonoBehaviour
         RestPlayerText.text = $" Rest : {inCurrentPlayer}";
     }
 
-    private void UpdateLastPlayer(string obj)
+    private void UpdateLastPlayer(uint inLastPlayerNumber)
     {
-        if (obj != null)
+        string lastPlayerInfo;
+        if (inLastPlayerNumber == 99999999)
         {
-            winnerInfoText.text = "Winner is " + obj;
-
+            lastPlayerInfo = "All Player has been destroied\n Draw Game";
         }
+        else
+        {
+            lastPlayerInfo = "Winner is Player No." + inLastPlayerNumber;
+        }
+        winnerInfoText.text = lastPlayerInfo;
+    }
+
+    private void UpdateGameState(GameState inGameState)
+    {
+        if (inGameState == GameState.End)
+        {
+            gameEndPanel.SetActive(true);
+            return;
+        }
+        gameEndPanel.SetActive(false);
     }
 }
