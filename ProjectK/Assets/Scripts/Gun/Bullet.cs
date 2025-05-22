@@ -40,7 +40,7 @@ public class Bullet : NetworkBehaviour
         lifeTime -= Time.deltaTime;
         if(lifeTime <= 0)
         {
-            Destroy(gameObject);
+            gameObject.GetComponent<NetworkObject>().Despawn();
         }
     }
 
