@@ -1,5 +1,6 @@
 using System;
 using System.Collections;
+using Unity.Netcode;
 using UnityEngine;
 
 public enum GunState
@@ -8,7 +9,7 @@ public enum GunState
     Attack,
     Reload
 }
-public class Gun : MonoBehaviour
+public class Gun : NetworkBehaviour
 {
     [SerializeField] private Bullet bulletPrefab;
     [SerializeField] private Transform fireTransform;
@@ -47,7 +48,7 @@ public class Gun : MonoBehaviour
         defaultReloadTime = 2f;
         restReloadTime = 0f;
 
-        defaultRps = 15;
+        defaultRps = 1;
         restRateTime = 0f;
 
         defaultBulletCount = 30;
@@ -73,6 +74,14 @@ public class Gun : MonoBehaviour
         fireTransform = transform.Find("fireTransform");
     }
 
+    [ServerRpc]
+    private void SpawnBulletServerRpc(Vector3 inDirection)
+    {
+        Bullet bullet = Instantiate(bulletPrefab, fireTransform.position, Quaternion.LookRotation(inDirection));
+        bullet.GetComponent<NetworkObject>().Spawn();
+        bullet.SetDirection(inDirection);
+    }
+
     public void Fire(Vector3 inDirection)
     {
         if (isReloading == true || isRating == true)
@@ -83,9 +92,14 @@ public class Gun : MonoBehaviour
         {
             return;
         }
+        //보내고 - 서버에서 한번더 확인해서 -> 생성
+        //서버에게 총알만들기
+#if MULTI
+        SpawnBulletServerRpc(inDirection);
+#else
         Bullet bullet = Instantiate(bulletPrefab, fireTransform.position, Quaternion.LookRotation(inDirection));
         bullet.SetDirection(inDirection);
-
+#endif
         if (OnFire != null)
         {
             OnFire.Invoke(transform.position);
