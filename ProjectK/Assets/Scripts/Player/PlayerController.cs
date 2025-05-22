@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using UnityEngine;
 using Unity.Netcode;
+using System.Security.Cryptography;
 
 public interface IPlayerInputReceiver
 {
@@ -24,6 +25,8 @@ public enum MoveType
 public class PlayerController : NetworkBehaviour, IPlayerInputReceiver, ITakeDamage
 {
     #region variable Scope
+    private uint myNetworkNumber;
+
     [Header("PlayerMovement")]
     private Vector3 lookDirection;
     [SerializeField] private float currentMoveSpeed; // 현재 움직임 속도
@@ -33,7 +36,9 @@ public class PlayerController : NetworkBehaviour, IPlayerInputReceiver, ITakeDam
     private PlayerMove playerMove; // 플레이어 무브 클래스
     private Gun playerGun;
     private bool isAimed;
-    public Vector3 mouseWorldPosition { get; private set; }
+    public Vector3 mouseWorldPosition;
+    public static event Action<Vector3> OnMousePositionUpdated;
+
     public MoveType currentMoveType;
     [Header("PlayerSight")]
     private PlayerSight playerSight;
@@ -43,8 +48,6 @@ public class PlayerController : NetworkBehaviour, IPlayerInputReceiver, ITakeDam
     [SerializeField] private float currentCrosshairSize;
     [SerializeField] private float gunCrosshairSize;
     [SerializeField] private float crosshairspreadRadius;
-    [SerializeField] private float minCrosshairSize;
-    [SerializeField] private float maxCrosshairSize;
     [SerializeField] private float crosshairLerpSpeed;
     public static event Action<float> OnCrosshairSizeChanged;
 
@@ -62,6 +65,7 @@ public class PlayerController : NetworkBehaviour, IPlayerInputReceiver, ITakeDam
     #region Unity Methods
     private void Awake()
     {
+        myNetworkNumber = 99999999;
         defaultSpeed = 5.0f;
         slowSpeed = 3.0f;
         runSpeed = 8.0f;
@@ -80,8 +84,6 @@ public class PlayerController : NetworkBehaviour, IPlayerInputReceiver, ITakeDam
         gunCrosshairSize = 0f;
         crosshairspreadRadius = 10f;
         crosshairLerpSpeed = 5f;
-        minCrosshairSize = defaultCrosshairSize - gunCrosshairSize;
-        maxCrosshairSize = defaultCrosshairSize + gunCrosshairSize;
     }
 
     private void Start()
@@ -160,9 +162,11 @@ public class PlayerController : NetworkBehaviour, IPlayerInputReceiver, ITakeDam
 
     public void InputMousePosition(Vector3 inMousePosition)
     {
-        mouseWorldPosition = inMousePosition;
+        mouseWorldPosition = inMousePosition; 
+        OnMousePositionUpdated?.Invoke(mouseWorldPosition);
+
     }
-    
+
     public void InteractDropBox()
     {
         DropBox box = boxDetector.GetNearestBox();
@@ -254,5 +258,15 @@ public class PlayerController : NetworkBehaviour, IPlayerInputReceiver, ITakeDam
             playerGun.EquiptItems(playerInventory.GetGunItmes());
         }
         return previousItem; //있던 슬롯에서 교체될것은 반환
+    }
+
+    public void SetNetworkNumber(uint inNumber)
+    {
+        myNetworkNumber = inNumber;
+    }
+
+    public uint GetNetworkNumber()
+    {
+        return myNetworkNumber;
     }
 }

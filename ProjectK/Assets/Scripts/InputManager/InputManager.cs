@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -11,6 +12,7 @@ public class InputManager : MonoBehaviour
     public static InputManager Instance { get; private set; }
 
     public static event Action<PlayerController> OnLocalPlayerRegistered;
+    public static event Action<Vector3> OnMousePositionChanged;
     private IPlayerInputReceiver localPlayerController;
     private PlayerState localPlayerState;
     private InGameUIManager inGameUIManager;
@@ -103,7 +105,6 @@ public class InputManager : MonoBehaviour
         // 마우스 월드 좌표 처리
         Vector3 mouseWorldPosition = GetMouseWorldPosition();
         localPlayerController.InputMousePosition(mouseWorldPosition);
-        //localPlayerController.RotateCharacter(mouseWorldPosition);
 
         // 이동 처리
         float h = Input.GetAxisRaw("Horizontal");
