@@ -22,12 +22,15 @@ public class Gun : MonoBehaviour
     private float defaultReloadTime; //기본 탄창 채우는 시간
     private float equiptReloadTime; //스텟 적용
     private float restReloadTime; //채우기 까지 남은 시간
+   
 
     private int defaultBulletCount; //기본 총알 수
     private int equiptBulletCount; //스텟 적용
     private int restBulletCount; //남은 총알 수
     private int defaultRps; //스텟 적용
     private int equiptRps; //1초당 총알 발사 갯수
+
+    public bool canShoot = true; // 총 발사 가능 여부 (구르기 시 총기 발사 X 구현위해 만듬)
 
     private bool isRating; //연사속도대기
     private float rateTime;

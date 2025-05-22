@@ -1,6 +1,5 @@
 using System.Collections;
 using UnityEngine;
-using UnityEngine.InputSystem.LowLevel;
 
 public enum PlayerState 
 { 
@@ -41,6 +40,9 @@ public class PlayerStateMachine : MonoBehaviour
                     SetPlayerAnimatorBool(currentPlayerState, true);
                     break;
                 case PlayerState.Die:
+                    SetPlayerAnimatorTrigger(currentPlayerState);
+                    break;
+                case PlayerState.Dodge:
                     SetPlayerAnimatorTrigger(currentPlayerState);
                     break;
                 default:

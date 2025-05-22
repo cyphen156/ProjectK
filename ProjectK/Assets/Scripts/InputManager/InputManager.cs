@@ -152,7 +152,7 @@ public class InputManager : MonoBehaviour
         }
 
         // ±¸¸£±â
-        if (Input.GetKeyDown(KeyCode.LeftControl))
+        if (Input.GetKeyDown(KeyCode.V))
         {
             localPlayerController.Dodge();
         }
