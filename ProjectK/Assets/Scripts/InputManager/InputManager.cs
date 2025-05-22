@@ -12,7 +12,6 @@ public class InputManager : MonoBehaviour
     public static InputManager Instance { get; private set; }
 
     public static event Action<PlayerController> OnLocalPlayerRegistered;
-    public static event Action<Vector3> OnMousePositionChanged;
     private IPlayerInputReceiver localPlayerController;
     private PlayerState localPlayerState;
     private InGameUIManager inGameUIManager;
@@ -54,6 +53,11 @@ public class InputManager : MonoBehaviour
 
     private void Update()
     {
+        if (localPlayerController == null)
+        {
+            return;
+        }
+
         if (currentReceiver == InputReceiver.None)
         {
             return;

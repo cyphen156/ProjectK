@@ -60,11 +60,11 @@ public class PlayerSight : MonoBehaviour
     #region Unity Methods   
     private void Awake()
     {
-        baseViewRadius = 5f;
+        baseViewRadius = 10f;
         activeViewRadius = 2f * baseViewRadius;
         baseViewAngle = 45f;
         activeViewAngle = baseViewAngle;
-        viewDistance = 10f;
+        viewDistance = activeViewRadius;
 
         meshResolution = 3f;
         edgeResolveIterations = 4;
@@ -101,14 +101,16 @@ public class PlayerSight : MonoBehaviour
     private ViewCastInfo ViewCast(float inGlobalAngle)
     {
         Vector3 direction = DirectionFromAngle(inGlobalAngle, true);
+        Vector3 rayPoint = transform.position;
+        rayPoint += 2 * Vector3.up;
         RaycastHit hit;
-        if (Physics.Raycast(transform.position, direction, out hit, activeViewRadius, obstacleMask))
+        if (Physics.Raycast(rayPoint, direction, out hit, activeViewRadius, obstacleMask))
         {
             return new ViewCastInfo(true, hit.point, hit.distance, inGlobalAngle);
         }
         else
         {
-            return new ViewCastInfo(false, transform.position + direction * activeViewRadius, activeViewRadius, inGlobalAngle);
+            return new ViewCastInfo(false, rayPoint + direction * activeViewRadius, activeViewRadius, inGlobalAngle);
         }
     }
     private IEnumerator FindTargetsWithDelay(float delay)

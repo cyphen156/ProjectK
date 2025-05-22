@@ -3,7 +3,6 @@ using System.Collections;
 using Unity.Cinemachine;
 using UnityEngine;
 using Unity.Netcode;
-using System.Security.Cryptography;
 
 public interface IPlayerInputReceiver
 {
@@ -206,7 +205,6 @@ public class PlayerController : NetworkBehaviour, IPlayerInputReceiver, ITakeDam
     {
         mouseWorldPosition = inMousePosition;
         OnMousePositionUpdated?.Invoke(mouseWorldPosition);
-
     }
 
     public void InteractDropBox()
