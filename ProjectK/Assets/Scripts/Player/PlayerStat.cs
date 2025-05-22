@@ -2,14 +2,13 @@ using System;
 
 public class PlayerStat
 {
-    private float maxHp;
+    private const float maxHp = 100;
     private float hp;
     private float maxStemina;
     private float stamina;
 
     public PlayerStat()
-    { 
-        maxHp = 100;
+    {
         hp = maxHp;
 
         maxStemina = 100;
