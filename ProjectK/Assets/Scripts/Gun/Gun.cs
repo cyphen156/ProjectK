@@ -48,7 +48,7 @@ public class Gun : NetworkBehaviour
         defaultReloadTime = 2f;
         restReloadTime = 0f;
 
-        defaultRps = 1;
+        defaultRps = 4;
         restRateTime = 0f;
 
         defaultBulletCount = 30;
