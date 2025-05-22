@@ -13,7 +13,7 @@ public class Bullet : MonoBehaviour
         //변수 초기값 
         defaultLifeTime = 5.0f;
         lifeTime = defaultLifeTime;
-        speed = 10.0f;
+        speed = 14.0f;
         damage = 30f;
     }
 
