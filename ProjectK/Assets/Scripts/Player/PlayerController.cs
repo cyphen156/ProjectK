@@ -151,8 +151,6 @@ public class PlayerController : NetworkBehaviour, IPlayerInputReceiver, ITakeDam
         if (inInputHorizontal == 0 && inInputVertical == 0)
         {
             ChangeStateServerRpc(PlayerState.Idle, NetworkManager.Singleton.LocalClientId);
-
-            Debug.Log(GetComponent<NetworkObject>().OwnerClientId + " " + netCurrentPlayerState.Value.ToString());
             return;
         }
 
