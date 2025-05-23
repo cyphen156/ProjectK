@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Unity.Netcode;
 using UnityEngine;
+using Unity.Netcode;
 public enum GameState
 {
     None,
@@ -14,6 +15,7 @@ public enum GameState
 
 public class GameManager : NetworkBehaviour
 {
+    public SpawnAssginer spawnAssigner;
     public static GameManager Instance { get; private set; }
 
     [Header("GamePlayTime")]
@@ -61,11 +63,25 @@ public class GameManager : NetworkBehaviour
         ResetGame();
     }
 
+    private void AssignPlayerPosition()
+    {
+        int i = 0;
+        List<Transform> spawnTransformList = spawnAssigner.GetSpawnPositionList();
+        foreach (var item in players)
+        {
+            //플레이어 스폰 위치 리스트가 섞여서 왔다고 가정
+            item.Key.SetSpawnPositionRpc(spawnTransformList[i].position);
+            i++;
+        }
+
+    }
+
     private void Update()
     {
-        // 게임 레디 상태
-        if (currentGameState.Value == GameState.Ready)
+        // 게임 레디 상태에서 시작하기
+        if (currentGameState.Value == GameState.Ready && IsHost && Input.GetKeyDown(KeyCode.L))
         {
+            AssignPlayerPosition();
             return;
         }
 
