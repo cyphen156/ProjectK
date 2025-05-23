@@ -74,7 +74,7 @@ public class DropBox : NetworkBehaviour
     public void OpenBox(Func<ItemBase, ItemBase> inItemPickCallBack)
     {
         //Debug.Log("박스를 열었다.");
-        OnOpenBox.Invoke(this);
+        OnOpenBox?.Invoke(this);
          itemPickCallBack = inItemPickCallBack;
     }
 
