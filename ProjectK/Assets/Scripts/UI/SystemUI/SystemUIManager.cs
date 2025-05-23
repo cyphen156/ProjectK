@@ -18,7 +18,7 @@ public class SystemUIManager : MonoBehaviour
     private GameObject gameEndPanel;
     private TextMeshProUGUI winnerInfoText;
 
-    [Header("DidUI")]
+    [Header("DieUI")]
     private GameObject PlayerDiePanel; // 플레이어 사망시 UI (재훈)
     private TextMeshProUGUI PlayerDieText; // 플레이어 사망시 UI (재훈)
 
