@@ -63,7 +63,7 @@ public class GameManager : NetworkBehaviour
         ResetGame();
     }
 
-    private void TestAssignPlayerPosition()
+    private void AssignPlayerPosition()
     {
         int i = 0;
         List<Transform> spawnTransformList = spawnAssigner.GetSpawnPositionList();
@@ -79,9 +79,9 @@ public class GameManager : NetworkBehaviour
     private void Update()
     {
         // 게임 레디 상태에서 시작하기
-        if (currentGameState == GameState.Ready && IsHost && Input.GetKeyDown(KeyCode.L))
+        if (currentGameState.Value == GameState.Ready && IsHost && Input.GetKeyDown(KeyCode.L))
         {
-            TestAssignPlayerPosition();
+            AssignPlayerPosition();
             return;
         }
 
