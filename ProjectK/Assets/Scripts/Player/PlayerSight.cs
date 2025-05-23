@@ -66,8 +66,8 @@ public class PlayerSight : MonoBehaviour
         activeViewAngle = baseViewAngle;
         viewDistance = activeViewRadius;
 
-        meshResolution = 3f;
-        edgeResolveIterations = 4;
+        meshResolution = 6f;
+        edgeResolveIterations = 10;
         edgeDistanceThreshold = 0.5f;
 
         visibleTargets = new List<Transform>();
@@ -88,7 +88,7 @@ public class PlayerSight : MonoBehaviour
         meshFilter = GetComponent<MeshFilter>();
         meshFilter.mesh = viewMesh;
         targetMask = LayerMask.GetMask("Player");
-        obstacleMask = ~targetMask;
+        obstacleMask = LayerMask.GetMask("Wall", "Deploy");
         StartCoroutine(FindTargetsWithDelay(0.2f));
     }
 
@@ -102,11 +102,17 @@ public class PlayerSight : MonoBehaviour
     {
         Vector3 direction = DirectionFromAngle(inGlobalAngle, true);
         Vector3 rayPoint = transform.position;
-        rayPoint += 2 * Vector3.up;
         RaycastHit hit;
-        if (Physics.Raycast(rayPoint, direction, out hit, activeViewRadius, obstacleMask))
+        Debug.DrawRay(rayPoint, direction * activeViewRadius, Color.yellow, 1f);
+
+        float maxDist = activeViewRadius;
+        float maxAllowedDist = maxDist * 1.05f;
+
+        if (Physics.Raycast(rayPoint, direction, out hit, maxDist, obstacleMask))
         {
-            return new ViewCastInfo(true, hit.point, hit.distance, inGlobalAngle);
+            float clampedDist = Mathf.Clamp(hit.distance, 0.1f, maxAllowedDist);
+            Vector3 point = rayPoint + direction * clampedDist;
+            return new ViewCastInfo(true, point, clampedDist, inGlobalAngle);
         }
         else
         {
@@ -129,8 +135,7 @@ public class PlayerSight : MonoBehaviour
         {
             inAngle += transform.eulerAngles.y;
         }
-        float rad = inAngle * Mathf.Deg2Rad;
-        return new Vector3(Mathf.Sin(rad), 0, Mathf.Cos(rad));
+        return new Vector3(Mathf.Sin(inAngle * Mathf.Deg2Rad), 0, Mathf.Cos(inAngle * Mathf.Deg2Rad));
     }
 
     private void FindVislbleTargets()
@@ -156,16 +161,18 @@ public class PlayerSight : MonoBehaviour
 
     private void DrawFieldOfView()
     {
-        int stepCount = Mathf.Clamp(Mathf.RoundToInt(meshResolution * activeViewAngle), 6, 500);
+        int stepCount = Mathf.RoundToInt(activeViewAngle * meshResolution);
         float angleStep = activeViewAngle / stepCount;
         List<Vector3> viewPoints = new List<Vector3>();
+
+        float baseAngle = Mathf.Atan2(transform.forward.x, transform.forward.z) * Mathf.Rad2Deg;
+
         ViewCastInfo oldViewCast = new ViewCastInfo();
         for (int i = 0; i <= stepCount; ++i)
         {
-            float baseAngle = Mathf.Atan2(transform.forward.x, transform.forward.z) * Mathf.Rad2Deg;
-            //float angle = baseAngle - activeViewAngle / 2 + angleStep * i;
-            float angle = transform.eulerAngles.y - activeViewAngle / 2 + angleStep * i;
+            float angle = baseAngle - activeViewAngle / 2 + angleStep * i;
             ViewCastInfo newViewCast = ViewCast(angle);
+            Debug.DrawRay(transform.position + Vector3.up * 0.1f, DirectionFromAngle(angle, true) * activeViewRadius, Color.red, 0.1f);
 
             if (i > 0)
             {
@@ -191,11 +198,12 @@ public class PlayerSight : MonoBehaviour
         Vector3[] vertices = new Vector3[vertexCount];
         int[] triangles = new int[(vertexCount - 2) * 3];
 
-        vertices[0] = Vector3.zero;
+        vertices[0] = transform.InverseTransformPoint(transform.position);
         for (int i = 0; i < vertexCount - 1; ++i)
         {
-            vertices[i + 1] = transform.InverseTransformPoint(viewPoints[i] + Vector3.forward * 0.01f);
-
+            Vector3 dir = (viewPoints[i] - transform.position).normalized;
+            Vector3 adjusted = viewPoints[i] + dir * 0.01f;
+            vertices[i + 1] = transform.InverseTransformPoint(adjusted);
             if (i < vertexCount - 2)
             {
                 triangles[i * 3] = 0;
