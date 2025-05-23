@@ -97,11 +97,7 @@ public class PlayerController : NetworkBehaviour, IPlayerInputReceiver, ITakeDam
     private void Start()
     {
         playerGun = GetComponentInChildren<Gun>();
-#if MULTI
         GameManager.Instance.RegisterAlivePlayer(this, netCurrentPlayerState.Value, IsOwner);
-#else    
-    GameManager.Instance.RegisterAlivePlayer(this, currentPlayerState);
-#endif
 
         StartCoroutine(Init());
     }
@@ -128,20 +124,13 @@ public class PlayerController : NetworkBehaviour, IPlayerInputReceiver, ITakeDam
     #region Input Methods
     public void InputReload()
     {
-#if MULTI
         ChangeGunStateServerRpc(GunState.Reload);
-#else
-        playerGun.ChangeGunState(GunState.Reload);
-#endif
     }
 
     public void InputAttack()
     {
-#if MULTI
         ChangeGunStateServerRpc(GunState.Attack);
-#else
-        playerGun.ChangeGunState(GunState.Attack);
-#endif
+
         Vector3 direction = playerSight.GetRandomSpreadDirection();
         playerGun.Fire(direction);
     }
@@ -161,12 +150,7 @@ public class PlayerController : NetworkBehaviour, IPlayerInputReceiver, ITakeDam
         
         if (inInputHorizontal == 0 && inInputVertical == 0)
         {
-#if MULTI
             ChangeStateServerRpc(PlayerState.Idle, NetworkManager.Singleton.LocalClientId);
-            Debug.Log(GetComponent<NetworkObject>().OwnerClientId + " " + netCurrentPlayerState.Value.ToString());
-#else
-  currentPlayerState = playerStateMachine.ChangePlayerState(PlayerState.Idle);
-#endif
             return;
         }
 
@@ -184,12 +168,8 @@ public class PlayerController : NetworkBehaviour, IPlayerInputReceiver, ITakeDam
             currentMoveSpeed = defaultSpeed; // 기본 움직임 속도
             currentMoveType = MoveType.Walk;
         }
-#if MULTI
+
         ChangeStateServerRpc(PlayerState.Walk, NetworkManager.Singleton.LocalClientId);
-       // Debug.Log(GetComponent<NetworkObject>().OwnerClientId + " " + netCurrentPlayerState.Value.ToString());
-#else
-  currentPlayerState = playerStateMachine.ChangePlayerState(PlayerState.Walk);
-#endif
         // inState
 
         playerMove.Move(inInputHorizontal * Time.deltaTime * currentMoveSpeed, inInputVertical * Time.deltaTime * currentMoveSpeed);
@@ -287,6 +267,13 @@ public class PlayerController : NetworkBehaviour, IPlayerInputReceiver, ITakeDam
     }
 
     public void TakeDamage(float inBulletDamage)
+    {
+        //호스트에서만 총알, 대상이 충돌 체크를 하므로 해당 함수는 호스트에서만 발동됨
+        TakeDamageRpc(inBulletDamage);
+    }
+
+    [Rpc(SendTo.Everyone)]
+    private void TakeDamageRpc(float inBulletDamage)
     {
         playerStat.ApplyHp(-inBulletDamage);
         float hp = playerStat.GetHP();

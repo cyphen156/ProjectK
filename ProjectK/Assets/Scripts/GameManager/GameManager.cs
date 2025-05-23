@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using Unity.Netcode;
 using UnityEngine;
 using Unity.Netcode;
 public enum GameState
@@ -31,8 +32,9 @@ public class GameManager : NetworkBehaviour
     public static event Action<int> PlayerCountChange;
 
     [Header("GameState")]
-    [SerializeField] private GameState currentGameState;
-    private uint gameWinner;  
+    [SerializeField] private NetworkVariable<GameState> currentGameState;
+
+    private uint gameWinner;
     public static event Action<uint> OnWinnerChanged;
     public static event Action<GameState> OnGameStateChanged;
 
@@ -51,8 +53,7 @@ public class GameManager : NetworkBehaviour
         {
             Destroy(gameObject);
         }
-
-        currentGameState = GameState.None;
+        currentGameState.Value = GameState.None;
         PlayTime = 5f;
         maxPlayTime = 60 * PlayTime;  // 분단위
     }
@@ -83,9 +84,9 @@ public class GameManager : NetworkBehaviour
             TestAssignPlayerPosition();
             return;
         }
-        
+
         // 게임 플레이중
-        else if (currentGameState == GameState.Play)
+        else if (currentGameState.Value == GameState.Play)
         {
             if (currentTime <= 0)
             {
@@ -106,7 +107,7 @@ public class GameManager : NetworkBehaviour
         }
 
         // 게임 종료 시
-        else if(currentGameState == GameState.End)
+        else if (currentGameState.Value == GameState.End)
         {
             // 종료 상태일때도 아무것도 안할거임   
         }
@@ -128,23 +129,23 @@ public class GameManager : NetworkBehaviour
         gameWinner = INVALID_PLAYER_NUMBER;
 
         // 게임 상태 초기화
-        currentGameState = GameState.Ready;
-        OnGameStateChanged?.Invoke(currentGameState);
+        currentGameState.Value = GameState.Ready;
+        OnGameStateChanged?.Invoke(currentGameState.Value);
     }
 
     // 게임 종료 UI 띄우기
     private void EndGame()
     {
         OnWinnerChanged?.Invoke(gameWinner);
-        currentGameState = GameState.End;
-        OnGameStateChanged?.Invoke(currentGameState);
+        currentGameState.Value = GameState.End;
+        OnGameStateChanged?.Invoke(currentGameState.Value);
     }
     private void EndGame(PlayerController inWinner)
     {
         gameWinner = inWinner.GetNetworkNumber();
         OnWinnerChanged?.Invoke(gameWinner);
-        currentGameState = GameState.End;
-        OnGameStateChanged?.Invoke(currentGameState);
+        currentGameState.Value = GameState.End;
+        OnGameStateChanged?.Invoke(currentGameState.Value);
 
         GameEnd(10f);
     }
@@ -192,7 +193,7 @@ public class GameManager : NetworkBehaviour
         {
             Debug.LogError("PlayerController is not registered");
             return;
-        }    
+        }
         else
         {
             players.Remove(inPlayerController);
@@ -207,8 +208,8 @@ public class GameManager : NetworkBehaviour
         GamePlayTimeChange?.Invoke(currentTime);
         PlayerCountChange?.Invoke(players.Count);
         AllocatePlayerNomber();
-        currentGameState = GameState.Play;
-        OnGameStateChanged?.Invoke(currentGameState);
+        currentGameState.Value = GameState.Play;
+        OnGameStateChanged?.Invoke(currentGameState.Value);
 
     }
 
