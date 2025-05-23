@@ -67,7 +67,8 @@ public class DropBox : NetworkBehaviour
     [Rpc(SendTo.Everyone)]
     private void AddDroxBoxItemRpc(int inItemId, int inItemAmount)
     {
-            Debug.Log(MasterDataManager.Instance.GetMasterItemData(inItemId).name + "을 뽑았다.");
+        ItemBase addItem = new ItemBase(MasterDataManager.Instance.GetMasterItemData(inItemId));
+        haveItems.Add(addItem);
     }
 
     public void OpenBox(Func<ItemBase, ItemBase> inItemPickCallBack)
