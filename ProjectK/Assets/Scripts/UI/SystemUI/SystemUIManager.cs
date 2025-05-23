@@ -49,8 +49,6 @@ public class SystemUIManager : MonoBehaviour
         gameEndPanel.SetActive(false);
     }
 
-    
-
     private void UpdateGameLifeTime(float inCurrentTime)
     {
         minutes = inCurrentTime / 60;
