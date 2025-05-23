@@ -67,7 +67,7 @@ public class DropBox : NetworkBehaviour
     [Rpc(SendTo.Everyone)]
     private void AddDroxBoxItemRpc(int inItemId, int inItemAmount)
     {
-        ItemBase addItem = new ItemBase(MasterDataManager.Instance.GetMasterItemData(inItemId));
+        ItemBase addItem = new ItemBase(MasterDataManager.Instance.GetMasterItemData(inItemId), inItemAmount);
         haveItems.Add(addItem);
     }
 
