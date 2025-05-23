@@ -320,4 +320,17 @@ public class PlayerController : NetworkBehaviour, IPlayerInputReceiver, ITakeDam
     {
         return myNetworkNumber;
     }
+
+    [Rpc(SendTo.Everyone)]
+    public void SetSpawnPositionRpc(Vector3 inPosition)
+    {
+        if (IsOwner)
+        {
+            transform.position = inPosition;
+        }
+        
+    }
+
+    
+
 }
