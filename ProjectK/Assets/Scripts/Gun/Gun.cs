@@ -77,9 +77,8 @@ public class Gun : NetworkBehaviour
     [ServerRpc]
     private void SpawnBulletServerRpc(Vector3 inDirection)
     {
-        Bullet bullet = Instantiate(bulletPrefab, fireTransform.position, Quaternion.LookRotation(inDirection));
-        bullet.GetComponent<NetworkObject>().Spawn();
-        bullet.SetDirection(inDirection);
+        Bullet bullet = BulletPool.Instance.GetBullet();
+        bullet.SetDirection(fireTransform.position, inDirection);
     }
 
     public void Fire(Vector3 inDirection)
