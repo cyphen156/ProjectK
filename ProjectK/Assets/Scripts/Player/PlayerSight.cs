@@ -60,7 +60,7 @@ public class PlayerSight : MonoBehaviour
     #region Unity Methods   
     private void Awake()
     {
-        baseViewRadius = 10f;
+        baseViewRadius = 15f;
         activeViewRadius = 2f * baseViewRadius;
         baseViewAngle = 45f;
         activeViewAngle = baseViewAngle;
