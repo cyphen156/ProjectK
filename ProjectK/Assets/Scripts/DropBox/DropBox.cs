@@ -2,8 +2,9 @@
 using System;
 using System.Collections.Generic;
 using UnityEngine;
+using Unity.Netcode;
 
-public class DropBox : MonoBehaviour
+public class DropBox : NetworkBehaviour
 {
     [SerializeField] private List<ItemBase> haveItems;
     private float startChance;
@@ -101,13 +102,26 @@ public class DropBox : MonoBehaviour
         //Debug.Log( "반환된거 " + returnItem.itemType + " " +returnItem.name);
         if (returnItem == null || returnItem.itemType == ItemMainType.None)
         {
-            haveItems.RemoveAt(inSlotIndex);
+            RemoveItemRpc(inSlotIndex);
         }
         else
         {
-            haveItems[inSlotIndex] = returnItem;
+            ReplaceItemRpc(inSlotIndex, returnItem.id, returnItem.amount);
         }
+    }
 
+    [Rpc(SendTo.Everyone)]
+    private void RemoveItemRpc(int inSlotIndex)
+    {
+        haveItems.RemoveAt(inSlotIndex);
+        OnChangeBox.Invoke(this);
+    }
+
+    [Rpc(SendTo.Everyone)]
+    private void ReplaceItemRpc(int inSlotIndex, int inItemId, int inItemAmount)
+    {
+        ItemBase replaceItem = new ItemBase(MasterDataManager.Instance.GetMasterItemData(inItemId), inItemAmount);
+        haveItems[inSlotIndex] = replaceItem;
         OnChangeBox.Invoke(this);
     }
 
