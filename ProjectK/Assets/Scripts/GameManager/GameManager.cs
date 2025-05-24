@@ -68,26 +68,14 @@ public class GameManager : NetworkBehaviour
         ResetGame();
     }
 
-    private void AssignPlayerPosition()
-    {
-        int i = 0;
-        List<Transform> spawnTransformList = spawnAssigner.GetSpawnPositionList();
-        foreach (var item in players)
-        {
-            //플레이어 스폰 위치 리스트가 섞여서 왔다고 가정
-            item.Key.SetSpawnPositionRpc(spawnTransformList[i].position);
-            i++;
-        }
-
-    }
+ 
 
     private void Update()
     {
         // 게임 레디 상태에서 시작하기
-        if (currentGameState.Value == GameState.Ready && IsHost && Input.GetKeyDown(KeyCode.L))
+        if (currentGameState.Value == GameState.Ready && IsHost && Input.GetKeyDown(KeyCode.S))
         {
-            SpawnDropBox();
-            AssignPlayerPosition();
+            StartGame();
             return;
         }
 
@@ -120,14 +108,7 @@ public class GameManager : NetworkBehaviour
     }
     #endregion
 
-    private void SpawnDropBox()
-    {
-        for (int i = 0; i < dropboxSpawnTransform.Count; i++)
-        {
-            GameObject dropBox = Instantiate(dropboxPrefab, dropboxSpawnTransform[i].position, Quaternion.identity);
-            dropBox.GetComponent<NetworkObject>().Spawn();
-        }
-    }
+   
 
     // 게임 종료 UI 띄우기
     private void ResetGame()
@@ -225,7 +206,29 @@ public class GameManager : NetworkBehaviour
         AllocatePlayerNomber();
         currentGameState.Value = GameState.Play;
         OnGameStateChanged?.Invoke(currentGameState.Value);
+        SpawnDropBox();
+        AssignPlayerPosition();
+    }
 
+    private void SpawnDropBox()
+    {
+        for (int i = 0; i < dropboxSpawnTransform.Count; i++)
+        {
+            GameObject dropBox = Instantiate(dropboxPrefab, dropboxSpawnTransform[i].position, Quaternion.identity);
+            dropBox.GetComponent<NetworkObject>().Spawn();
+        }
+    }
+
+    private void AssignPlayerPosition()
+    {
+        int i = 0;
+        List<Transform> spawnTransformList = spawnAssigner.GetSpawnPositionList();
+        foreach (var item in players)
+        {
+            //플레이어 스폰 위치 리스트가 섞여서 왔다고 가정
+            item.Key.SetSpawnPositionRpc(spawnTransformList[i].position);
+            i++;
+        }
     }
 
     public int GetAlivePlayerCount()
@@ -261,6 +264,7 @@ public class GameManager : NetworkBehaviour
             EndGame();
         }
     }
+
     private void AllocatePlayerNomber()
     {
         uint number = 1;
@@ -268,5 +272,17 @@ public class GameManager : NetworkBehaviour
         {
             player.SetNetworkNumber(number++);
         }
+    }
+
+    public PlayerController GetPlayer(int inPlayerNumber)
+    {
+        foreach(var player in players)
+        {
+            if(player.Key.GetNetworkNumber() == inPlayerNumber)
+            {
+                return player.Key;
+            }
+        }
+        return null;
     }
 }
