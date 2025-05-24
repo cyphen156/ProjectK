@@ -2,7 +2,9 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using Unity.Netcode;
 using UnityEngine;
+using Unity.Netcode;
 public enum GameState
 {
     None,
@@ -11,8 +13,9 @@ public enum GameState
     End
 }
 
-public class GameManager : MonoBehaviour
+public class GameManager : NetworkBehaviour
 {
+    public SpawnAssginer spawnAssigner;
     public static GameManager Instance { get; private set; }
 
     [Header("GamePlayTime")]
@@ -29,12 +32,18 @@ public class GameManager : MonoBehaviour
     public static event Action<int> PlayerCountChange;
 
     [Header("GameState")]
-    [SerializeField] private GameState currentGameState;
-    private uint gameWinner;  
+    [SerializeField] private NetworkVariable<GameState> currentGameState;
+
+    private uint gameWinner;
     public static event Action<uint> OnWinnerChanged;
     public static event Action<GameState> OnGameStateChanged;
 
     public static event Action<PlayerController, PlayerState> LocalPlayerState;
+
+    [Header("DropBox")]
+    [SerializeField] private GameObject dropboxPrefab;
+    public List<Transform> dropboxSpawnTransform;
+
 
     #region Unity Methods
     private void Awake()
@@ -49,7 +58,7 @@ public class GameManager : MonoBehaviour
         {
             Destroy(gameObject);
         }
-        currentGameState = GameState.None;
+        currentGameState.Value = GameState.None;
         PlayTime = 5f;
         maxPlayTime = 60 * PlayTime;  // 분단위
     }
@@ -59,16 +68,19 @@ public class GameManager : MonoBehaviour
         ResetGame();
     }
 
+ 
+
     private void Update()
     {
-        // 게임 레디 상태
-        if (currentGameState == GameState.Ready)
+        // 게임 레디 상태에서 시작하기
+        if (currentGameState.Value == GameState.Ready && IsHost && Input.GetKeyDown(KeyCode.S))
         {
+            StartGame();
             return;
         }
-        
+
         // 게임 플레이중
-        else if (currentGameState == GameState.Play)
+        else if (currentGameState.Value == GameState.Play)
         {
             if (currentTime <= 0)
             {
@@ -89,12 +101,14 @@ public class GameManager : MonoBehaviour
         }
 
         // 게임 종료 시
-        else if(currentGameState == GameState.End)
+        else if (currentGameState.Value == GameState.End)
         {
             // 종료 상태일때도 아무것도 안할거임   
         }
     }
     #endregion
+
+   
 
     // 게임 종료 UI 띄우기
     private void ResetGame()
@@ -111,23 +125,23 @@ public class GameManager : MonoBehaviour
         gameWinner = INVALID_PLAYER_NUMBER;
 
         // 게임 상태 초기화
-        currentGameState = GameState.Ready;
-        OnGameStateChanged?.Invoke(currentGameState);
+        currentGameState.Value = GameState.Ready;
+        OnGameStateChanged?.Invoke(currentGameState.Value);
     }
 
     // 게임 종료 UI 띄우기
     private void EndGame()
     {
         OnWinnerChanged?.Invoke(gameWinner);
-        currentGameState = GameState.End;
-        OnGameStateChanged?.Invoke(currentGameState);
+        currentGameState.Value = GameState.End;
+        OnGameStateChanged?.Invoke(currentGameState.Value);
     }
     private void EndGame(PlayerController inWinner)
     {
         gameWinner = inWinner.GetNetworkNumber();
         OnWinnerChanged?.Invoke(gameWinner);
-        currentGameState = GameState.End;
-        OnGameStateChanged?.Invoke(currentGameState);
+        currentGameState.Value = GameState.End;
+        OnGameStateChanged?.Invoke(currentGameState.Value);
 
         GameEnd(10f);
     }
@@ -175,7 +189,7 @@ public class GameManager : MonoBehaviour
         {
             Debug.LogError("PlayerController is not registered");
             return;
-        }    
+        }
         else
         {
             players.Remove(inPlayerController);
@@ -190,9 +204,31 @@ public class GameManager : MonoBehaviour
         GamePlayTimeChange?.Invoke(currentTime);
         PlayerCountChange?.Invoke(players.Count);
         AllocatePlayerNomber();
-        currentGameState = GameState.Play;
-        OnGameStateChanged?.Invoke(currentGameState);
+        currentGameState.Value = GameState.Play;
+        OnGameStateChanged?.Invoke(currentGameState.Value);
+        SpawnDropBox();
+        AssignPlayerPosition();
+    }
 
+    private void SpawnDropBox()
+    {
+        for (int i = 0; i < dropboxSpawnTransform.Count; i++)
+        {
+            GameObject dropBox = Instantiate(dropboxPrefab, dropboxSpawnTransform[i].position, Quaternion.identity);
+            dropBox.GetComponent<NetworkObject>().Spawn();
+        }
+    }
+
+    private void AssignPlayerPosition()
+    {
+        int i = 0;
+        List<Transform> spawnTransformList = spawnAssigner.GetSpawnPositionList();
+        foreach (var item in players)
+        {
+            //플레이어 스폰 위치 리스트가 섞여서 왔다고 가정
+            item.Key.SetSpawnPositionRpc(spawnTransformList[i].position);
+            i++;
+        }
     }
 
     public int GetAlivePlayerCount()
@@ -228,6 +264,7 @@ public class GameManager : MonoBehaviour
             EndGame();
         }
     }
+
     private void AllocatePlayerNomber()
     {
         uint number = 1;
@@ -235,5 +272,17 @@ public class GameManager : MonoBehaviour
         {
             player.SetNetworkNumber(number++);
         }
+    }
+
+    public PlayerController GetPlayer(uint inPlayerNumber)
+    {
+        foreach(var player in players)
+        {
+            if(player.Key.GetNetworkNumber() == inPlayerNumber)
+            {
+                return player.Key;
+            }
+        }
+        return null;
     }
 }

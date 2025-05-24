@@ -18,6 +18,10 @@ public class SystemUIManager : MonoBehaviour
     private GameObject gameEndPanel;
     private TextMeshProUGUI winnerInfoText;
 
+    [Header("DieUI")]
+    private GameObject PlayerDiePanel; // ÇÃ·¹ÀÌ¾î »ç¸Á½Ã UI (ÀçÈÆ)
+    private TextMeshProUGUI PlayerDieText; // ÇÃ·¹ÀÌ¾î »ç¸Á½Ã UI (ÀçÈÆ)
+
     private void Awake()
     {
         minutes = 0f;
@@ -27,6 +31,9 @@ public class SystemUIManager : MonoBehaviour
         RestPlayerText = transform.Find("RestPlayerBackground/RestPlayerText").GetComponentInParent<TextMeshProUGUI>();
         gameEndPanel = GameObject.Find("GameEndPanel");
         winnerInfoText = gameEndPanel.GetComponentInChildren<TextMeshProUGUI>();
+
+        PlayerDiePanel = GameObject.Find("PlayerDiePanel"); // ÇÃ·¹ÀÌ¾î »ç¸Á½Ã UI (ÀçÈÆ)
+        PlayerDieText = PlayerDiePanel.GetComponentInChildren<TextMeshProUGUI>(); // ÇÃ·¹ÀÌ¾î »ç¸Á½Ã UI (ÀçÈÆ)
     }
 
     private void Start()
@@ -47,9 +54,10 @@ public class SystemUIManager : MonoBehaviour
         GameManager.OnWinnerChanged += UpdateLastPlayer;
         GameManager.OnGameStateChanged += UpdateGameState; 
         gameEndPanel.SetActive(false);
-    }
 
-    
+        GameManager.LocalPlayerState += UpdateLocalPlayerState; // ÇÃ·¹ÀÌ¾î »ç¸Á½Ã UI (ÀçÈÆ)
+        PlayerDiePanel.SetActive(false); // ÇÃ·¹ÀÌ¾î »ç¸Á½Ã UI (ÀçÈÆ)
+    }
 
     private void UpdateGameLifeTime(float inCurrentTime)
     {
@@ -87,4 +95,19 @@ public class SystemUIManager : MonoBehaviour
         }
         gameEndPanel.SetActive(false);
     }
+
+    private void UpdateLocalPlayerState(PlayerController inPlayerController, PlayerState inState)
+    {
+        if (inState == PlayerState.Die)
+        {
+            PlayerDieText.text = "ÇÃ·¹ÀÌ¾î" + inPlayerController.GetNetworkNumber() + "»ç¸Á";
+
+            PlayerDiePanel.SetActive(true);
+        }
+        else
+        {
+            PlayerDiePanel.SetActive(false);
+        }
+    }
+
 }

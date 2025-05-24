@@ -9,7 +9,9 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 5531529610074158898}
+  - component: {fileID: 7644462576899125716}
   - component: {fileID: 7222010527777720713}
+  - component: {fileID: 5558540612941308292}
   m_Layer: 0
   m_Name: GameManager
   m_TagString: Untagged
@@ -32,6 +34,31 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &7644462576899125716
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7120438797326706399}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d5a57f767e5e46a458fc5d3c628d0cbb, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  GlobalObjectIdHash: 3615952116
+  InScenePlacedSourceGlobalObjectIdHash: 3777396841
+  DeferredDespawnTick: 0
+  Ownership: 1
+  AlwaysReplicateAsRoot: 0
+  SynchronizeTransform: 1
+  ActiveSceneSynchronization: 0
+  SceneMigrationSynchronization: 0
+  SpawnWithObservers: 1
+  DontDestroyWithOwner: 0
+  AutoObjectParentSync: 1
+  SyncOwnerTransformWhenParented: 1
+  AllowOwnerToParent: 0
 --- !u!114 &7222010527777720713
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -44,3 +71,29 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0fb55d95b6b58334193c6b89fbb36942, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  ShowTopMostFoldoutHeaderGroup: 1
+  spawnAssigner: {fileID: 5558540612941308292}
+  PlayTime: 0
+  currentGameState:
+    m_InternalValue: 0
+  dropboxPrefab: {fileID: 6269210911794144598, guid: 538c519208220c1439b7632e7eb95264, type: 3}
+  dropboxSpawnTransform:
+  - {fileID: 0}
+--- !u!114 &5558540612941308292
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7120438797326706399}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 24e2491d2763dca4d8683f542d2cc9a0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  spawnPositionList:
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
