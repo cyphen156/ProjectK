@@ -274,7 +274,7 @@ public class GameManager : NetworkBehaviour
         }
     }
 
-    public PlayerController GetPlayer(int inPlayerNumber)
+    public PlayerController GetPlayer(uint inPlayerNumber)
     {
         foreach(var player in players)
         {
