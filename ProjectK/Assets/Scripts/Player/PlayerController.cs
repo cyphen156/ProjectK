@@ -25,7 +25,7 @@ public enum MoveType
 public class PlayerController : NetworkBehaviour, IPlayerInputReceiver, ITakeDamage
 {
     #region variable Scope
-    private uint myNetworkNumber;
+    private NetworkVariable<uint> myNetworkNumber;
 
     [Header("PlayerMovement")]
     private Vector3 lookDirection;
@@ -66,11 +66,10 @@ public class PlayerController : NetworkBehaviour, IPlayerInputReceiver, ITakeDam
     private float lastInputHorizontal = 0f;
     private float lastInputVertical = 0f;
 
-
-    #region Unity Methods
+     #region Unity Methods
     private void Awake()
     {
-        myNetworkNumber = 99999999;
+        myNetworkNumber = new NetworkVariable<uint>();
         defaultSpeed = 5.0f;
         slowSpeed = 3.0f;
         runSpeed = 8.0f;
@@ -303,12 +302,12 @@ public class PlayerController : NetworkBehaviour, IPlayerInputReceiver, ITakeDam
 
     public void SetNetworkNumber(uint inNumber)
     {
-        myNetworkNumber = inNumber;
+        myNetworkNumber.Value = inNumber;
     }
 
     public uint GetNetworkNumber()
     {
-        return myNetworkNumber;
+        return myNetworkNumber.Value;
     }
 
     [Rpc(SendTo.Everyone)]
@@ -318,7 +317,6 @@ public class PlayerController : NetworkBehaviour, IPlayerInputReceiver, ITakeDam
         {
             transform.position = inPosition;
         }
-        
     }
 
     
