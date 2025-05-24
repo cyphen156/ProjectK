@@ -195,7 +195,7 @@ public class PlayerController : NetworkBehaviour, IPlayerInputReceiver, ITakeDam
             {
                 return;
             }
-            box.OpenBox(PickItem);
+            box.OpenBox(myNetworkNumber.Value);
         }
     }
 
