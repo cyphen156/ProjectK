@@ -13,7 +13,8 @@ public class DropBox : NetworkBehaviour
     public static event Action<DropBox> OnOpenBox;
     public static event Action OnCloseBox;
     public static event Action<DropBox> OnChangeBox;
-    private Func<ItemBase, ItemBase> itemPickCallBack;
+    private uint openPlayerNumber;
+    private const uint InValidPlayerNumber = uint.MaxValue;
 
     private void Awake()
     {
@@ -102,18 +103,18 @@ public class DropBox : NetworkBehaviour
     #endregion
 
     #region 상자 열고 닫기, 아이템 선택하기
-    public void OpenBox(Func<ItemBase, ItemBase> inItemPickCallBack)
+    public void OpenBox(uint inPlayerNumber)
     {
         //Debug.Log("박스를 열었다.");
         OnOpenBox?.Invoke(this);
-         itemPickCallBack = inItemPickCallBack;
+         openPlayerNumber = inPlayerNumber;
     }
 
     public void CloseBox()
     {
         //Debug.Log("박스를 닫았다.");
         OnCloseBox.Invoke();
-        itemPickCallBack = null;
+        openPlayerNumber = InValidPlayerNumber;
     }
 
     public List<ItemBase> GetBoxItemList()
@@ -128,19 +129,23 @@ public class DropBox : NetworkBehaviour
             return;
         }
 
-        ReqItemPickRpc(inSlotIndex);
+        ReqItemPickRpc(inSlotIndex, openPlayerNumber);
     }
 
     [Rpc(SendTo.Server)]
-    private void ReqItemPickRpc(int inSlotIndex)
+    private void ReqItemPickRpc(int inSlotIndex, uint inOpenPlayerNumber)
     {
         //Debug.Log("아이템 습득 판별은 Server에서만");
-        ItemBase returnItem = null;
-        if (itemPickCallBack != null)
+        if(inOpenPlayerNumber == InValidPlayerNumber)
         {
-            returnItem = itemPickCallBack(haveItems[inSlotIndex]);
+            Logger.Log("박스연 캐릭터가 없거나 잘못된 넘버를 가진 캐릭터");
+            return;
         }
 
+        ItemBase returnItem = null;
+        PlayerController player = GameManager.Instance.GetPlayer(inOpenPlayerNumber);
+        returnItem = player.PickItem((haveItems[inSlotIndex]));
+       
         //Debug.Log( "반환된거 " + returnItem.itemType + " " +returnItem.name);
         if (returnItem == null || returnItem.itemType == ItemMainType.None)
         {
