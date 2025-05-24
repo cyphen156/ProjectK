@@ -189,12 +189,15 @@ public class PlayerController : NetworkBehaviour, IPlayerInputReceiver, ITakeDam
 
     public void InteractDropBox()
     {
-        DropBox box = boxDetector.GetNearestBox();
-        if (box == null)
+        if (IsOwner)
         {
-            return;
+            DropBox box = boxDetector.GetNearestBox();
+            if (box == null)
+            {
+                return;
+            }
+            box.OpenBox(PickItem);
         }
-        box.OpenBox(PickItem);
     }
 
     public void Dodge()

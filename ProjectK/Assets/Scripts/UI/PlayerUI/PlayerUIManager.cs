@@ -40,6 +40,7 @@ public class PlayerUIManager : MonoBehaviour
 
     private void Start()
     {
+        DropBox.OnOpenBox += OnOpenDropBox;
         DropBox.OnCloseBox += OnCloseDropBox;
         DropBox.OnChangeBox += OnChangeDropBox;
         PlayerController.OnCrosshairSizeChanged += UpdateCrosshairUISize;

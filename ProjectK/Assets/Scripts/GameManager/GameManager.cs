@@ -40,6 +40,11 @@ public class GameManager : NetworkBehaviour
 
     public static event Action<PlayerController, PlayerState> LocalPlayerState;
 
+    [Header("DropBox")]
+    [SerializeField] private GameObject dropboxPrefab;
+    public List<Transform> dropboxSpawnTransform;
+
+
     #region Unity Methods
     private void Awake()
     {
@@ -81,6 +86,7 @@ public class GameManager : NetworkBehaviour
         // 게임 레디 상태에서 시작하기
         if (currentGameState.Value == GameState.Ready && IsHost && Input.GetKeyDown(KeyCode.L))
         {
+            SpawnDropBox();
             AssignPlayerPosition();
             return;
         }
@@ -113,6 +119,15 @@ public class GameManager : NetworkBehaviour
         }
     }
     #endregion
+
+    private void SpawnDropBox()
+    {
+        for (int i = 0; i < dropboxSpawnTransform.Count; i++)
+        {
+            GameObject dropBox = Instantiate(dropboxPrefab, dropboxSpawnTransform[i].position, Quaternion.identity);
+            dropBox.GetComponent<NetworkObject>().Spawn();
+        }
+    }
 
     // 게임 종료 UI 띄우기
     private void ResetGame()
