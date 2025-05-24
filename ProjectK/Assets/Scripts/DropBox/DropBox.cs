@@ -3,7 +3,6 @@ using System;
 using System.Collections.Generic;
 using Unity.Netcode;
 using UnityEngine;
-using Unity.Netcode;
 
 public class DropBox : NetworkBehaviour
 {
@@ -26,15 +25,14 @@ public class DropBox : NetworkBehaviour
 
     private void Start()
     {
-        if (IsHost)
-        {
-            DiceItem();
-        }
+
+        DiceItem();
+
     }
 
     private void Update()
     {
-        if (Input.GetKeyDown(KeyCode.F5) && IsHost)
+        if (Input.GetKeyDown(KeyCode.F5))
         {
             DiceItem();
         }
@@ -42,7 +40,11 @@ public class DropBox : NetworkBehaviour
 
     private void DiceItem()
     {
-        haveItems.Clear();
+        if (IsHost == false)
+        {
+            return;
+        }
+        ResetItemListRpc();
         startChance = 100;
         for (int i = 1; i <= maxRollCount; i++)
         {
@@ -65,13 +67,39 @@ public class DropBox : NetworkBehaviour
         }
     }
 
+    #region 내용물 동기화
+    [Rpc(SendTo.Everyone)]
+    private void ResetItemListRpc()
+    {
+        haveItems.Clear();
+        OnChangeBox?.Invoke(this);
+    }
+
     [Rpc(SendTo.Everyone)]
     private void AddDroxBoxItemRpc(int inItemId, int inItemAmount)
     {
         ItemBase addItem = new ItemBase(MasterDataManager.Instance.GetMasterItemData(inItemId), inItemAmount);
         haveItems.Add(addItem);
+        OnChangeBox?.Invoke(this);
     }
 
+    [Rpc(SendTo.Everyone)]
+    private void RemoveItemRpc(int inSlotIndex)
+    {
+        haveItems.RemoveAt(inSlotIndex);
+        OnChangeBox.Invoke(this);
+    }
+
+    [Rpc(SendTo.Everyone)]
+    private void ReplaceItemRpc(int inSlotIndex, int inItemId, int inItemAmount)
+    {
+        ItemBase replaceItem = new ItemBase(MasterDataManager.Instance.GetMasterItemData(inItemId), inItemAmount);
+        haveItems[inSlotIndex] = replaceItem;
+        OnChangeBox.Invoke(this);
+    }
+    #endregion
+
+    #region 상자 열고 닫기, 아이템 선택하기
     public void OpenBox(Func<ItemBase, ItemBase> inItemPickCallBack)
     {
         //Debug.Log("박스를 열었다.");
@@ -90,7 +118,6 @@ public class DropBox : NetworkBehaviour
     {
         return haveItems;
     }
-
     public void SelectItem(int inSlotIndex)
     {
         if (haveItems.Count <= inSlotIndex)
@@ -114,21 +141,9 @@ public class DropBox : NetworkBehaviour
             ReplaceItemRpc(inSlotIndex, returnItem.id, returnItem.amount);
         }
     }
+    #endregion
 
-    [Rpc(SendTo.Everyone)]
-    private void RemoveItemRpc(int inSlotIndex)
-    {
-        haveItems.RemoveAt(inSlotIndex);
-        OnChangeBox.Invoke(this);
-    }
-
-    [Rpc(SendTo.Everyone)]
-    private void ReplaceItemRpc(int inSlotIndex, int inItemId, int inItemAmount)
-    {
-        ItemBase replaceItem = new ItemBase(MasterDataManager.Instance.GetMasterItemData(inItemId), inItemAmount);
-        haveItems[inSlotIndex] = replaceItem;
-        OnChangeBox.Invoke(this);
-    }
+    
 
 }
 
