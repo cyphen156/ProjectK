@@ -83,6 +83,8 @@ public class DropBox : NetworkBehaviour
         OnChangeBox?.Invoke(this);
     }
 
+
+
     [Rpc(SendTo.Everyone)]
     private void RemoveItemRpc(int inSlotIndex)
     {
@@ -118,6 +120,7 @@ public class DropBox : NetworkBehaviour
     {
         return haveItems;
     }
+
     public void SelectItem(int inSlotIndex)
     {
         if (haveItems.Count <= inSlotIndex)
@@ -125,8 +128,15 @@ public class DropBox : NetworkBehaviour
             return;
         }
 
+        ReqItemPickRpc(inSlotIndex);
+    }
+
+    [Rpc(SendTo.Server)]
+    private void ReqItemPickRpc(int inSlotIndex)
+    {
+        //Debug.Log("아이템 습득 판별은 Server에서만");
         ItemBase returnItem = null;
-        if(itemPickCallBack != null)
+        if (itemPickCallBack != null)
         {
             returnItem = itemPickCallBack(haveItems[inSlotIndex]);
         }
@@ -141,6 +151,8 @@ public class DropBox : NetworkBehaviour
             ReplaceItemRpc(inSlotIndex, returnItem.id, returnItem.amount);
         }
     }
+
+ 
     #endregion
 
     
