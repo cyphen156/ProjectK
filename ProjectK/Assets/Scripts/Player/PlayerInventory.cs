@@ -11,19 +11,20 @@ public class PlayerInventory : MonoBehaviour
     [SerializeField] 
     private ItemBase[] consumeItems;
 
-    private ItemSubType[] gunFixType;
-    private ItemSubType[] consumeFixType;
+    public static event Action<ItemBase[]> OnChangeGunItems;
+    public static event Action<ItemBase[]> OnChangeConsumeItems;
+    public static readonly ItemSubType[] GunSlotInputType = { ItemSubType.Bullet, ItemSubType.Muzzle, ItemSubType.Rail, ItemSubType.Magazine };
+    public static readonly ItemSubType[] ConsumeSlotInputType = { ItemSubType.Recovery, ItemSubType.Recovery, ItemSubType.Stamina, ItemSubType.Deploy, ItemSubType.Throw, ItemSubType.Throw };
 
     const int NO_INDEX_VALUE = -1;
 
     private void Awake()
     {
         //총 인벤토리에서 고정위치
-        gunFixType = new ItemSubType[]{ItemSubType.Bullet, ItemSubType.Muzzle, ItemSubType.Rail, ItemSubType.Magazine };
-        gunItems = new ItemBase[gunFixType.Length];
+        gunItems = new ItemBase[GunSlotInputType.Length];
+
         //소비 인벤토리에서 고정위치 
-        consumeFixType = new ItemSubType[] { ItemSubType.Recovery, ItemSubType.Recovery, ItemSubType.Stamina, ItemSubType.Deploy, ItemSubType.Throw, ItemSubType.Throw };
-        consumeItems = new ItemBase[consumeFixType.Length];
+        consumeItems = new ItemBase[ConsumeSlotInputType.Length];
     }
 
     private void Update()
@@ -36,11 +37,11 @@ public class PlayerInventory : MonoBehaviour
             {
                 ItemBase copy = new ItemBase(pair.Value);
                 ItemBase newItem = new ItemBase(copy, 1);
-                TryAddOrReturnPreviousItem(newItem);
+                TryAddOrReturnPreviousItem(newItem, null);
             }
         }
     }
-    public ItemBase TryAddOrReturnPreviousItem(ItemBase inItem)
+    public ItemBase TryAddOrReturnPreviousItem(ItemBase inItem, Gun inPlayerGun)
     {
         ItemBase returnItem = null;
 
@@ -48,18 +49,14 @@ public class PlayerInventory : MonoBehaviour
         if(itemType == ItemMainType.AttachMent)
         {
             //같은 아이템 차고 있으면 들어온 아이템을 장착하고 기존 아이템 반환
-            if(EquiptItem(inItem, out returnItem) == false)
-            {
-                Debug.LogError("아이템Data의 SubType이 존재하지 않습니다.");
-                return returnItem;
-            }
+            EquiptItem(inItem, out returnItem);
+            inPlayerGun?.EquiptItems(gunItems);
+            OnChangeGunItems?.Invoke(gunItems);
         }
         else if(itemType == ItemMainType.Expendables)
         {
-            if(AquireConsumeItem(inItem, out returnItem) == false){
-                Debug.LogError("아이템Data의 SubType이 존재하지 않습니다.");
-                return returnItem;
-            }
+            AquireConsumeItem(inItem, out returnItem);
+            OnChangeConsumeItems.Invoke(consumeItems);
         }
 
         return returnItem;
@@ -75,31 +72,30 @@ public class PlayerInventory : MonoBehaviour
         return gunItems;
     }
 
-    private bool EquiptItem(ItemBase inEquipItem, out ItemBase returnItem)
+    private void EquiptItem(ItemBase inEquipItem, out ItemBase returnItem)
     {
         //장비타입 슬롯 인덱스 찾기
         ItemSubType subType = inEquipItem.subType;
-        int slotIdx = FindSlotIndex(gunFixType, subType);
+        int slotIdx = FindSlotIndex(GunSlotInputType, subType);
         if(slotIdx == NO_INDEX_VALUE)
         {
             returnItem = null;
-            return false;
+            return;
         }
 
         returnItem = gunItems[slotIdx]; //착용중이던 아이템
         gunItems[slotIdx] = inEquipItem; //새로 장착
-        return true;
     }
 
-    private bool AquireConsumeItem(ItemBase inConsumeItem, out ItemBase returnItem)
+    private void AquireConsumeItem(ItemBase inConsumeItem, out ItemBase returnItem)
     {
         //장비타입 슬롯 인덱스 찾기
         ItemSubType subType = inConsumeItem.subType;
-        int slotIdx = FindSlotIndex(consumeFixType, subType);
+        int slotIdx = FindSlotIndex(ConsumeSlotInputType, subType);
         if (slotIdx == NO_INDEX_VALUE)
         {
             returnItem = null;
-            return false;
+            return;
         }
         
         //각 서브타입에 따라 획득 방식 적용
@@ -109,7 +105,7 @@ public class PlayerInventory : MonoBehaviour
             if (AddConsumeItem(slotIdx, inConsumeItem) == true)
             {
                 returnItem = null;
-                return true;
+                return;
             }
 
             int nextIdx = slotIdx + 1;
@@ -117,12 +113,12 @@ public class PlayerInventory : MonoBehaviour
             if (AddConsumeItem(nextIdx, inConsumeItem) == true)
             {
                 returnItem = null;
-                return true;
+                return ;
             }
 
             //두 슬롯 다 다른 아이템이 있는경우
             returnItem = ChangeConsumeItem(nextIdx, inConsumeItem);
-            return true;
+            return;
         }
         else if(subType == ItemSubType.Stamina || subType == ItemSubType.Deploy)
         {
@@ -130,16 +126,16 @@ public class PlayerInventory : MonoBehaviour
             if(AddConsumeItem(slotIdx, inConsumeItem) == true)
             {
                 returnItem = null;
-                return true;
+                return;
             }
 
             //다른 아이템이 있는 경우 교환
             returnItem = ChangeConsumeItem(slotIdx, inConsumeItem);
-            return true;
+            return;
         }
  
         returnItem = null;
-        return true;
+        return;
     }
 
     private int FindSlotIndex(ItemSubType[] inSlotType, ItemSubType inSubType)
