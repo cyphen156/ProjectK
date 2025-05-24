@@ -1,6 +1,7 @@
 ﻿
 using System;
 using System.Collections.Generic;
+using Unity.Netcode;
 using UnityEngine;
 using Unity.Netcode;
 
@@ -25,12 +26,15 @@ public class DropBox : NetworkBehaviour
 
     private void Start()
     {
-        DiceItem();
+        if (IsHost)
+        {
+            DiceItem();
+        }
     }
 
     private void Update()
     {
-        if (Input.GetKeyDown(KeyCode.F5))
+        if (Input.GetKeyDown(KeyCode.F5) && IsHost)
         {
             DiceItem();
         }
@@ -52,25 +56,26 @@ public class DropBox : NetworkBehaviour
             ItemMainType mainType = (ItemMainType)mainTypeNum;
             
             ItemBase rollItem = MasterDataManager.Instance.DropBox.RollDropBox(mainType);
-            if (rollItem == null)
-            {
-                Debug.Log("뽑기 실패");
-            }
-            else
-            {
-                Debug.Log(rollItem.name + "을 뽑았다.");
-                haveItems.Add(rollItem);
-            }
+            
+            AddDroxBoxItemRpc(rollItem.id, rollItem.amount);
+
             //뽑았으면 확률 조정
             startChance *= stackRate;
 
         }
     }
 
+    [Rpc(SendTo.Everyone)]
+    private void AddDroxBoxItemRpc(int inItemId, int inItemAmount)
+    {
+        ItemBase addItem = new ItemBase(MasterDataManager.Instance.GetMasterItemData(inItemId), inItemAmount);
+        haveItems.Add(addItem);
+    }
+
     public void OpenBox(Func<ItemBase, ItemBase> inItemPickCallBack)
     {
         //Debug.Log("박스를 열었다.");
-        OnOpenBox.Invoke(this);
+        OnOpenBox?.Invoke(this);
          itemPickCallBack = inItemPickCallBack;
     }
 
