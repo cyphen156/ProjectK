@@ -23,7 +23,6 @@ public class SystemUIManager : MonoBehaviour
     private TextMeshProUGUI PlayerDieText; // 플레이어 사망시 UI (재훈)
 
     [Header("GamePlayUI")]
-    private bool isHost;
     private GameObject lobbyPanel;
 
     private void Awake()
@@ -39,7 +38,6 @@ public class SystemUIManager : MonoBehaviour
         PlayerDiePanel = GameObject.Find("PlayerDiePanel"); // 플레이어 사망시 UI (재훈)
         PlayerDieText = PlayerDiePanel.GetComponentInChildren<TextMeshProUGUI>(); // 플레이어 사망시 UI (재훈)
 
-        isHost = false;
         lobbyPanel = GameObject.Find("LobbyPanel");
     }
 
