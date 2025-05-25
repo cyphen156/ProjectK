@@ -39,6 +39,8 @@ public class GameManager : NetworkBehaviour
 
     public static event Action<PlayerController, PlayerState> LocalPlayerState;
 
+    public static event Action OnHideLobbyUIRequested;
+
     [Header("DropBox")]
     [SerializeField] private GameObject dropboxPrefab;
     public List<Transform> dropboxSpawnTransform;
@@ -200,13 +202,28 @@ public class GameManager : NetworkBehaviour
     public void StartGame()
     {
         // 게임 시작
-        GamePlayTimeChange?.Invoke(currentTime);
-        PlayerCountChange?.Invoke(players.Count);
         AllocatePlayerNomber();
         currentGameState.Value = GameState.Play;
-        OnGameStateChanged?.Invoke(currentGameState.Value);
         SpawnDropBox();
         AssignPlayerPosition();
+        ApplyStartUIRpc();
+    }
+
+    public void RequestStartGame()
+    {
+        if (IsHost)
+        {
+            StartGame();
+        }
+    }
+
+    [Rpc(SendTo.Everyone)]
+    private void ApplyStartUIRpc()
+    {
+        OnHideLobbyUIRequested?.Invoke();
+        GamePlayTimeChange?.Invoke(currentTime);
+        PlayerCountChange?.Invoke(players.Count);
+        OnGameStateChanged?.Invoke(currentGameState.Value);
     }
 
     private void SpawnDropBox()
