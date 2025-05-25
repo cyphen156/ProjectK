@@ -1,4 +1,5 @@
 using Unity.Netcode;
+using Unity.Netcode.Components;
 using UnityEngine;
 
 public class Bullet : NetworkBehaviour
@@ -8,56 +9,47 @@ public class Bullet : NetworkBehaviour
     private float speed;
     private float damage;
     private Vector3 direction;
-    private NetworkVariable<bool> isActive = new NetworkVariable<bool>(false);
+    private NetworkVariable<bool> isActive = new NetworkVariable<bool>();
 
     private void Awake()
     {
-        gameObject.SetActive(isActive.Value);
         defaultLifeTime = 5.0f;
         lifeTime = defaultLifeTime;
         speed = 14.0f;
         damage = 30f;
-
-
-
-    }
-    public override void OnNetworkSpawn()
-    {
-        isActive.OnValueChanged += OnActiveValueChange;
     }
 
-    public void SetDirection(Vector3 inSpawnPosition, Vector3 inDirection)
-    {
-        //총에서 만들어서 호출
-        transform.position = inSpawnPosition;
-        direction = inDirection;
-        lifeTime = defaultLifeTime;
-        ActiveRpc(true);
-    }
 
-    [Rpc(SendTo.Everyone)]
-    private void ActiveRpc(bool inActive)
+    protected override void InternalOnNetworkPostSpawn()
     {
-        gameObject.SetActive(inActive);
-    }
-
-    private void Update()
-    {
-        if(IsHost == false)
-        {
-            Debug.Log("호스트가 아니다");
-        
-        }
-
+        //Debug.Log("스폰 되었다.2");
+        //OnNetworkSpawn - 스폰될떄
+        //Internal(지금함수) - 스폰되고 나서 
         if (IsServer == false)
         {
-            Debug.Log("서버가 아니다");
-    
+            //OnNetworkSpawn에서 비활성화 해버리면 NetWorkObejct가 Null이 뜸
+            gameObject.SetActive(isActive.Value);
         }
+    }
 
-        if(IsClient == false)
+    public void SetBulletInfo(Vector3 inSpawnPosition, Vector3 inDirection)
+    {
+        //총에서 만들어서 호출
+        ControlActive(true); //총알 쐈다
+        //transform.position = inSpawnPosition;
+        var netTransform = GetComponent<NetworkTransform>();
+        //위치를 스폰위치로 순간이동 시켜서 동기화
+        netTransform.Teleport(inSpawnPosition, Quaternion.identity, transform.localScale);
+        direction = inDirection;
+        lifeTime = defaultLifeTime;
+    }
+
+    #region 총알 행동
+    private void Update()
+    {
+        if (IsHost == false)
         {
-            Debug.Log("클라아님");
+            return;
         }
 
         Move();
@@ -75,14 +67,8 @@ public class Bullet : NetworkBehaviour
         if (lifeTime <= 0)
         {
             //Destroy(gameObject);
-            InActive();
+            BulletOff();
         }
-    }
-
-    private void OnActiveValueChange(bool inPreActive, bool inActive)
-    {
-        Debug.Log("바뀐다");
-        gameObject.SetActive(inActive);
     }
 
     private void OnTriggerEnter(Collider other)
@@ -95,20 +81,38 @@ public class Bullet : NetworkBehaviour
             if (takeDamageObj != null)
             {
                 takeDamageObj.TakeDamage(damage);
-                gameObject.GetComponent<NetworkObject>().Despawn();
+                BulletOff();
             }
         }
     }
+    #endregion
 
-    public void InActive()
+
+    #region 총알 활성화 동기화
+    private void BulletOff()
     {
-        if(IsHost == false)
+        if (IsHost == false)
         {
-            Debug.Log("비활성화는 서버만보여주기");
-            return;
+           return;
         }
-        ActiveRpc(false);
+        ControlActive(false);
         BulletPool.Instance.Recycle(this);
     }
 
+    public void ControlActive(bool inActive)
+    {
+        if (IsHost == false)
+        {
+            return;
+        }
+        isActive.Value = inActive;
+        ActiveRpc(inActive);
+    }
+
+    [Rpc(SendTo.Everyone)]
+    private void ActiveRpc(bool inActive)
+    {
+        gameObject.SetActive(inActive);
+    }
+    #endregion
 }
