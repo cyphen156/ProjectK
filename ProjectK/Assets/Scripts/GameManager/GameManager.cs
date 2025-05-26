@@ -110,7 +110,7 @@ public class GameManager : NetworkBehaviour
     {
         if (!IsHost)
         {
-            return; 
+            return;
         }
 
         if (currentGameState.Value == inGameState)
@@ -118,7 +118,13 @@ public class GameManager : NetworkBehaviour
             return;
         }
         currentGameState.Value = inGameState;
-        OnGameStateChanged?.Invoke(inGameState);
+        NotifyClientsGameStateChangedRpc(currentGameState.Value);
+    }
+
+    [Rpc(SendTo.Everyone)]
+    private void NotifyClientsGameStateChangedRpc(GameState newState)
+    {
+        OnGameStateChanged?.Invoke(newState);
     }
     public override void OnNetworkSpawn()
     {
@@ -127,7 +133,7 @@ public class GameManager : NetworkBehaviour
             ResetGame();
         }
     }
-
+    
     // 게임 종료 UI 띄우기
     private void ResetGame()
     {
@@ -165,30 +171,30 @@ public class GameManager : NetworkBehaviour
         yield return new WaitForSeconds(inTime);
         ResetGame();
     }
-    public void RegisterAlivePlayer(PlayerController inPlayerController, PlayerState inPlayerStat, bool inIsOwner = true)
+    public void RegisterAlivePlayer(PlayerController inPlayerController, PlayerState inPlayerState, bool inIsOwner = true)
     {
         if (!players.ContainsKey(inPlayerController))
         {
-            players.Add(inPlayerController, inPlayerStat);
+            players.Add(inPlayerController, inPlayerState);
             if (inIsOwner) //심볼이 Multi 면 오너값이 제대로 들어옴
             {
-                LocalPlayerState?.Invoke(inPlayerController, inPlayerStat);
+                LocalPlayerState?.Invoke(inPlayerController, inPlayerState);
             }
             PlayerCountChange?.Invoke(players.Count);
         }
     }
-    public void UpdatePlayerState(PlayerController inPlayerController, PlayerState inPlayerStat)
+    public void UpdatePlayerState(PlayerController inPlayerController, PlayerState inPlayerState)
     {
         if (players.ContainsKey(inPlayerController))
         {
-            players[inPlayerController] = inPlayerStat;
+            players[inPlayerController] = inPlayerState;
 
             //if (isLocal)
             {
-                LocalPlayerState?.Invoke(inPlayerController, inPlayerStat);
+                LocalPlayerState?.Invoke(inPlayerController, inPlayerState);
             }
 
-            if (inPlayerStat == PlayerState.Die)
+            if (inPlayerState == PlayerState.Die)
             {
                 PlayerCountChange?.Invoke(GetAlivePlayerCount());
                 CheckGameOver();
