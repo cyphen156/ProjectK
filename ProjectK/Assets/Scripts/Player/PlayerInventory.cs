@@ -19,6 +19,8 @@ public class PlayerInventory : NetworkBehaviour
 
     const int NO_INDEX_VALUE = -1;
 
+    
+
     private void Awake()
     {
         //총 인벤토리에서 고정위치
@@ -71,11 +73,35 @@ public class PlayerInventory : NetworkBehaviour
         return returnItem;
     }
 
-    public void UseItem(int inConsumeSlot)
+    // 여기 작업 필요
+    public bool HasUseItem(int inConsumeSlot)
     {
-        //슬롯 번호가 들어오면 해당 슬롯의 아이템을 사용
+        switch (inConsumeSlot)
+        {
+            case 1:
+                break;
+            case 2:
+                break;
+            case 3:
+                break;
+            case 4:
+                break;
+            default:
+                Logger.Log("There is not Allowed Input Key Event");
+                break;
+        }
+        return false;
     }
-
+    // 여기 작업 필요
+    public bool HasUseGranade()
+    {
+        //if ( > 0)
+        {
+            //--;
+            return true;
+        }
+        //return false;
+    }
     public ItemBase[] GetGunItmes()
     {
         return gunItems;

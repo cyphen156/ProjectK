@@ -3444,6 +3444,9 @@ MonoBehaviour:
   crosshairspreadRadius: 0
   crosshairLerpSpeed: 0
   currentPlayerState: 0
+  selcetedItem: {fileID: 0}
+  woodenBoxPrefab: {fileID: 1250500775315529122, guid: bc776000e024989468623334d52e6b52, type: 3}
+  granadePrefab: {fileID: 7340496573315005411, guid: bfb9dcb9dd535d940bf79a9aad8e1d50, type: 3}
 --- !u!114 &3535864916125701533
 MonoBehaviour:
   m_ObjectHideFlags: 0
