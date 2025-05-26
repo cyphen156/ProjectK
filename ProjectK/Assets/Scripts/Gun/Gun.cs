@@ -26,19 +26,19 @@ public class Gun : NetworkBehaviour
    
 
     private int defaultBulletCount; //기본 총알 수
-    private int equiptBulletCount; //스텟 적용
-    private int restBulletCount; //남은 총알 수
-    private int defaultRps; //스텟 적용
-    private int equiptRps; //1초당 총알 발사 갯수
+    [SerializeField] private int equiptBulletCount; //스텟 적용
+    [SerializeField] private int restBulletCount; //남은 총알 수
+    [SerializeField] private int defaultRps; //스텟 적용
+    [SerializeField] private int equiptRps; //1초당 총알 발사 갯수
 
-    public bool canShoot = true; // 총 발사 가능 여부 (구르기 시 총기 발사 X 구현위해 만듬)
+    [SerializeField] public bool canShoot = true; // 총 발사 가능 여부 (구르기 시 총기 발사 X 구현위해 만듬)
 
-    private bool isRating; //연사속도대기
-    private float rateTime;
-    private float restRateTime;
+    [SerializeField] private bool isRating; //연사속도대기
+    [SerializeField] private float rateTime;
+    [SerializeField] float restRateTime;
 
-    private float defaultFocusRegion; //탄 밀집도 : 클수록 퍼진다.
-    public float equiptFocusRegion;
+    [SerializeField] private float defaultFocusRegion; //탄 밀집도 : 클수록 퍼진다.
+    [SerializeField] public float equiptFocusRegion;
 
     public static event Action<int> OnChageAmmoUI;
     private bool isStateLock;
