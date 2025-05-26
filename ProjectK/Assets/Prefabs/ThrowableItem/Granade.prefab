@@ -15,7 +15,7 @@ GameObject:
   - component: {fileID: 4947201210717684010}
   - component: {fileID: 7340496573315005411}
   - component: {fileID: 2080460621595339209}
-  m_Layer: 0
+  m_Layer: 13
   m_Name: Granade
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -105,7 +105,7 @@ SphereCollider:
     serializedVersion: 2
     m_Bits: 0
   m_LayerOverridePriority: 0
-  m_IsTrigger: 1
+  m_IsTrigger: 0
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 3
@@ -149,7 +149,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   ShowTopMostFoldoutHeaderGroup: 1
-  explosionEffectPrefab: {fileID: 0}
+  explosionEffectPrefab: {fileID: 557740369502570611, guid: 13e12e796923f134582b799f7dc0194c, type: 3}
 --- !u!54 &2080460621595339209
 Rigidbody:
   m_ObjectHideFlags: 0

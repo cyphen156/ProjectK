@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using UnityEngine;
 using Unity.Netcode;
+using Unity.Mathematics;
 
 public interface IPlayerInputReceiver
 {
@@ -67,11 +68,13 @@ public class PlayerController : NetworkBehaviour, IPlayerInputReceiver, ITakeDam
     private float lastInputHorizontal = 0f;
     private float lastInputVertical = 0f;
 
-    [Header("Granande")]
+    [Header("ItemPrefabs")]
+    [SerializeField] private GameObject selcetedItem;
+    //[SerializeField] private Granade granadePrefab;
+    //[SerializeField] private Granade granadePrefab;
+    [SerializeField] private WoodenBox woodenBoxPrefab;
     [SerializeField] private Granade granadePrefab;
     #endregion
-
-
 
     #region Unity Methods
     private void Awake()
@@ -323,22 +326,51 @@ public class PlayerController : NetworkBehaviour, IPlayerInputReceiver, ITakeDam
         }
     }
 
-
+    // 여기 작업 필요
     public void UseItem(int inIndex)
     {
+        if(playerInventory.HasUseItem(inIndex))
+        {
+            switch (inIndex)
+            {
+                case 1:
+                    break;
+                case 2:
+                    break;
+                case 3:
+                    break;
+                case 4:
+                    SpawnDeployableRpc();
+                    break;
+                default:
+                    Logger.Log("There is not Allowed Input Key Event");
+                    break;
+            }
+        }
+    }
 
+    [Rpc(SendTo.Server)]
+    private void SpawnDeployableRpc()
+    {
+        Quaternion lookRotation = Quaternion.LookRotation(lookDirection);
+        Quaternion finalRotation = lookRotation;
+        WoodenBox go = Instantiate(woodenBoxPrefab, transform.position + Vector3.forward * 7f + Vector3.up * 10f, finalRotation);
+        go.GetComponent<NetworkObject>().Spawn();
+        go.SetOwner(GetNetworkNumber());
     }
 
     public void UseGranade()
     {
-        //if () // 플레이어 인벤토리 4번 슬롯 갯수 확인
+        if (playerInventory.HasUseGranade())
         {
             SpawnGranadeRpc();
         }
     }
+    [Rpc(SendTo.Server)]
     private void SpawnGranadeRpc()
     {
         Granade granade = Instantiate(granadePrefab, transform.position, Quaternion.LookRotation(lookDirection));
+        granade.GetComponent<NetworkObject>().Spawn();
         granade.SetOwner(GetNetworkNumber());
         Vector3 start = transform.position + Vector3.up;
         granade.Launch(start, mouseWorldPosition);

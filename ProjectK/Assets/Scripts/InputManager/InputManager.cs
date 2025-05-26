@@ -168,7 +168,6 @@ public class InputManager : MonoBehaviour
         {
             localPlayerController.UseGranade();
         }
-
     }
     private void UpdateLocalPlayerStateChanged(PlayerController inPlayerController, PlayerState inLocalPlayerState)
     {

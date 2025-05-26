@@ -1,10 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
+using Unity.Netcode;
 using UnityEngine;
 
 
 
-public class PlayerInventory : MonoBehaviour
+public class PlayerInventory : NetworkBehaviour
 {
     [SerializeField] 
     private ItemBase[] gunItems;
@@ -17,6 +18,8 @@ public class PlayerInventory : MonoBehaviour
     public static readonly ItemSubType[] ConsumeSlotInputType = { ItemSubType.Recovery, ItemSubType.Recovery, ItemSubType.Stamina, ItemSubType.Deploy, ItemSubType.Throw, ItemSubType.Throw };
 
     const int NO_INDEX_VALUE = -1;
+
+    
 
     private void Awake()
     {
@@ -62,11 +65,35 @@ public class PlayerInventory : MonoBehaviour
         return returnItem;
     }
 
-    public void UseItem(int inConsumeSlot)
+    // 여기 작업 필요
+    public bool HasUseItem(int inConsumeSlot)
     {
-        //슬롯 번호가 들어오면 해당 슬롯의 아이템을 사용
+        switch (inConsumeSlot)
+        {
+            case 1:
+                break;
+            case 2:
+                break;
+            case 3:
+                break;
+            case 4:
+                break;
+            default:
+                Logger.Log("There is not Allowed Input Key Event");
+                break;
+        }
+        return false;
     }
-
+    // 여기 작업 필요
+    public bool HasUseGranade()
+    {
+        //if ( > 0)
+        {
+            //--;
+            return true;
+        }
+        //return false;
+    }
     public ItemBase[] GetGunItmes()
     {
         return gunItems;

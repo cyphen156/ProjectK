@@ -3,9 +3,9 @@ using UnityEngine;
 
 public class WoodenBox : NetworkBehaviour, ITakeDamage, ISpawnable
 {
-    private float hp;
-    private float lifeTime;
-    private uint ownerNetworkId;
+    [SerializeField] private float hp;
+    [SerializeField] private float lifeTime;
+    [SerializeField] private uint ownerNetworkId;
 
     #region Unity Methods
 
@@ -54,6 +54,21 @@ public class WoodenBox : NetworkBehaviour, ITakeDamage, ISpawnable
             GetComponent<NetworkObject>().Despawn();
         }
         // ««∞› ¿Ã∆Â∆Æ 
+    }
+
+    private void OnCollisionEnter(Collision collision)
+    {
+        if (!IsHost)
+        {
+            return;
+        }
+
+        if (collision.gameObject.layer == LayerMask.NameToLayer("Ground") ||
+            collision.gameObject.layer == LayerMask.NameToLayer("Wall"))
+        {
+            Rigidbody rb = GetComponent<Rigidbody>();
+            rb.isKinematic = true;
+        }
     }
 }
 

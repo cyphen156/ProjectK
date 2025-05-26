@@ -22,7 +22,6 @@ public class Granade : NetworkBehaviour, ISpawnable
         explosionRadius = 5f;
         explosionDelay = 5f;
         obstacleMask = LayerMask.GetMask("Player", "Deploy");
-        explosionEffectPrefab = Resources.Load<GameObject>("Prefabs/Effect/ExplosionEffect");
     }
 
     public void Launch(Vector3 start, Vector3 target, float launchAngle = 30f)
@@ -51,6 +50,7 @@ public class Granade : NetworkBehaviour, ISpawnable
         yield return new WaitForSeconds(explosionDelay);
         if (IsHost)
         {
+            Debug.Log("!111111111111111111");
             Explode();
         }
     }
