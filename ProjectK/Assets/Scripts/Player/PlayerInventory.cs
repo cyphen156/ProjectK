@@ -1,10 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
+using Unity.Netcode;
 using UnityEngine;
 
 
 
-public class PlayerInventory : MonoBehaviour
+public class PlayerInventory : NetworkBehaviour
 {
     [SerializeField] 
     private ItemBase[] gunItems;
@@ -51,12 +52,20 @@ public class PlayerInventory : MonoBehaviour
             //같은 아이템 차고 있으면 들어온 아이템을 장착하고 기존 아이템 반환
             EquiptItem(inItem, out returnItem);
             inPlayerGun?.EquiptItems(gunItems);
-            OnChangeGunItems?.Invoke(gunItems);
+
+            if (IsOwner)
+            {
+                OnChangeGunItems?.Invoke(gunItems);
+            }
+            
         }
         else if(itemType == ItemMainType.Expendables)
         {
             AquireConsumeItem(inItem, out returnItem);
-            OnChangeConsumeItems?.Invoke(consumeItems);
+            if (IsOwner)
+            {
+                OnChangeConsumeItems?.Invoke(consumeItems);
+            }
         }
 
         return returnItem;
