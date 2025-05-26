@@ -289,11 +289,8 @@ public class PlayerController : NetworkBehaviour, IPlayerInputReceiver, ITakeDam
     public ItemBase PickItem(ItemBase inPickItem)
     {
         //인벤토리 적용
-        ItemBase previousItem = playerInventory.TryAddOrReturnPreviousItem(inPickItem);
-        if (inPickItem.itemType == ItemMainType.AttachMent)
-        {
-            playerGun.EquiptItems(playerInventory.GetGunItmes());
-        }
+        ItemBase previousItem = playerInventory.TryAddOrReturnPreviousItem(inPickItem, playerGun);
+  
         return previousItem; //있던 슬롯에서 교체될것은 반환
     }
 
