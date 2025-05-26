@@ -11,6 +11,7 @@ GameObject:
   - component: {fileID: 3071900138594261308}
   - component: {fileID: 7062546383096777002}
   - component: {fileID: 367257436038577104}
+  - component: {fileID: 3084531800677442062}
   m_Layer: 5
   m_Name: ConsumeSlot
   m_TagString: Untagged
@@ -77,6 +78,33 @@ MonoBehaviour:
   m_FillOrigin: 0
   m_UseSpriteMesh: 0
   m_PixelsPerUnitMultiplier: 1
+--- !u!114 &3084531800677442062
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 940974014728207421}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: dd29f6c5e7624c749877b06c48cb4d36, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  slotItem:
+    id: 0
+    itemType: 0
+    subType: 0
+    useType: 0
+    name: 
+    stat: 0
+    power: 0
+    isBuff: 0
+    lifeTime: 0
+    damageRange: 0
+    throwMaxReach: 0
+    amount: 0
+  itemImage: {fileID: 1482224190148899674}
+  itemAmountText: {fileID: 7632666220043319321}
 --- !u!1 &3934377560181466693
 GameObject:
   m_ObjectHideFlags: 0
