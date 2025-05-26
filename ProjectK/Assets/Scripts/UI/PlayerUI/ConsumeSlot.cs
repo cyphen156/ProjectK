@@ -36,6 +36,7 @@ public class ConsumeSlot : MonoBehaviour
             return;
         }
         itemImage.gameObject.SetActive(true);
+        itemImage.sprite = slotItem.sprite;
         itemAmountText.gameObject.SetActive(true);
         itemAmountText.text = slotItem.amount.ToString();
     }

@@ -31,5 +31,6 @@ public class GunInventorySlot : MonoBehaviour
             return;
         }
         gunIcon.gameObject.SetActive(true);
+        gunIcon.sprite = slotItem.sprite;
     }
 }
