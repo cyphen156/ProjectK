@@ -2,9 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using Unity.Netcode;
 using UnityEngine;
-using UnityEngine.InputSystem.LowLevel;
 public enum GameState
 {
     None,
@@ -13,9 +11,8 @@ public enum GameState
     End
 }
 
-public class GameManager : NetworkBehaviour
+public class GameManager : MonoBehaviour
 {
-    public SpawnAssginer spawnAssigner;
     public static GameManager Instance { get; private set; }
 
     [Header("GamePlayTime")]
@@ -32,20 +29,12 @@ public class GameManager : NetworkBehaviour
     public static event Action<int> PlayerCountChange;
 
     [Header("GameState")]
-    [SerializeField] private NetworkVariable<GameState> currentGameState = new NetworkVariable<GameState>(GameState.None);
-
-    private uint gameWinner;
+    [SerializeField] private GameState currentGameState;
+    private uint gameWinner;  
     public static event Action<uint> OnWinnerChanged;
     public static event Action<GameState> OnGameStateChanged;
 
     public static event Action<PlayerController, PlayerState> LocalPlayerState;
-
-    public static event Action OnHideLobbyUIRequested;
-
-    [Header("DropBox")]
-    [SerializeField] private GameObject dropboxPrefab;
-    public List<Transform> dropboxSpawnTransform;
-
 
     #region Unity Methods
     private void Awake()
@@ -60,26 +49,26 @@ public class GameManager : NetworkBehaviour
         {
             Destroy(gameObject);
         }
+        currentGameState = GameState.None;
         PlayTime = 5f;
         maxPlayTime = 60 * PlayTime;  // 분단위
     }
 
-    //private void OnEnable()
-    //{
-    //    ResetGame();
-    //}
+    private void OnEnable()
+    {
+        ResetGame();
+    }
 
     private void Update()
     {
-        // 게임 레디 상태에서 시작하기
-        if (currentGameState.Value == GameState.Ready && IsHost && Input.GetKeyDown(KeyCode.S))
+        // 게임 레디 상태
+        if (currentGameState == GameState.Ready)
         {
-            StartGame();
             return;
         }
-
+        
         // 게임 플레이중
-        else if (currentGameState.Value == GameState.Play)
+        else if (currentGameState == GameState.Play)
         {
             if (currentTime <= 0)
             {
@@ -100,28 +89,12 @@ public class GameManager : NetworkBehaviour
         }
 
         // 게임 종료 시
-        else if (currentGameState.Value == GameState.End)
+        else if(currentGameState == GameState.End)
         {
             // 종료 상태일때도 아무것도 안할거임   
         }
     }
     #endregion
-    private void ChangeGameState(GameState inGameState)
-    {
-        if (currentGameState.Value == inGameState)
-        {
-            return;
-        }
-        currentGameState.Value = inGameState;
-        OnGameStateChanged?.Invoke(inGameState);
-    }
-    public override void OnNetworkSpawn()
-    {
-        if (IsServer)
-        {
-            ResetGame();
-        }
-    }
 
     // 게임 종료 UI 띄우기
     private void ResetGame()
@@ -138,21 +111,25 @@ public class GameManager : NetworkBehaviour
         gameWinner = INVALID_PLAYER_NUMBER;
 
         // 게임 상태 초기화
-        ChangeGameState(GameState.Ready);
+        currentGameState = GameState.Ready;
+        OnGameStateChanged?.Invoke(currentGameState);
     }
 
     // 게임 종료 UI 띄우기
     private void EndGame()
     {
         OnWinnerChanged?.Invoke(gameWinner);
-        ChangeGameState(GameState.End);
+        currentGameState = GameState.End;
+        OnGameStateChanged?.Invoke(currentGameState);
     }
     private void EndGame(PlayerController inWinner)
     {
         gameWinner = inWinner.GetNetworkNumber();
         OnWinnerChanged?.Invoke(gameWinner);
-        ChangeGameState(GameState.End);
-        StartCoroutine(GameEnd(10f));
+        currentGameState = GameState.End;
+        OnGameStateChanged?.Invoke(currentGameState);
+
+        GameEnd(10f);
     }
 
     private IEnumerator GameEnd(float inTime)
@@ -198,7 +175,7 @@ public class GameManager : NetworkBehaviour
         {
             Debug.LogError("PlayerController is not registered");
             return;
-        }
+        }    
         else
         {
             players.Remove(inPlayerController);
@@ -210,48 +187,12 @@ public class GameManager : NetworkBehaviour
     public void StartGame()
     {
         // 게임 시작
-        AllocatePlayerNomber();
-        SpawnDropBox();
-        AssignPlayerPosition();
-        ChangeGameState(GameState.Play);
-        ApplyStartUIRpc();
-    }
-
-    public void RequestStartGame()
-    {
-        if (IsHost)
-        {
-            StartGame();
-        }
-    }
-
-    [Rpc(SendTo.Everyone)]
-    private void ApplyStartUIRpc()
-    {
-        OnHideLobbyUIRequested?.Invoke();
         GamePlayTimeChange?.Invoke(currentTime);
         PlayerCountChange?.Invoke(players.Count);
-    }
+        AllocatePlayerNomber();
+        currentGameState = GameState.Play;
+        OnGameStateChanged?.Invoke(currentGameState);
 
-    private void SpawnDropBox()
-    {
-        for (int i = 0; i < dropboxSpawnTransform.Count; i++)
-        {
-            GameObject dropBox = Instantiate(dropboxPrefab, dropboxSpawnTransform[i].position, Quaternion.identity);
-            dropBox.GetComponent<NetworkObject>().Spawn();
-        }
-    }
-
-    private void AssignPlayerPosition()
-    {
-        int i = 0;
-        List<Transform> spawnTransformList = spawnAssigner.GetSpawnPositionList();
-        foreach (var item in players)
-        {
-            //플레이어 스폰 위치 리스트가 섞여서 왔다고 가정
-            item.Key.SetSpawnPositionRpc(spawnTransformList[i].position);
-            i++;
-        }
     }
 
     public int GetAlivePlayerCount()
@@ -287,7 +228,6 @@ public class GameManager : NetworkBehaviour
             EndGame();
         }
     }
-
     private void AllocatePlayerNomber()
     {
         uint number = 1;
@@ -295,17 +235,5 @@ public class GameManager : NetworkBehaviour
         {
             player.SetNetworkNumber(number++);
         }
-    }
-
-    public PlayerController GetPlayer(uint inPlayerNumber)
-    {
-        foreach(var player in players)
-        {
-            if(player.Key.GetNetworkNumber() == inPlayerNumber)
-            {
-                return player.Key;
-            }
-        }
-        return null;
     }
 }

@@ -26,7 +26,7 @@ public class InputManager : MonoBehaviour
     [SerializeField]
     private InputReceiver currentReceiver;
 
-    #region unity methods
+    #region
     private void Awake()
     {
         if (Instance == null)
