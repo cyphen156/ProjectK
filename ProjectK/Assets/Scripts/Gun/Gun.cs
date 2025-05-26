@@ -65,8 +65,7 @@ public class Gun : NetworkBehaviour
     private void Start()
     {
         FindTransform();
-
-        OnChageAmmoUI?.Invoke(restBulletCount);
+        OnChangeAmmo();
     }
 
     private void FindTransform()
@@ -107,8 +106,7 @@ public class Gun : NetworkBehaviour
         isRating = true;
         restRateTime = rateTime;
         restBulletCount -= 1;
-
-        OnChageAmmoUI?.Invoke(restBulletCount);
+        OnChangeAmmo();
     }
 
     public void Reload()
@@ -208,9 +206,7 @@ public class Gun : NetworkBehaviour
         {
             isReloading = false;
             restBulletCount = equiptBulletCount;
-
-            OnChageAmmoUI?.Invoke(restBulletCount);
-
+            OnChangeAmmo();
             DoneRateTime();
         }
     }
@@ -282,4 +278,12 @@ public class Gun : NetworkBehaviour
         rateTime = 1f /equiptRps; //연사속도
     }
 
+    private void OnChangeAmmo()
+    {
+        if (IsOwner)
+        {
+            OnChageAmmoUI?.Invoke(restBulletCount);
+        }
+        
+    }
 }
