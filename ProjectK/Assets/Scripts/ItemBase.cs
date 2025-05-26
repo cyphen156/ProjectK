@@ -1,4 +1,6 @@
 ﻿using System;
+using System.IO;
+using UnityEngine;
 
 public enum ItemMainType
 {
@@ -57,6 +59,7 @@ public class ItemBase
     public float damageRange;
     public float throwMaxReach;
     public int amount;
+    public Sprite sprite;
 
     public ItemBase()
     {
@@ -89,6 +92,13 @@ public class ItemBase
         lifeTime = float.Parse(intParseData[lifeTimeIdx]);
         damageRange = float.Parse(intParseData[damageRangeIdx]);
         throwMaxReach = float.Parse(intParseData[throwIdx]);
+        
+        byte[] fileData = File.ReadAllBytes(Application.dataPath + "/Images/Crosshair/crosshair027.png");
+        Texture2D tex = new Texture2D(2, 2);
+        if (tex.LoadImage(fileData))
+        {
+            sprite = Sprite.Create(tex, new Rect(0, 0, tex.width, tex.height), new Vector2(0.5f, 0.5f));
+        }
     }
 
     private T ParseEnum<T>(string inEnumStr) where T : Enum
@@ -112,6 +122,7 @@ public class ItemBase
         damageRange = inOrigin.damageRange;
         throwMaxReach = inOrigin.throwMaxReach;
         amount = inOrigin.amount;
+        sprite = inOrigin.sprite;
     }
 
     //깊은복사, 수량 별도
