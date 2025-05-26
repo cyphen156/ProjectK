@@ -56,7 +56,7 @@ public class PlayerInventory : MonoBehaviour
         else if(itemType == ItemMainType.Expendables)
         {
             AquireConsumeItem(inItem, out returnItem);
-            OnChangeConsumeItems.Invoke(consumeItems);
+            OnChangeConsumeItems?.Invoke(consumeItems);
         }
 
         return returnItem;
