@@ -25,7 +25,7 @@ public enum MoveType
 public class PlayerController : NetworkBehaviour, IPlayerInputReceiver, ITakeDamage
 {
     #region variable Scope
-    private uint myNetworkNumber;
+    private NetworkVariable<uint> myNetworkNumber;
 
     [Header("PlayerMovement")]
     private Vector3 lookDirection;
@@ -59,18 +59,17 @@ public class PlayerController : NetworkBehaviour, IPlayerInputReceiver, ITakeDam
     private PlayerStat playerStat;
     private BoxDetector boxDetector;
     private PlayerInventory playerInventory;
+    #endregion
 
     public static event Action<float> OnChangeHpUI;
 
     private float lastInputHorizontal = 0f;
     private float lastInputVertical = 0f;
-    
-    #endregion
 
-    #region Unity Methods
+     #region Unity Methods
     private void Awake()
     {
-        myNetworkNumber = 99999999;
+        myNetworkNumber = new NetworkVariable<uint>();
         defaultSpeed = 5.0f;
         slowSpeed = 3.0f;
         runSpeed = 8.0f;
@@ -189,12 +188,15 @@ public class PlayerController : NetworkBehaviour, IPlayerInputReceiver, ITakeDam
 
     public void InteractDropBox()
     {
-        DropBox box = boxDetector.GetNearestBox();
-        if (box == null)
+        if (IsOwner)
         {
-            return;
+            DropBox box = boxDetector.GetNearestBox();
+            if (box == null)
+            {
+                return;
+            }
+            box.OpenBox(myNetworkNumber.Value);
         }
-        box.OpenBox(PickItem);
     }
 
     public void Dodge()
@@ -208,7 +210,7 @@ public class PlayerController : NetworkBehaviour, IPlayerInputReceiver, ITakeDam
             dodgeDirection = transform.forward; // 입력이 없으면 정면
         }
         float dodgeDistance = 5.0f; // 구르기 거리
-        //playerMove.Move(dodgeDirection.x * dodgeDistance, dodgeDirection.z * dodgeDistance);
+        playerMove.Move(dodgeDirection.x * dodgeDistance, dodgeDirection.z * dodgeDistance);
         //4. 방향도 맞춰주고 싶으면
         playerMove.RotateCharacter(dodgeDirection);
     }
@@ -250,6 +252,7 @@ public class PlayerController : NetworkBehaviour, IPlayerInputReceiver, ITakeDam
             {
                 targetCrosshairSize -= crosshairspreadRadius;
             }
+
         }
 
         currentCrosshairSize = Mathf.Lerp(currentCrosshairSize, targetCrosshairSize, Time.deltaTime * crosshairLerpSpeed);
@@ -296,11 +299,23 @@ public class PlayerController : NetworkBehaviour, IPlayerInputReceiver, ITakeDam
 
     public void SetNetworkNumber(uint inNumber)
     {
-        myNetworkNumber = inNumber;
+        myNetworkNumber.Value = inNumber;
     }
 
     public uint GetNetworkNumber()
     {
-        return myNetworkNumber;
+        return myNetworkNumber.Value;
     }
+
+    [Rpc(SendTo.Everyone)]
+    public void SetSpawnPositionRpc(Vector3 inPosition)
+    {
+        if (IsOwner)
+        {
+            transform.position = inPosition;
+        }
+    }
+
+    
+
 }

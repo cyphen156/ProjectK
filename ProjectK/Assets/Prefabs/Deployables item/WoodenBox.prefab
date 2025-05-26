@@ -12,8 +12,7 @@ GameObject:
   - component: {fileID: 6316197016816659497}
   - component: {fileID: 379959931494081269}
   - component: {fileID: -2282188862541363065}
-  - component: {fileID: 5395355630142945182}
-  m_Layer: 11
+  m_Layer: 0
   m_Name: WoodenBox
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -28,13 +27,13 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2300984422719332067}
   serializedVersion: 2
-  m_LocalRotation: {x: 0.7071068, y: 0, z: 0, w: 0.7071068}
-  m_LocalPosition: {x: 0, y: 1, z: 0}
+  m_LocalRotation: {x: -0.7145676, y: -0, z: -0, w: 0.6995664}
+  m_LocalPosition: {x: -0.5786507, y: 2.993, z: 32.016}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 90, y: 0, z: 0}
+  m_LocalEulerAnglesHint: {x: -91.215, y: 0, z: 0}
 --- !u!33 &6316197016816659497
 MeshFilter:
   m_ObjectHideFlags: 0
@@ -109,15 +108,3 @@ BoxCollider:
   serializedVersion: 3
   m_Size: {x: 2.5, y: 0.3022168, z: 2.58622}
   m_Center: {x: 0, y: 2.4352582, z: 0.058597572}
---- !u!114 &5395355630142945182
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2300984422719332067}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: e14431b6239545b449d93664e38d2b3a, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
