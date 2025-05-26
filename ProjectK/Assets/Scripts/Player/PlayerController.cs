@@ -57,9 +57,8 @@ public class PlayerController : NetworkBehaviour, IPlayerInputReceiver, ITakeDam
     [Header("PlayerStateMachine")]
     private PlayerStateMachine playerStateMachine;
     public static event Action<PlayerController, PlayerState> OnPlayerStateChanged;
-    [SerializeField] private PlayerState currentPlayerState;
     private NetworkVariable<PlayerState> netCurrentPlayerState; 
-    private PlayerStat playerStat;
+    [SerializeField] private PlayerStat playerStat;
     private BoxDetector boxDetector;
     private PlayerInventory playerInventory;
 
@@ -87,7 +86,6 @@ public class PlayerController : NetworkBehaviour, IPlayerInputReceiver, ITakeDam
         mouseWorldPosition = Vector3.zero;
         lookDirection = Vector3.forward;
         playerMove = GetComponent<PlayerMove>();
-        currentPlayerState = PlayerState.Idle;
         playerSight = GetComponent<PlayerSight>();
         playerStat = new PlayerStat();
         playerInventory = GetComponent<PlayerInventory>();
@@ -148,6 +146,10 @@ public class PlayerController : NetworkBehaviour, IPlayerInputReceiver, ITakeDam
     [ServerRpc]
     private void ChangeGunStateServerRpc(GunState inState)
     {
+        if (netCurrentPlayerState.Value == PlayerState.Die)
+        {
+            return;
+        }
         playerGun.ChangeGunState(inState);
     }
 
@@ -184,10 +186,20 @@ public class PlayerController : NetworkBehaviour, IPlayerInputReceiver, ITakeDam
         playerMove.Move(inInputHorizontal * Time.deltaTime * currentMoveSpeed, inInputVertical * Time.deltaTime * currentMoveSpeed);
     }
 
-    [ServerRpc]
+    [Rpc(SendTo.Server)]
     private void ChangeStateServerRpc(PlayerState inState, ulong inId)
     {
-        netCurrentPlayerState.Value = playerStateMachine.ChangePlayerState(inState);
+        if (netCurrentPlayerState.Value == PlayerState.Die)
+        {
+            return;
+        }
+        if (netCurrentPlayerState.Value == inState)
+        {
+            return;
+        }
+        PlayerState changedState = playerStateMachine.ChangePlayerState(inState);
+        netCurrentPlayerState.Value = changedState;
+        GameManager.Instance?.UpdatePlayerState(this, changedState);
     }
 
     public void InputMousePosition(Vector3 inMousePosition)
@@ -211,8 +223,7 @@ public class PlayerController : NetworkBehaviour, IPlayerInputReceiver, ITakeDam
 
     public void Dodge()
     {
-        //1. 구르기 애니메이션 재생
-        currentPlayerState = playerStateMachine.ChangePlayerState(PlayerState.Dodge);
+        ChangeStateServerRpc(PlayerState.Dodge, NetworkManager.Singleton.LocalClientId);
         //2. 구르기 방향 결정
         Vector3 dodgeDirection = new Vector3(lastInputHorizontal, 0, lastInputVertical).normalized;
         if(dodgeDirection == Vector3.zero)
@@ -280,8 +291,36 @@ public class PlayerController : NetworkBehaviour, IPlayerInputReceiver, ITakeDam
 
     public void TakeDamage(float inBulletDamage)
     {
-        //호스트에서만 총알, 대상이 충돌 체크를 하므로 해당 함수는 호스트에서만 발동됨
-        TakeDamageRpc(inBulletDamage);
+        playerStat.ApplyHp(-inBulletDamage);
+        float hp = playerStat.GetHP();
+
+        if (hp <= 0f)
+        {
+            ChangeStateServerRpc(PlayerState.Die, OwnerClientId);
+        }
+
+        UpdateHpClientRpc(hp); 
+    }
+
+    [Rpc(SendTo.Server)]
+    private void ApplyDamageServerRpc(float inBulletDamage)
+    {
+        playerStat.ApplyHp(-inBulletDamage);
+        float hp = playerStat.GetHP();
+
+        if (hp <= 0f)
+        {
+            ChangeStateServerRpc(PlayerState.Die, OwnerClientId); // 사망 상태 전환
+        }
+
+        // 클라이언트에게 UI 갱신 요청
+        UpdateHpClientRpc(hp);
+    }
+
+    [Rpc(SendTo.Owner)]
+    private void UpdateHpClientRpc(float newHp)
+    {
+        OnChangeHpUI?.Invoke(newHp);
     }
 
     [Rpc(SendTo.Everyone)]
@@ -293,7 +332,7 @@ public class PlayerController : NetworkBehaviour, IPlayerInputReceiver, ITakeDam
         OnChangeHpUI?.Invoke(hp);
         if (hp <= 0)
         {
-            Logger.Info("플레이어가 죽음");
+            ChangeStateServerRpc(PlayerState.Die, NetworkManager.Singleton.LocalClientId);
             return;
         }
     }
