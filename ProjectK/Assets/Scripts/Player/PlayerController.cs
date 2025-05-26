@@ -1,6 +1,5 @@
 using System;
 using System.Collections;
-using Unity.Cinemachine;
 using UnityEngine;
 using Unity.Netcode;
 
@@ -13,6 +12,9 @@ public interface IPlayerInputReceiver
     void InteractDropBox();
     void Dodge();
     void IsAim(bool isAim);
+    void UseItem(int number);
+    void UseGranade();
+
 }
 
 public enum MoveType
@@ -59,14 +61,19 @@ public class PlayerController : NetworkBehaviour, IPlayerInputReceiver, ITakeDam
     private PlayerStat playerStat;
     private BoxDetector boxDetector;
     private PlayerInventory playerInventory;
-    #endregion
 
     public static event Action<float> OnChangeHpUI;
 
     private float lastInputHorizontal = 0f;
     private float lastInputVertical = 0f;
 
-     #region Unity Methods
+    [Header("Granande")]
+    [SerializeField] private Granade granadePrefab;
+    #endregion
+
+
+
+    #region Unity Methods
     private void Awake()
     {
         myNetworkNumber = new NetworkVariable<uint>();
@@ -316,6 +323,24 @@ public class PlayerController : NetworkBehaviour, IPlayerInputReceiver, ITakeDam
         }
     }
 
-    
 
+    public void UseItem(int inIndex)
+    {
+
+    }
+
+    public void UseGranade()
+    {
+        //if () // 플레이어 인벤토리 4번 슬롯 갯수 확인
+        {
+            SpawnGranadeRpc();
+        }
+    }
+    private void SpawnGranadeRpc()
+    {
+        Granade granade = Instantiate(granadePrefab, transform.position, Quaternion.LookRotation(lookDirection));
+        granade.SetOwner(GetNetworkNumber());
+        Vector3 start = transform.position + Vector3.up;
+        granade.Launch(start, mouseWorldPosition);
+    }
 }

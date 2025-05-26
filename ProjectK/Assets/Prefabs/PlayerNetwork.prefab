@@ -3444,6 +3444,7 @@ MonoBehaviour:
   crosshairspreadRadius: 0
   crosshairLerpSpeed: 0
   currentPlayerState: 0
+  granadePrefab: {fileID: 7340496573315005411, guid: bfb9dcb9dd535d940bf79a9aad8e1d50, type: 3}
 --- !u!114 &3535864916125701533
 MonoBehaviour:
   m_ObjectHideFlags: 0

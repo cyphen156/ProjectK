@@ -156,6 +156,19 @@ public class InputManager : MonoBehaviour
         {
             localPlayerController.Dodge();
         }
+
+        for (int i = 1; i <= 4; i++)
+        {
+            if (Input.GetKeyDown(KeyCode.Alpha0 + i))
+            {
+                localPlayerController.UseItem(i);
+            }
+        }
+        if (Input.GetKeyDown(KeyCode.G))
+        {
+            localPlayerController.UseGranade();
+        }
+
     }
     private void UpdateLocalPlayerStateChanged(PlayerController inPlayerController, PlayerState inLocalPlayerState)
     {
