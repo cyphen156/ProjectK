@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Unity.Netcode;
 using UnityEngine;
-using Unity.Netcode;
+using UnityEngine.InputSystem.LowLevel;
 public enum GameState
 {
     None,
@@ -32,13 +32,15 @@ public class GameManager : NetworkBehaviour
     public static event Action<int> PlayerCountChange;
 
     [Header("GameState")]
-    [SerializeField] private NetworkVariable<GameState> currentGameState;
+    [SerializeField] private NetworkVariable<GameState> currentGameState = new NetworkVariable<GameState>(GameState.None);
 
     private uint gameWinner;
     public static event Action<uint> OnWinnerChanged;
     public static event Action<GameState> OnGameStateChanged;
 
     public static event Action<PlayerController, PlayerState> LocalPlayerState;
+
+    public static event Action OnHideLobbyUIRequested;
 
     [Header("DropBox")]
     [SerializeField] private GameObject dropboxPrefab;
@@ -58,17 +60,14 @@ public class GameManager : NetworkBehaviour
         {
             Destroy(gameObject);
         }
-        currentGameState.Value = GameState.None;
         PlayTime = 5f;
         maxPlayTime = 60 * PlayTime;  // 분단위
     }
 
-    private void OnEnable()
-    {
-        ResetGame();
-    }
-
- 
+    //private void OnEnable()
+    //{
+    //    ResetGame();
+    //}
 
     private void Update()
     {
@@ -107,8 +106,22 @@ public class GameManager : NetworkBehaviour
         }
     }
     #endregion
-
-   
+    private void ChangeGameState(GameState inGameState)
+    {
+        if (currentGameState.Value == inGameState)
+        {
+            return;
+        }
+        currentGameState.Value = inGameState;
+        OnGameStateChanged?.Invoke(inGameState);
+    }
+    public override void OnNetworkSpawn()
+    {
+        if (IsServer)
+        {
+            ResetGame();
+        }
+    }
 
     // 게임 종료 UI 띄우기
     private void ResetGame()
@@ -125,25 +138,21 @@ public class GameManager : NetworkBehaviour
         gameWinner = INVALID_PLAYER_NUMBER;
 
         // 게임 상태 초기화
-        currentGameState.Value = GameState.Ready;
-        OnGameStateChanged?.Invoke(currentGameState.Value);
+        ChangeGameState(GameState.Ready);
     }
 
     // 게임 종료 UI 띄우기
     private void EndGame()
     {
         OnWinnerChanged?.Invoke(gameWinner);
-        currentGameState.Value = GameState.End;
-        OnGameStateChanged?.Invoke(currentGameState.Value);
+        ChangeGameState(GameState.End);
     }
     private void EndGame(PlayerController inWinner)
     {
         gameWinner = inWinner.GetNetworkNumber();
         OnWinnerChanged?.Invoke(gameWinner);
-        currentGameState.Value = GameState.End;
-        OnGameStateChanged?.Invoke(currentGameState.Value);
-
-        GameEnd(10f);
+        ChangeGameState(GameState.End);
+        StartCoroutine(GameEnd(10f));
     }
 
     private IEnumerator GameEnd(float inTime)
@@ -201,13 +210,27 @@ public class GameManager : NetworkBehaviour
     public void StartGame()
     {
         // 게임 시작
-        GamePlayTimeChange?.Invoke(currentTime);
-        PlayerCountChange?.Invoke(players.Count);
         AllocatePlayerNomber();
-        currentGameState.Value = GameState.Play;
-        OnGameStateChanged?.Invoke(currentGameState.Value);
         SpawnDropBox();
         AssignPlayerPosition();
+        ChangeGameState(GameState.Play);
+        ApplyStartUIRpc();
+    }
+
+    public void RequestStartGame()
+    {
+        if (IsHost)
+        {
+            StartGame();
+        }
+    }
+
+    [Rpc(SendTo.Everyone)]
+    private void ApplyStartUIRpc()
+    {
+        OnHideLobbyUIRequested?.Invoke();
+        GamePlayTimeChange?.Invoke(currentTime);
+        PlayerCountChange?.Invoke(players.Count);
     }
 
     private void SpawnDropBox()
