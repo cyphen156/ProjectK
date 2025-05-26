@@ -59,13 +59,13 @@ public class PlayerController : NetworkBehaviour, IPlayerInputReceiver, ITakeDam
     private PlayerStat playerStat;
     private BoxDetector boxDetector;
     private PlayerInventory playerInventory;
-    #endregion
 
     public static event Action<float> OnChangeHpUI;
 
     private float lastInputHorizontal = 0f;
     private float lastInputVertical = 0f;
-
+    
+    #endregion
 
     #region Unity Methods
     private void Awake()
@@ -250,7 +250,6 @@ public class PlayerController : NetworkBehaviour, IPlayerInputReceiver, ITakeDam
             {
                 targetCrosshairSize -= crosshairspreadRadius;
             }
-
         }
 
         currentCrosshairSize = Mathf.Lerp(currentCrosshairSize, targetCrosshairSize, Time.deltaTime * crosshairLerpSpeed);

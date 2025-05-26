@@ -1,13 +1,14 @@
 using Unity.Netcode;
 using UnityEngine;
 
-public class Bullet : NetworkBehaviour
+public class Bullet : NetworkBehaviour, ISpawnable
 {
     private float defaultLifeTime;
     private float lifeTime;
     private float speed;
     private float damage;
     private Vector3 direction;
+    private uint ownerNetworkId;
 
     private void Awake()
     {
@@ -18,23 +19,30 @@ public class Bullet : NetworkBehaviour
         damage = 30f;
     }
 
-    public void SetDirection(Vector3 inDirection)
-    {
-        //총에서 만들어서 호출
-        direction = inDirection;
-    }
-
     private void Update()
     {
         Move();
         CountLifeTime();
+    }
+    public void SetOwner(uint inOwnerId)
+    {
+        ownerNetworkId = inOwnerId;
+    }
+
+    public uint GetOwner()
+    {
+        return ownerNetworkId;
     }
 
     private void Move()
     {
         transform.Translate(direction.normalized * speed * Time.deltaTime, Space.World);
     }
-
+    public void SetDirection(Vector3 inDirection)
+    {
+        //총에서 만들어서 호출
+        direction = inDirection;
+    }
     private void CountLifeTime()
     {
         lifeTime -= Time.deltaTime;
@@ -48,15 +56,26 @@ public class Bullet : NetworkBehaviour
     {
         if (IsHost)
         {
-            ITakeDamage takeDamageObj = other.GetComponent<ITakeDamage>();
-            //체력을 동기화하면 다른 클라이언트의 체력도 동기화가 된다. 
-            //원하는건 그 타겟을 넘기고 싶은거 - 넷 오브젝트가 있을 것
-            if (takeDamageObj != null)
+            // 데미지를 줄 수 있다면
+            if (other.TryGetComponent<ITakeDamage>(out var target))
             {
-                takeDamageObj.TakeDamage(damage);
-                gameObject.GetComponent<NetworkObject>().Despawn();
+                bool isSelfOwnedSpawnedObject = false;
+
+                if (other.TryGetComponent<ISpawnable>(out var spawnObj))
+                {
+                    if (spawnObj.GetOwner() == ownerNetworkId)
+                    {
+                        isSelfOwnedSpawnedObject = true;
+                    }
+                }
+
+                if (!isSelfOwnedSpawnedObject)
+                {
+                    target.TakeDamage(damage);
+                }
             }
+
+            GetComponent<NetworkObject>().Despawn();
         }
     }
-
 }
