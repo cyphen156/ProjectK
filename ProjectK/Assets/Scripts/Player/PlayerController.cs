@@ -57,7 +57,6 @@ public class PlayerController : NetworkBehaviour, IPlayerInputReceiver, ITakeDam
     [Header("PlayerStateMachine")]
     private PlayerStateMachine playerStateMachine;
     public static event Action<PlayerController, PlayerState> OnPlayerStateChanged;
-    [SerializeField] private PlayerState currentPlayerState;
     private NetworkVariable<PlayerState> netCurrentPlayerState; 
     private PlayerStat playerStat;
     private BoxDetector boxDetector;
@@ -87,7 +86,6 @@ public class PlayerController : NetworkBehaviour, IPlayerInputReceiver, ITakeDam
         mouseWorldPosition = Vector3.zero;
         lookDirection = Vector3.forward;
         playerMove = GetComponent<PlayerMove>();
-        currentPlayerState = PlayerState.Idle;
         playerSight = GetComponent<PlayerSight>();
         playerStat = new PlayerStat();
         playerInventory = GetComponent<PlayerInventory>();
@@ -187,7 +185,9 @@ public class PlayerController : NetworkBehaviour, IPlayerInputReceiver, ITakeDam
     [ServerRpc]
     private void ChangeStateServerRpc(PlayerState inState, ulong inId)
     {
-        netCurrentPlayerState.Value = playerStateMachine.ChangePlayerState(inState);
+        PlayerState changedState = playerStateMachine.ChangePlayerState(inState);
+        netCurrentPlayerState.Value = changedState;
+        OnPlayerStateChanged?.Invoke(this, changedState);
     }
 
     public void InputMousePosition(Vector3 inMousePosition)
@@ -211,8 +211,7 @@ public class PlayerController : NetworkBehaviour, IPlayerInputReceiver, ITakeDam
 
     public void Dodge()
     {
-        //1. 구르기 애니메이션 재생
-        currentPlayerState = playerStateMachine.ChangePlayerState(PlayerState.Dodge);
+        ChangeStateServerRpc(PlayerState.Dodge, NetworkManager.Singleton.LocalClientId);
         //2. 구르기 방향 결정
         Vector3 dodgeDirection = new Vector3(lastInputHorizontal, 0, lastInputVertical).normalized;
         if(dodgeDirection == Vector3.zero)
@@ -293,7 +292,7 @@ public class PlayerController : NetworkBehaviour, IPlayerInputReceiver, ITakeDam
         OnChangeHpUI?.Invoke(hp);
         if (hp <= 0)
         {
-            Logger.Info("플레이어가 죽음");
+            ChangeStateServerRpc(PlayerState.Die, NetworkManager.Singleton.LocalClientId);
             return;
         }
     }

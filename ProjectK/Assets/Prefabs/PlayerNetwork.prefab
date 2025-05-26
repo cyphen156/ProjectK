@@ -2266,7 +2266,7 @@ GameObject:
   - component: {fileID: 5825953316208341968}
   - component: {fileID: 1057223515992408879}
   - component: {fileID: 2999697312092910552}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: SerchBox
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -3443,7 +3443,6 @@ MonoBehaviour:
   gunCrosshairSize: 0
   crosshairspreadRadius: 0
   crosshairLerpSpeed: 0
-  currentPlayerState: 0
   selcetedItem: {fileID: 0}
   woodenBoxPrefab: {fileID: 1250500775315529122, guid: bc776000e024989468623334d52e6b52, type: 3}
   granadePrefab: {fileID: 7340496573315005411, guid: bfb9dcb9dd535d940bf79a9aad8e1d50, type: 3}
@@ -3496,6 +3495,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 86ec7f6219062ac40b630ccb74040d24, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  ShowTopMostFoldoutHeaderGroup: 1
   gunItems: []
   consumeItems: []
 --- !u!33 &6603424864483091074

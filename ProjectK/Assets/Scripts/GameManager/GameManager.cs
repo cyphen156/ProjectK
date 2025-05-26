@@ -108,6 +108,11 @@ public class GameManager : NetworkBehaviour
     #endregion
     private void ChangeGameState(GameState inGameState)
     {
+        if (!IsHost)
+        {
+            return; 
+        }
+
         if (currentGameState.Value == inGameState)
         {
             return;
