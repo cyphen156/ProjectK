@@ -9,9 +9,17 @@ public class PlayerUIManager : MonoBehaviour
 {
     private PlayerController playerController;
     [SerializeField] private Transform crosshairTransform;
+
+    [Header("DropBox")]
     [SerializeField] private DropBoxSlot[] DropboxSlots;
     [SerializeField] private Button[] DropboxSlotButtons;
-    
+
+    [Header("GunInventory")]
+    [SerializeField] private GunInventorySlot[] gunInvetorySlot;
+
+    [Header("ConsumeSlot")]
+    [SerializeField] private ConsumeSlot[] consumeSlot;
+
     private Slider hpSlider;
     private Slider staminaSlider;
     private GameObject dropBoxPanelObj;
@@ -46,6 +54,8 @@ public class PlayerUIManager : MonoBehaviour
         PlayerController.OnCrosshairSizeChanged += UpdateCrosshairUISize;
         PlayerController.OnChangeHpUI += UpdateHpUI;
         Gun.OnChageAmmoUI += UpdateAmmoUI;
+        PlayerInventory.OnChangeGunItems += GunSlotUISetting;
+        PlayerInventory.OnChangeConsumeItems += ConsumeSlotUISetting;
 
         StartSettingHUDUI();
 
@@ -168,4 +178,26 @@ public class PlayerUIManager : MonoBehaviour
         crosshairTransform.position = Camera.main.WorldToScreenPoint(mouseWorldPosition);
     }
     #endregion
+
+    private void GunSlotUISetting(ItemBase[] inGuns)
+    {
+        for(int i = 0; i < gunInvetorySlot.Length; i++)
+        {
+            if (inGuns[i] != null && inGuns[i].itemType != ItemMainType.None)
+            {
+                gunInvetorySlot[i].SetSlot(inGuns[i]);
+            }
+        }
+    }
+
+    private void ConsumeSlotUISetting(ItemBase[] inConsumes)
+    {
+        for (int i = 0; i < consumeSlot.Length; i++)
+        {
+            if (inConsumes[i] != null && inConsumes[i].itemType != ItemMainType.None)
+            {
+                consumeSlot[i].SetSlot(inConsumes[i]);
+            }
+        }
+    }
 }
