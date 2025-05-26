@@ -3,7 +3,7 @@ using Unity.Netcode;
 using UnityEngine;
 
 [RequireComponent(typeof(Rigidbody))]
-public class Granade : NetworkBehaviour
+public class Granade : NetworkBehaviour, ISpawnable
 {
     [SerializeField] private GameObject explosionEffectPrefab;
     private Rigidbody rb;
@@ -11,6 +11,7 @@ public class Granade : NetworkBehaviour
     private float damage;
     private float explosionRadius;
     private float explosionDelay;
+    private uint ownerNetworkId;
 
     private LayerMask obstacleMask;
 
@@ -21,10 +22,9 @@ public class Granade : NetworkBehaviour
         explosionRadius = 5f;
         explosionDelay = 5f;
         obstacleMask = LayerMask.GetMask("Player", "Deploy");
-        explosionEffectPrefab = Resources.Load<GameObject>("Prefabs/Effect/ExplosionEffect");
     }
 
-    public void Launch(Vector3 start, Vector3 target, float launchAngle = 60f)
+    public void Launch(Vector3 start, Vector3 target, float launchAngle = 30f)
     {
         transform.position = start;
 
@@ -50,6 +50,7 @@ public class Granade : NetworkBehaviour
         yield return new WaitForSeconds(explosionDelay);
         if (IsHost)
         {
+            Debug.Log("!111111111111111111");
             Explode();
         }
     }
@@ -67,5 +68,15 @@ public class Granade : NetworkBehaviour
         }
         Instantiate(explosionEffectPrefab, transform.position, Quaternion.identity);
         GetComponent<NetworkObject>().Despawn();
+    }
+
+    public void SetOwner(uint inOwnerId)
+    {
+        ownerNetworkId = inOwnerId;
+    }
+
+    public uint GetOwner()
+    {
+        return ownerNetworkId;
     }
 }
