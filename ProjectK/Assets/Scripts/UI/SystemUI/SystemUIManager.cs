@@ -22,9 +22,6 @@ public class SystemUIManager : MonoBehaviour
     private GameObject PlayerDiePanel; // «√∑π¿ÃæÓ ªÁ∏¡Ω√ UI (¿Á»∆)
     private TextMeshProUGUI PlayerDieText; // «√∑π¿ÃæÓ ªÁ∏¡Ω√ UI (¿Á»∆)
 
-    [Header("GamePlayUI")]
-    private GameObject lobbyPanel;
-
     private void Awake()
     {
         minutes = 0f;
@@ -37,8 +34,6 @@ public class SystemUIManager : MonoBehaviour
 
         PlayerDiePanel = GameObject.Find("PlayerDiePanel"); // «√∑π¿ÃæÓ ªÁ∏¡Ω√ UI (¿Á»∆)
         PlayerDieText = PlayerDiePanel.GetComponentInChildren<TextMeshProUGUI>(); // «√∑π¿ÃæÓ ªÁ∏¡Ω√ UI (¿Á»∆)
-
-        lobbyPanel = GameObject.Find("LobbyPanel");
     }
 
     private void Start()
@@ -62,8 +57,6 @@ public class SystemUIManager : MonoBehaviour
 
         GameManager.LocalPlayerState += UpdateLocalPlayerState; // «√∑π¿ÃæÓ ªÁ∏¡Ω√ UI (¿Á»∆)
         PlayerDiePanel.SetActive(false); // «√∑π¿ÃæÓ ªÁ∏¡Ω√ UI (¿Á»∆)
-
-        GameManager.OnHideLobbyUIRequested += HideLobbyPanel;
     }
 
     private void UpdateGameLifeTime(float inCurrentTime)
@@ -117,14 +110,4 @@ public class SystemUIManager : MonoBehaviour
         }
     }
 
-
-    public void OnClickPlayButton()
-    {
-        GameManager.Instance.RequestStartGame();
-    }
-
-    private void HideLobbyPanel()
-    {
-        lobbyPanel.SetActive(false);
-    }
 }

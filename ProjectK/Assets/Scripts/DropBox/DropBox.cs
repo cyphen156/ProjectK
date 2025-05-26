@@ -1,10 +1,9 @@
 ﻿
 using System;
 using System.Collections.Generic;
-using Unity.Netcode;
 using UnityEngine;
 
-public class DropBox : NetworkBehaviour
+public class DropBox : MonoBehaviour
 {
     [SerializeField] private List<ItemBase> haveItems;
     private float startChance;
@@ -13,8 +12,7 @@ public class DropBox : NetworkBehaviour
     public static event Action<DropBox> OnOpenBox;
     public static event Action OnCloseBox;
     public static event Action<DropBox> OnChangeBox;
-    private uint openPlayerNumber;
-    private const uint InValidPlayerNumber = uint.MaxValue;
+    private Func<ItemBase, ItemBase> itemPickCallBack;
 
     private void Awake()
     {
@@ -26,9 +24,7 @@ public class DropBox : NetworkBehaviour
 
     private void Start()
     {
-
         DiceItem();
-
     }
 
     private void Update()
@@ -41,11 +37,7 @@ public class DropBox : NetworkBehaviour
 
     private void DiceItem()
     {
-        if (IsHost == false)
-        {
-            return;
-        }
-        ResetItemListRpc();
+        haveItems.Clear();
         startChance = 100;
         for (int i = 1; i <= maxRollCount; i++)
         {
@@ -59,62 +51,33 @@ public class DropBox : NetworkBehaviour
             ItemMainType mainType = (ItemMainType)mainTypeNum;
             
             ItemBase rollItem = MasterDataManager.Instance.DropBox.RollDropBox(mainType);
-            
-            AddDroxBoxItemRpc(rollItem.id, rollItem.amount);
-
+            if (rollItem == null)
+            {
+                Debug.Log("뽑기 실패");
+            }
+            else
+            {
+                Debug.Log(rollItem.name + "을 뽑았다.");
+                haveItems.Add(rollItem);
+            }
             //뽑았으면 확률 조정
             startChance *= stackRate;
 
         }
     }
 
-    #region 내용물 동기화
-    [Rpc(SendTo.Everyone)]
-    private void ResetItemListRpc()
-    {
-        haveItems.Clear();
-        OnChangeBox?.Invoke(this);
-    }
-
-    [Rpc(SendTo.Everyone)]
-    private void AddDroxBoxItemRpc(int inItemId, int inItemAmount)
-    {
-        ItemBase addItem = new ItemBase(MasterDataManager.Instance.GetMasterItemData(inItemId), inItemAmount);
-        haveItems.Add(addItem);
-        OnChangeBox?.Invoke(this);
-    }
-
-
-
-    [Rpc(SendTo.Everyone)]
-    private void RemoveItemRpc(int inSlotIndex)
-    {
-        haveItems.RemoveAt(inSlotIndex);
-        OnChangeBox.Invoke(this);
-    }
-
-    [Rpc(SendTo.Everyone)]
-    private void ReplaceItemRpc(int inSlotIndex, int inItemId, int inItemAmount)
-    {
-        ItemBase replaceItem = new ItemBase(MasterDataManager.Instance.GetMasterItemData(inItemId), inItemAmount);
-        haveItems[inSlotIndex] = replaceItem;
-        OnChangeBox.Invoke(this);
-    }
-    #endregion
-
-    #region 상자 열고 닫기, 아이템 선택하기
-    public void OpenBox(uint inPlayerNumber)
+    public void OpenBox(Func<ItemBase, ItemBase> inItemPickCallBack)
     {
         //Debug.Log("박스를 열었다.");
-        OnOpenBox?.Invoke(this);
-         openPlayerNumber = inPlayerNumber;
+        OnOpenBox.Invoke(this);
+         itemPickCallBack = inItemPickCallBack;
     }
 
     public void CloseBox()
     {
         //Debug.Log("박스를 닫았다.");
         OnCloseBox.Invoke();
-        openPlayerNumber = InValidPlayerNumber;
+        itemPickCallBack = null;
     }
 
     public List<ItemBase> GetBoxItemList()
@@ -129,38 +92,24 @@ public class DropBox : NetworkBehaviour
             return;
         }
 
-        ReqItemPickRpc(inSlotIndex, openPlayerNumber);
-    }
-
-    [Rpc(SendTo.Server)]
-    private void ReqItemPickRpc(int inSlotIndex, uint inOpenPlayerNumber)
-    {
-        //Debug.Log("아이템 습득 판별은 Server에서만");
-        if(inOpenPlayerNumber == InValidPlayerNumber)
+        ItemBase returnItem = null;
+        if(itemPickCallBack != null)
         {
-            Logger.Log("박스연 캐릭터가 없거나 잘못된 넘버를 가진 캐릭터");
-            return;
+            returnItem = itemPickCallBack(haveItems[inSlotIndex]);
         }
 
-        ItemBase returnItem = null;
-        PlayerController player = GameManager.Instance.GetPlayer(inOpenPlayerNumber);
-        returnItem = player.PickItem((haveItems[inSlotIndex]));
-       
         //Debug.Log( "반환된거 " + returnItem.itemType + " " +returnItem.name);
         if (returnItem == null || returnItem.itemType == ItemMainType.None)
         {
-            RemoveItemRpc(inSlotIndex);
+            haveItems.RemoveAt(inSlotIndex);
         }
         else
         {
-            ReplaceItemRpc(inSlotIndex, returnItem.id, returnItem.amount);
+            haveItems[inSlotIndex] = returnItem;
         }
+
+        OnChangeBox.Invoke(this);
     }
-
- 
-    #endregion
-
-    
 
 }
 

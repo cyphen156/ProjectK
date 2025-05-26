@@ -56,7 +56,6 @@ public class PlayerSight : MonoBehaviour
     private LayerMask targetMask;
     private LayerMask obstacleMask;
     private List<Transform> visibleTargets;
-    private Vector3 sightOffset;
 
     #region Unity Methods   
     private void Awake()
@@ -67,10 +66,10 @@ public class PlayerSight : MonoBehaviour
         activeViewAngle = baseViewAngle;
         viewDistance = activeViewRadius;
 
-        meshResolution = 6f;
-        edgeResolveIterations = 10;
+        meshResolution = 3f;
+        edgeResolveIterations = 4;
         edgeDistanceThreshold = 0.5f;
-        sightOffset = new Vector3(0f, 2f, 0f);
+
         visibleTargets = new List<Transform>();
     }
     private void OnEnable()
@@ -89,7 +88,7 @@ public class PlayerSight : MonoBehaviour
         meshFilter = GetComponent<MeshFilter>();
         meshFilter.mesh = viewMesh;
         targetMask = LayerMask.GetMask("Player");
-        obstacleMask = LayerMask.GetMask("Wall", "Deploy", "Ground");
+        obstacleMask = ~targetMask;
         StartCoroutine(FindTargetsWithDelay(0.2f));
     }
 
@@ -102,22 +101,16 @@ public class PlayerSight : MonoBehaviour
     private ViewCastInfo ViewCast(float inGlobalAngle)
     {
         Vector3 direction = DirectionFromAngle(inGlobalAngle, true);
-        Vector3 rayPoint = transform.position + sightOffset;
+        Vector3 rayPoint = transform.position;
+        rayPoint += 2 * Vector3.up;
         RaycastHit hit;
-        Debug.DrawRay(rayPoint, direction * activeViewRadius, Color.yellow, 1f);
-
-        float maxDist = activeViewRadius;
-        float maxAllowedDist = maxDist * 1.05f;
-
-        if (Physics.Raycast(rayPoint, direction, out hit, maxDist, obstacleMask))
+        if (Physics.Raycast(rayPoint, direction, out hit, activeViewRadius, obstacleMask))
         {
-            float clampedDist = Mathf.Clamp(hit.distance, 0.1f, maxAllowedDist);
-            Vector3 point = rayPoint + direction * clampedDist;
-            return new ViewCastInfo(true, point, inGlobalAngle, clampedDist);
+            return new ViewCastInfo(true, hit.point, hit.distance, inGlobalAngle);
         }
         else
         {
-            return new ViewCastInfo(false, rayPoint + direction * activeViewRadius, inGlobalAngle, activeViewRadius);
+            return new ViewCastInfo(false, rayPoint + direction * activeViewRadius, activeViewRadius, inGlobalAngle);
         }
     }
     private IEnumerator FindTargetsWithDelay(float delay)
@@ -136,23 +129,24 @@ public class PlayerSight : MonoBehaviour
         {
             inAngle += transform.eulerAngles.y;
         }
-        return new Vector3(Mathf.Sin(inAngle * Mathf.Deg2Rad), 0, Mathf.Cos(inAngle * Mathf.Deg2Rad));
+        float rad = inAngle * Mathf.Deg2Rad;
+        return new Vector3(Mathf.Sin(rad), 0, Mathf.Cos(rad));
     }
 
     private void FindVislbleTargets()
     {
         visibleTargets.Clear();
-        Collider[] targetsInViewRadius = Physics.OverlapSphere(transform.position + sightOffset, activeViewRadius, targetMask);
+        Collider[] targetsInViewRadius = Physics.OverlapSphere(transform.position, activeViewRadius, targetMask);
 
         for (int i = 0; i < targetsInViewRadius.Length; ++i)
         {
             Transform target = targetsInViewRadius[i].transform;
-            Vector3 directionToTarget = (target.position + sightOffset - transform.position + sightOffset).normalized;
+            Vector3 directionToTarget = (target.position - transform.position).normalized;
             if (Vector3.Angle(transform.forward, directionToTarget) < activeViewAngle / 2)
             {
-                float distanceToTarget = Vector3.Distance(transform.position + sightOffset, target.position + sightOffset);
+                float distanceToTarget = Vector3.Distance(transform.position, target.position);
 
-                if (!Physics.Raycast(transform.position + sightOffset, directionToTarget, distanceToTarget, obstacleMask))
+                if (!Physics.Raycast(transform.position, directionToTarget, distanceToTarget, obstacleMask))
                 {
                     visibleTargets.Add(target);
                 }
@@ -162,19 +156,16 @@ public class PlayerSight : MonoBehaviour
 
     private void DrawFieldOfView()
     {
-        Vector3 origin = transform.position + sightOffset;
-        int stepCount = Mathf.RoundToInt(activeViewAngle * meshResolution);
+        int stepCount = Mathf.Clamp(Mathf.RoundToInt(meshResolution * activeViewAngle), 6, 500);
         float angleStep = activeViewAngle / stepCount;
         List<Vector3> viewPoints = new List<Vector3>();
-
-        float baseAngle = Mathf.Atan2(transform.forward.x, transform.forward.z) * Mathf.Rad2Deg;
-
         ViewCastInfo oldViewCast = new ViewCastInfo();
         for (int i = 0; i <= stepCount; ++i)
         {
-            float angle = baseAngle - activeViewAngle / 2f + angleStep * i;
+            float baseAngle = Mathf.Atan2(transform.forward.x, transform.forward.z) * Mathf.Rad2Deg;
+            //float angle = baseAngle - activeViewAngle / 2 + angleStep * i;
+            float angle = transform.eulerAngles.y - activeViewAngle / 2 + angleStep * i;
             ViewCastInfo newViewCast = ViewCast(angle);
-            Debug.DrawRay(transform.position + Vector3.up * 0.1f, DirectionFromAngle(angle, true) * activeViewRadius, Color.red, 0.1f);
 
             if (i > 0)
             {
@@ -200,12 +191,11 @@ public class PlayerSight : MonoBehaviour
         Vector3[] vertices = new Vector3[vertexCount];
         int[] triangles = new int[(vertexCount - 2) * 3];
 
-        vertices[0] = transform.InverseTransformPoint(origin);
+        vertices[0] = Vector3.zero;
         for (int i = 0; i < vertexCount - 1; ++i)
         {
-            Vector3 dir = (viewPoints[i] - origin).normalized;
-            Vector3 adjusted = viewPoints[i] + dir * 0.01f;
-            vertices[i + 1] = transform.InverseTransformPoint(adjusted);
+            vertices[i + 1] = transform.InverseTransformPoint(viewPoints[i] + Vector3.forward * 0.01f);
+
             if (i < vertexCount - 2)
             {
                 triangles[i * 3] = 0;

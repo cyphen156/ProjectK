@@ -31,7 +31,6 @@ public static class Logger
         string fullMessage = $"[{timeStamp}] {message}";
 
         // 콘솔 출력
-        Debug.Log(logFilePath);
         Debug.LogError(fullMessage);
 
         // 파일 출력
