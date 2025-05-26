@@ -210,7 +210,7 @@ public class PlayerController : NetworkBehaviour, IPlayerInputReceiver, ITakeDam
             dodgeDirection = transform.forward; // 입력이 없으면 정면
         }
         float dodgeDistance = 5.0f; // 구르기 거리
-        //playerMove.Move(dodgeDirection.x * dodgeDistance, dodgeDirection.z * dodgeDistance);
+        playerMove.Move(dodgeDirection.x * dodgeDistance, dodgeDirection.z * dodgeDistance);
         //4. 방향도 맞춰주고 싶으면
         playerMove.RotateCharacter(dodgeDirection);
     }
