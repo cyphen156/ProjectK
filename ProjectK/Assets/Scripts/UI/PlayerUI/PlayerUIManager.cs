@@ -94,6 +94,12 @@ public class PlayerUIManager : MonoBehaviour
 
     private void OnOpenDropBox(DropBox inDropBox)
     {
+        if(openedDropBox != null && openedDropBox == inDropBox)
+        {
+            inDropBox.CloseBox();
+            return;
+        }
+
         openedDropBox = inDropBox;
         dropBoxPanelObj.SetActive(true);
         SetDropBoxUI();
@@ -109,10 +115,14 @@ public class PlayerUIManager : MonoBehaviour
         SetDropBoxUI();
     }
 
-    private void OnCloseDropBox()
+    private void OnCloseDropBox(DropBox inCloseBox)
     {
+        if(openedDropBox != null && openedDropBox == inCloseBox)
+        {
+            dropBoxPanelObj.SetActive(false);
+        }
         openedDropBox = null;
-        dropBoxPanelObj.SetActive(false);
+        
     }
 
     private void SetDropBoxUI()
