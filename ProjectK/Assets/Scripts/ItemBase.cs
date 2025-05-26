@@ -92,13 +92,24 @@ public class ItemBase
         lifeTime = float.Parse(intParseData[lifeTimeIdx]);
         damageRange = float.Parse(intParseData[damageRangeIdx]);
         throwMaxReach = float.Parse(intParseData[throwIdx]);
+
+
+        byte[] fileData = null;
+        if (File.Exists(Application.dataPath + "/Images/Item/" + name + ".png"))
+        {
+            fileData = File.ReadAllBytes(Application.dataPath + "/Images/Item/" + name + ".png");
+        }
+        else
+        {
+            fileData = File.ReadAllBytes(Application.dataPath + "/Images/Item/default.png");
+        }
         
-        byte[] fileData = File.ReadAllBytes(Application.dataPath + "/Images/Crosshair/crosshair027.png");
         Texture2D tex = new Texture2D(2, 2);
         if (tex.LoadImage(fileData))
         {
             sprite = Sprite.Create(tex, new Rect(0, 0, tex.width, tex.height), new Vector2(0.5f, 0.5f));
         }
+    
     }
 
     private T ParseEnum<T>(string inEnumStr) where T : Enum
