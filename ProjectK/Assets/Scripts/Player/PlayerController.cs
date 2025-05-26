@@ -288,14 +288,29 @@ public class PlayerController : NetworkBehaviour, IPlayerInputReceiver, ITakeDam
         }
     }
 
+    
     //아이템픽하는거
     public ItemBase PickItem(ItemBase inPickItem)
     {
+        uint number = myNetworkNumber.Value;
+        //Debug.Log(NetworkManager.Singleton.LocalClientId + "의 " + number + " 인벤토리가 습득");
         //인벤토리 적용
         ItemBase previousItem = playerInventory.TryAddOrReturnPreviousItem(inPickItem, playerGun);
-  
+        PickItemRpc(inPickItem.id, inPickItem.amount);
         return previousItem; //있던 슬롯에서 교체될것은 반환
     }
+
+
+    [Rpc(SendTo.NotMe)]
+    public void PickItemRpc(int inItemId, int itemAmount)
+    {
+        //인벤토리 적용
+        uint number = myNetworkNumber.Value;
+        //Debug.Log(NetworkManager.Singleton.LocalClientId + "의 " + number + " 인벤토리가 습득");
+        ItemBase pickItem = new ItemBase(MasterDataManager.Instance.GetMasterItemData(inItemId), itemAmount);
+        ItemBase previousItem = playerInventory.TryAddOrReturnPreviousItem(pickItem, playerGun);
+    }
+
 
     public void SetNetworkNumber(uint inNumber)
     {
