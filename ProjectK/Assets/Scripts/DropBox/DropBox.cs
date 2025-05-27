@@ -11,7 +11,7 @@ public class DropBox : NetworkBehaviour
     private float stackRate; //찬스가 중첩 될수록 변하는 비율
     private int maxRollCount;
     public static event Action<DropBox> OnOpenBox;
-    public static event Action OnCloseBox;
+    public static event Action<DropBox> OnCloseBox;
     public static event Action<DropBox> OnChangeBox;
     private uint openPlayerNumber;
     private const uint InValidPlayerNumber = uint.MaxValue;
@@ -113,7 +113,7 @@ public class DropBox : NetworkBehaviour
     public void CloseBox()
     {
         //Debug.Log("박스를 닫았다.");
-        OnCloseBox.Invoke();
+        OnCloseBox?.Invoke(this);
         openPlayerNumber = InValidPlayerNumber;
     }
 

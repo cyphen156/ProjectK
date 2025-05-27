@@ -1,8 +1,8 @@
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.UIElements;
+using Unity.Netcode;
 
-public class BoxDetector : MonoBehaviour
+public class BoxDetector : NetworkBehaviour
 {
     private List<DropBox> inRangeBoxList; //범위 안에 들어온 상자들
 
@@ -47,6 +47,10 @@ public class BoxDetector : MonoBehaviour
         if (box == null)
         {
             return;
+        }
+        if (IsOwner)
+        {
+            box.CloseBox();
         }
         inRangeBoxList.Remove(box);
     }
