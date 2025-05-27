@@ -73,6 +73,9 @@ public class PlayerController : NetworkBehaviour, IPlayerInputReceiver, ITakeDam
     //[SerializeField] private Granade granadePrefab;
     [SerializeField] private WoodenBox woodenBoxPrefab;
     [SerializeField] private Granade granadePrefab;
+
+    [Header("Effect")]
+    [SerializeField] private EffectSpawner hitEffectSpawner;
     #endregion
 
     #region Unity Methods
@@ -308,6 +311,9 @@ public class PlayerController : NetworkBehaviour, IPlayerInputReceiver, ITakeDam
             return;
         }
         playerStat.ApplyHp(-inBulletDamage);
+
+        hitEffectSpawner.PlayEffect();
+
         float hp = playerStat.GetHP();
 
         if (IsOwner)
