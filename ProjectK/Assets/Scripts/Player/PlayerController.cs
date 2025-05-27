@@ -301,8 +301,10 @@ public class PlayerController : NetworkBehaviour, IPlayerInputReceiver, ITakeDam
         playerStat.ApplyHp(-inBulletDamage);
         float hp = playerStat.GetHP();
 
-        if(IsOwner)
-        OnChangeHpUI?.Invoke(hp);
+        if (IsOwner)
+        {
+            OnChangeHpUI?.Invoke(hp);
+        }
 
         if (hp <= 0)
         {
