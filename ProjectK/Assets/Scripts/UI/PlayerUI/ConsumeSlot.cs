@@ -31,7 +31,7 @@ public class ConsumeSlot : MonoBehaviour
 
     private void SetInfo()
     {
-        if (slotItem == null)
+        if (slotItem == null || slotItem.itemType == ItemMainType.None)
         {
             return;
         }

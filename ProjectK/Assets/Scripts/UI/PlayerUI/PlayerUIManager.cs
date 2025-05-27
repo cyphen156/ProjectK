@@ -204,10 +204,7 @@ public class PlayerUIManager : MonoBehaviour
     {
         for (int i = 0; i < consumeSlot.Length; i++)
         {
-            if (inConsumes[i] != null && inConsumes[i].itemType != ItemMainType.None)
-            {
-                consumeSlot[i].SetSlot(inConsumes[i]);
-            }
+           consumeSlot[i].SetSlot(inConsumes[i]);
         }
     }
 }
