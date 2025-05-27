@@ -150,7 +150,12 @@ public class SystemUIManager : MonoBehaviour
 
     public void OnClickButtonJoinClient()
     {
-        unityTransport.ConnectionData.Address = ipInputField.text;
+        string Address = ipInputField.text;
+        if(Address == "")
+        {
+            Address = "127.0.0.1";
+        }
+        unityTransport.ConnectionData.Address = Address;
         NetworkManager.Singleton.StartClient();
         loginPanel.SetActive(false);
     }
