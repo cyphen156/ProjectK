@@ -359,7 +359,7 @@ public class PlayerController : NetworkBehaviour, IPlayerInputReceiver, ITakeDam
     // 여기 작업 필요
     public void UseItem(int inIndex)
     {
-        if(playerInventory.HasUseItem(inIndex))
+        if(playerInventory.HasItem(inIndex))
         {
             switch (inIndex)
             {
