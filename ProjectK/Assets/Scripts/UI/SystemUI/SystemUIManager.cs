@@ -63,7 +63,8 @@ public class SystemUIManager : MonoBehaviour
             Debug.LogError("GameLifeTimeText∞° Null¿”");
         }
 
-        GameManager.GamePlayTimeChange += UpdateGameLifeTime;
+
+        GameManager.currentTime.OnValueChanged += UpdateGameLifeTime;
         GameManager.PlayerCountChange += UpdateRestPlayer;
         GameManager.OnWinnerChanged += UpdateLastPlayer;
         GameManager.OnGameStateChanged += UpdateGameState; 
@@ -77,7 +78,7 @@ public class SystemUIManager : MonoBehaviour
         unityTransport = NetworkManager.Singleton.GetComponent<UnityTransport>();
     }
 
-    private void UpdateGameLifeTime(float inCurrentTime)
+    private void UpdateGameLifeTime(float pre, float inCurrentTime)
     {
         minutes = inCurrentTime / 60;
         seconds = inCurrentTime % 60;

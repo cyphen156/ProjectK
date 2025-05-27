@@ -4,7 +4,6 @@ using System.Collections.Generic;
 using System.Linq;
 using Unity.Netcode;
 using UnityEngine;
-using UnityEngine.InputSystem.LowLevel;
 public enum GameState
 {
     None,
@@ -21,9 +20,9 @@ public class GameManager : NetworkBehaviour
     [Header("GamePlayTime")]
     [SerializeField] private float PlayTime;
     private float maxPlayTime;
-    private float currentTime;
+    private NetworkVariable<int> alivePlayCount = new NetworkVariable<int>(0);
+    public static NetworkVariable<float> currentTime = new NetworkVariable<float>(0);
     private float timeAccumulator;
-    public static event Action<float> GamePlayTimeChange;
 
     [Header("PlayerCount")]
     private const uint INVALID_PLAYER_NUMBER = 99999999;
@@ -60,49 +59,34 @@ public class GameManager : NetworkBehaviour
         {
             Destroy(gameObject);
         }
+
         PlayTime = 5f;
         maxPlayTime = 60 * PlayTime;  // 분단위
     }
 
-    //private void OnEnable()
-    //{
-    //    ResetGame();
-    //}
-
     private void Update()
     {
-        // 게임 레디 상태에서 시작하기
-        if (currentGameState.Value == GameState.Ready && IsHost && Input.GetKeyDown(KeyCode.S))
-        {
-            StartGame();
-            return;
-        }
-
         // 게임 플레이중
-        else if (currentGameState.Value == GameState.Play)
+         if (currentGameState.Value == GameState.Play)
         {
-            if (currentTime <= 0)
+            if (currentTime.Value <= 0)
             {
                 EndGame();
                 return;
             }
 
             // 그거 아니면 게임을 계속 진행한다
-            timeAccumulator += Time.deltaTime;
-            while (timeAccumulator >= 1f)
+            if (IsServer)
             {
-                // 1초 단위로 UI에 업데이트
-                currentTime -= 1f;
-                timeAccumulator -= 1f;
-
-                GamePlayTimeChange?.Invoke(currentTime);
+                timeAccumulator += Time.deltaTime;
+                while (timeAccumulator >= 1f)
+                {
+                    // 1초 단위로 UI에 업데이트
+                    currentTime.Value -= 1f;
+                    timeAccumulator -= 1f;
+                }
             }
-        }
-
-        // 게임 종료 시
-        else if (currentGameState.Value == GameState.End)
-        {
-            // 종료 상태일때도 아무것도 안할거임   
+     
         }
     }
     #endregion
@@ -138,7 +122,7 @@ public class GameManager : NetworkBehaviour
     private void ResetGame()
     {
         // 플레이 타임 초기화
-        currentTime = maxPlayTime;
+        currentTime.Value = maxPlayTime;
         timeAccumulator = 0f;
 
         // 플레이어 수 초기화
@@ -240,7 +224,6 @@ public class GameManager : NetworkBehaviour
     private void ApplyStartUIRpc()
     {
         OnHideLobbyUIRequested?.Invoke();
-        GamePlayTimeChange?.Invoke(currentTime);
         PlayerCountChange?.Invoke(players.Count);
     }
 
