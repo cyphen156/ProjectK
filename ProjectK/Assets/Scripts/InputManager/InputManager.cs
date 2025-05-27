@@ -1,13 +1,12 @@
 using System;
-using System.Collections;
-using System.Collections.Generic;
+using Unity.Netcode;
 using UnityEngine;
 
 /// <summary>
 /// 플레이어 입력을 해석하고 로컬 플레이어에게만 전달하는 전역 입력 처리기
 /// </summary>
 
-public class InputManager : MonoBehaviour
+public class InputManager : NetworkBehaviour
 {
     public static InputManager Instance { get; private set; }
 
@@ -176,6 +175,16 @@ public class InputManager : MonoBehaviour
             RegisterLocalPlayer(inPlayerController);
         }
         Logger.Error($"플레이어 상태 변경 {localPlayerState} -> " + inLocalPlayerState);
-        localPlayerState = inLocalPlayerState;
+        ChangeStateRpc(inPlayerController.GetNetworkNumber(), inLocalPlayerState);
     }
+
+    [Rpc(SendTo.Everyone)]
+    private void ChangeStateRpc(uint inPlayerNumber, PlayerState inChangeState)
+    {
+        if(inPlayerNumber == (NetworkManager.Singleton.LocalClientId + 1))
+        {
+            localPlayerState = inChangeState;
+        }
+    }
+
 }
