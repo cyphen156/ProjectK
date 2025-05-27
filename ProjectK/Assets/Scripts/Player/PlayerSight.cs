@@ -1,9 +1,10 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using Unity.Netcode;
 
 [RequireComponent(typeof(MeshFilter), typeof(MeshRenderer))]
-public class PlayerSight : MonoBehaviour
+public class PlayerSight : NetworkBehaviour
 {
     public struct ViewCastInfo
     {
@@ -75,12 +76,19 @@ public class PlayerSight : MonoBehaviour
     }
     private void OnEnable()
     {
-        PlayerController.OnCrosshairSizeChanged += UpdateCrosshairRadius;
+        if (IsOwner)
+        {
+            PlayerController.OnCrosshairSizeChanged += UpdateCrosshairRadius;
+        }
+        
     }
 
     private void OnDisable()
     {
-        PlayerController.OnCrosshairSizeChanged -= UpdateCrosshairRadius;
+        if (IsOwner)
+        {
+            PlayerController.OnCrosshairSizeChanged -= UpdateCrosshairRadius;
+        }
     }
 
     private void Start()
