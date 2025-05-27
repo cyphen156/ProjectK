@@ -3,10 +3,9 @@ using System.Collections;
 using TMPro;
 using Unity.Netcode;
 using Unity.Netcode.Transports.UTP;
-using Unity.VisualScripting;
 using UnityEngine;
 
-public class SystemUIManager : MonoBehaviour
+public class SystemUIManager : NetworkBehaviour
 {
     [Header("GameLifeTime")]
     private TextMeshProUGUI GameLifeTimeText;
@@ -70,7 +69,7 @@ public class SystemUIManager : MonoBehaviour
         GameManager.OnGameStateChanged += UpdateGameState; 
         gameEndPanel.SetActive(false);
 
-        GameManager.LocalPlayerState += UpdateLocalPlayerState; // 플레이어 사망시 UI (재훈)
+        GameManager.LocalPlayerState += UpdatePlayerDie; // 플레이어 사망시 UI (재훈)
         PlayerDiePanel.SetActive(false); // 플레이어 사망시 UI (재훈)
 
         GameManager.OnHideLobbyUIRequested += HideLobbyPanel;
@@ -115,19 +114,31 @@ public class SystemUIManager : MonoBehaviour
         gameEndPanel.SetActive(false);
     }
 
-    private void UpdateLocalPlayerState(PlayerController inPlayerController, PlayerState inState)
+    private void UpdatePlayerDie(PlayerController inPlayerController, PlayerState inState)
     {
+        //inPlayercontroller 케릭터가 죽었을때, 해당 케릭터 주인의 systemUIManger가 패널이 떠야한다. 
+
+      //  Debug.Log("데쓰 업그레이드" + NetworkManager.Singleton.LocalClientId +"번 클라에서 확인");
         if (inState == PlayerState.Die)
         {
-            PlayerDieText.text = "플레이어" + inPlayerController.GetNetworkNumber() + "사망";
+            PlayerDieRpc(inPlayerController.GetNetworkNumber());
+        }
+    }
+
+    [Rpc(SendTo.Everyone)]
+    private void PlayerDieRpc(uint inPlayerNumber)
+    {
+      //  Debug.Log(inPlayerNumber-1 + "죽었다고 들어옴" + NetworkManager.Singleton.LocalClientId + "번 클라에서 확인");
+      // playerNumber를 매길때는 1부터, Localclient는 0번부터 시작인데, SetNumber도 문제고
+      // LocalClientId 를 쓰면 좋은데 얘 값은 uLong 이걸 쓰는 변수가 uInt로 너무많은 변수가 있어서 로컬클라에 +1 
+        if(inPlayerNumber == (NetworkManager.Singleton.LocalClientId + 1))
+        {
+            PlayerDieText.text = "플레이어" + (inPlayerNumber) + "사망";
 
             PlayerDiePanel.SetActive(true);
         }
-        else
-        {
-            PlayerDiePanel.SetActive(false);
-        }
     }
+
 
     #region 로비 UI
     public void OnClickPlayButton()
