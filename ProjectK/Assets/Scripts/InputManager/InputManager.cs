@@ -13,7 +13,6 @@ public class InputManager : NetworkBehaviour
     public static event Action<PlayerController> OnLocalPlayerRegistered;
     private IPlayerInputReceiver localPlayerController;
     private PlayerState localPlayerState;
-    private InGameUIManager inGameUIManager;
 
     public enum InputReceiver
     {
@@ -37,17 +36,27 @@ public class InputManager : NetworkBehaviour
         {
             Destroy(gameObject);
         }
-        currentReceiver = InputReceiver.All;
+        currentReceiver = InputReceiver.None;
     }
 
     private void OnEnable()
     {
         GameManager.LocalPlayerState += UpdateLocalPlayerStateChanged;
+        GameManager.OnGameStateChanged += UpdateGameState;
     }
 
     private void OnDisable()
     {
         GameManager.LocalPlayerState -= UpdateLocalPlayerStateChanged;
+        GameManager.OnGameStateChanged -= UpdateGameState;
+    }
+
+    private void UpdateGameState(GameState state)
+    {
+        if (state == GameState.Play)
+        {
+            currentReceiver = InputReceiver.All;
+        }
     }
 
     private void Update()
@@ -62,9 +71,7 @@ public class InputManager : NetworkBehaviour
             return;
         }
 
-
         if (localPlayerState == PlayerState.Die)
-            //|| currentPlayerState == PlayerState.Dodge
         {
             return;
         }
@@ -83,15 +90,7 @@ public class InputManager : NetworkBehaviour
         {
             OnLocalPlayerRegistered?.Invoke(controller);
         }
-        currentReceiver = InputReceiver.All;
-    }
-    public void RegisterUIManager(InGameUIManager inManager)
-    {
-        inGameUIManager = inManager;
-    }
-    public void SetInputReceiver(InputReceiver inReceiver)
-    {
-        currentReceiver = inReceiver;
+        currentReceiver = InputReceiver.InGameUIOnly;
     }
 
     private Vector3 GetMouseWorldPosition()
