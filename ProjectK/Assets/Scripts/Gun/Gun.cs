@@ -231,6 +231,10 @@ public class Gun : NetworkBehaviour
 
     public void ChangeGunState(GunState inGunState)
     {
+        if (isStateLock)
+        {
+            return;
+        }
         if (CurrentGunState != inGunState)
         {
             Logger.Warning($"gunstateChanged :{CurrentGunState} -> {inGunState}");
@@ -241,15 +245,12 @@ public class Gun : NetworkBehaviour
                     break;
                 case GunState.Attack:
                     SetGunAnimatorTrigger(inGunState);
+                    StartCoroutine(ChangeGunStateCoroutine(CurrentGunState, rateTime));
                     break;
                 case GunState.Reload:
-                    if (isStateLock)
-                    {
-                        return;
-                    }
                     Reload();
                     SetGunAnimatorTrigger(inGunState);
-                    StartCoroutine(ChangeGunStateCoroutine(CurrentGunState, 2f));
+                    StartCoroutine(ChangeGunStateCoroutine(CurrentGunState, equiptReloadTime));
                     break;
                 default:
                     Logger.Log("FatalErreo :: Tried State Change is Not Allowed");
@@ -263,6 +264,11 @@ public class Gun : NetworkBehaviour
         isStateLock = true;
         yield return new WaitForSeconds(inDelay);
         isStateLock = false;
+
+        if (CurrentGunState == inState)
+        {
+            CurrentGunState = GunState.None;
+        }
     }
     public void SetGunAnimatorTrigger(GunState inState)
     {

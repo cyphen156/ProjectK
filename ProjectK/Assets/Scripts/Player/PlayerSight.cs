@@ -61,8 +61,8 @@ public class PlayerSight : MonoBehaviour
     #region Unity Methods   
     private void Awake()
     {
-        baseViewRadius = 15f;
-        activeViewRadius = 2f * baseViewRadius;
+        baseViewRadius = 10f;
+        activeViewRadius = 3f * baseViewRadius;
         baseViewAngle = 45f;
         activeViewAngle = baseViewAngle;
         viewDistance = activeViewRadius;
@@ -96,6 +96,7 @@ public class PlayerSight : MonoBehaviour
     private void LateUpdate()
     {
         DrawFieldOfView();
+
     }
     #endregion
 
@@ -104,7 +105,6 @@ public class PlayerSight : MonoBehaviour
         Vector3 direction = DirectionFromAngle(inGlobalAngle, true);
         Vector3 rayPoint = transform.position + sightOffset;
         RaycastHit hit;
-        Debug.DrawRay(rayPoint, direction * activeViewRadius, Color.yellow, 1f);
 
         float maxDist = activeViewRadius;
         float maxAllowedDist = maxDist * 1.05f;
