@@ -61,8 +61,8 @@ public class PlayerSight : MonoBehaviour
     #region Unity Methods   
     private void Awake()
     {
-        baseViewRadius = 10f;
-        activeViewRadius = 3f * baseViewRadius;
+        baseViewRadius = 8f;
+        activeViewRadius = 5f * baseViewRadius;
         baseViewAngle = 45f;
         activeViewAngle = baseViewAngle;
         viewDistance = activeViewRadius;
@@ -96,7 +96,7 @@ public class PlayerSight : MonoBehaviour
     private void LateUpdate()
     {
         DrawFieldOfView();
-
+        DrawSelfCircleSight();
     }
     #endregion
 
@@ -159,7 +159,39 @@ public class PlayerSight : MonoBehaviour
             }
         }
     }
+    private void DrawSelfCircleSight(int segments = 36)
+    {
+        Vector3 origin = transform.position + sightOffset;
 
+        Vector3[] vertices = new Vector3[segments + 1];
+        int[] triangles = new int[segments * 3];
+
+        vertices[0] = transform.InverseTransformPoint(origin); // 반드시 로컬 좌표로
+
+        for (int i = 0; i < segments; i++)
+        {
+            float angle = i * Mathf.PI * 2f / segments;
+            Vector3 dir = new Vector3(Mathf.Sin(angle), 0f, Mathf.Cos(angle));
+            Vector3 worldPoint = origin + dir * baseViewRadius;
+            vertices[i + 1] = transform.InverseTransformPoint(worldPoint);
+        }
+
+        for (int i = 0; i < segments; i++)
+        {
+            int tri = i * 3;
+            triangles[tri] = 0;
+            triangles[tri + 1] = i + 1;
+            triangles[tri + 2] = (i + 2 > segments) ? 1 : i + 2;
+        }
+
+        Mesh mesh = new Mesh();
+        mesh.vertices = vertices;
+        mesh.triangles = triangles;
+        mesh.RecalculateNormals();
+
+        MeshRenderer renderer = GetComponent<MeshRenderer>();
+        Graphics.DrawMesh(mesh, transform.localToWorldMatrix, renderer.sharedMaterial, gameObject.layer);
+    }
     private void DrawFieldOfView()
     {
         Vector3 origin = transform.position + sightOffset;
