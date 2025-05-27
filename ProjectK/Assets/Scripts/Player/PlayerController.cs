@@ -291,36 +291,8 @@ public class PlayerController : NetworkBehaviour, IPlayerInputReceiver, ITakeDam
 
     public void TakeDamage(float inBulletDamage)
     {
-        playerStat.ApplyHp(-inBulletDamage);
-        float hp = playerStat.GetHP();
-
-        if (hp <= 0f)
-        {
-            ChangeStateServerRpc(PlayerState.Die, OwnerClientId);
-        }
-
-        UpdateHpClientRpc(hp); 
-    }
-
-    [Rpc(SendTo.Server)]
-    private void ApplyDamageServerRpc(float inBulletDamage)
-    {
-        playerStat.ApplyHp(-inBulletDamage);
-        float hp = playerStat.GetHP();
-
-        if (hp <= 0f)
-        {
-            ChangeStateServerRpc(PlayerState.Die, OwnerClientId); // 사망 상태 전환
-        }
-
-        // 클라이언트에게 UI 갱신 요청
-        UpdateHpClientRpc(hp);
-    }
-
-    [Rpc(SendTo.Owner)]
-    private void UpdateHpClientRpc(float newHp)
-    {
-        OnChangeHpUI?.Invoke(newHp);
+        //서버에서 피격 충돌 판정, 피격 함수를 Rpc로 동기화
+        TakeDamageRpc(inBulletDamage);
     }
 
     [Rpc(SendTo.Everyone)]
@@ -329,7 +301,11 @@ public class PlayerController : NetworkBehaviour, IPlayerInputReceiver, ITakeDam
         playerStat.ApplyHp(-inBulletDamage);
         float hp = playerStat.GetHP();
 
-        OnChangeHpUI?.Invoke(hp);
+        if (IsOwner)
+        {
+            OnChangeHpUI?.Invoke(hp);
+        }
+
         if (hp <= 0)
         {
             ChangeStateServerRpc(PlayerState.Die, NetworkManager.Singleton.LocalClientId);
@@ -383,7 +359,7 @@ public class PlayerController : NetworkBehaviour, IPlayerInputReceiver, ITakeDam
     // 여기 작업 필요
     public void UseItem(int inIndex)
     {
-        if(playerInventory.HasUseItem(inIndex))
+        if(playerInventory.HasItem(inIndex))
         {
             switch (inIndex)
             {
