@@ -22,45 +22,50 @@ public class PlayerStateMachine : MonoBehaviour
         isStateLock = false;
     }
 
-    public PlayerState ChangePlayerState(PlayerState state)
+    public void ChangePlayerState(PlayerState state)
     {
-        if (currentPlayerState != state)
+        if (isStateLock || currentPlayerState == state)
         {
-            PlayerState previousPlayerState = currentPlayerState;
-
-            currentPlayerState = state;
-            Logger.Warning($"PlayerStateChanged :{previousPlayerState} -> {currentPlayerState}");
-
-            switch (currentPlayerState)
-            {
-                case PlayerState.Idle:
-                    SetPlayerAnimatorBool(previousPlayerState, false);
-                    break;
-                case PlayerState.Walk:
-                    SetPlayerAnimatorBool(currentPlayerState, true);
-                    break;
-                case PlayerState.Die:
-                    SetPlayerAnimatorTrigger(currentPlayerState);
-                    break;
-                case PlayerState.Dodge:
-                    SetPlayerAnimatorTrigger(currentPlayerState);
-                    break;
-                default:
-                    Logger.Log("FatalErreo :: Tried State Change is Not Allowed");
-                    break;
-            }
+            return;
         }
-        return currentPlayerState;
+        PlayerState previousPlayerState = currentPlayerState;
+
+        currentPlayerState = state;
+        Logger.Warning($"PlayerStateChanged :{previousPlayerState} -> {currentPlayerState}");
+
+        switch (currentPlayerState)
+        {
+            case PlayerState.Idle:
+                SetPlayerAnimatorBool(previousPlayerState, false);
+                break;
+            case PlayerState.Walk:
+                SetPlayerAnimatorBool(currentPlayerState, true);
+                break;
+            case PlayerState.Die:
+                SetPlayerAnimatorTrigger(currentPlayerState);
+                break;
+            case PlayerState.Dodge:
+                SetPlayerAnimatorTrigger(currentPlayerState);
+                StartCoroutine(ChangePlayerStateCoroutine(currentPlayerState, 0.4f));
+                break;
+            default:
+                Logger.Log("FatalErreo :: Tried State Change is Not Allowed");
+                break;
+        }
     }
 
     public IEnumerator ChangePlayerStateCoroutine(PlayerState inState, float inDelay)
     {
         isStateLock = true;
         yield return new WaitForSeconds(inDelay);
-        SetPlayerAnimatorBool(currentPlayerState, false);
         isStateLock = false;
-    }
 
+        if (currentPlayerState == inState)
+        {
+            SetPlayerAnimatorBool(PlayerState.Walk, false);
+            ChangePlayerState(PlayerState.Idle);
+        }
+    }
     public void SetPlayerAnimatorTrigger(PlayerState inState)
     {
         animator.SetTrigger(inState.ToString());
@@ -69,5 +74,9 @@ public class PlayerStateMachine : MonoBehaviour
     public void SetPlayerAnimatorBool(PlayerState inState, bool inBoolState)
     {
         animator.SetBool(inState.ToString(), inBoolState);
+    }
+    public PlayerState GetCurrentPlayerState()
+    {
+        return currentPlayerState;
     }
 }
