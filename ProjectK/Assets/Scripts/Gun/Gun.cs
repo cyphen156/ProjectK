@@ -111,6 +111,12 @@ public class Gun : NetworkBehaviour
 
     public void Reload()
     {
+        ReloadRpc();
+    }
+
+    [Rpc(SendTo.Everyone)]
+    public void ReloadRpc()
+    {
         if (isReloading == true || IsFullBullet() == true)
         {
             return;
