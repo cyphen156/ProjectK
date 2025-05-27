@@ -1,6 +1,8 @@
 using System;
 using System.Collections;
 using TMPro;
+using Unity.Netcode;
+using Unity.Netcode.Transports.UTP;
 using Unity.VisualScripting;
 using UnityEngine;
 
@@ -25,6 +27,11 @@ public class SystemUIManager : MonoBehaviour
     [Header("GamePlayUI")]
     private GameObject lobbyPanel;
 
+    [Header("Login")]
+    private GameObject loginPanel;
+    private UnityTransport unityTransport;
+    [SerializeField] private TMP_InputField ipInputField;
+
     private void Awake()
     {
         minutes = 0f;
@@ -39,6 +46,8 @@ public class SystemUIManager : MonoBehaviour
         PlayerDieText = PlayerDiePanel.GetComponentInChildren<TextMeshProUGUI>(); // 플레이어 사망시 UI (재훈)
 
         lobbyPanel = GameObject.Find("LobbyPanel");
+
+        loginPanel = GameObject.Find("LoginPanel");
     }
 
     private void Start()
@@ -64,6 +73,8 @@ public class SystemUIManager : MonoBehaviour
         PlayerDiePanel.SetActive(false); // 플레이어 사망시 UI (재훈)
 
         GameManager.OnHideLobbyUIRequested += HideLobbyPanel;
+
+        unityTransport = NetworkManager.Singleton.GetComponent<UnityTransport>();
     }
 
     private void UpdateGameLifeTime(float inCurrentTime)
@@ -117,7 +128,7 @@ public class SystemUIManager : MonoBehaviour
         }
     }
 
-
+    #region 로비 UI
     public void OnClickPlayButton()
     {
         GameManager.Instance.RequestStartGame();
@@ -127,4 +138,21 @@ public class SystemUIManager : MonoBehaviour
     {
         lobbyPanel.SetActive(false);
     }
+    #endregion
+
+    #region 로그인 UI
+    public void OnClickButtonCreateHostRoom()
+    {
+        NetworkManager.Singleton.StartHost();
+        loginPanel.SetActive(false);
+    }
+
+
+    public void OnClickButtonJoinClient()
+    {
+        unityTransport.ConnectionData.Address = ipInputField.text;
+        NetworkManager.Singleton.StartClient();
+        loginPanel.SetActive(false);
+    }
+    #endregion
 }
