@@ -118,11 +118,10 @@ public class PlayerController : NetworkBehaviour, IPlayerInputReceiver, ITakeDam
     private void Update()
     {
         lookDirection = CalculateDirectionFromMouseWorldPosition();
-        //if (currentPlayerState == PlayerState.Dodge)
-        //{
-        //    lookDirection = new Vector3(inInputHorizontal, 0, inInputVertical);
-        //}
-        playerMove.RotateCharacter(lookDirection);
+        if (netCurrentPlayerState.Value != PlayerState.Dodge)
+        {
+            playerMove.RotateCharacter(lookDirection);
+        }
         UpdateCrosshairSize();
     }
 
@@ -197,9 +196,15 @@ public class PlayerController : NetworkBehaviour, IPlayerInputReceiver, ITakeDam
         {
             return;
         }
-        PlayerState changedState = playerStateMachine.ChangePlayerState(inState);
-        netCurrentPlayerState.Value = changedState;
-        GameManager.Instance?.UpdatePlayerState(this, changedState);
+        PlayerState before = playerStateMachine.GetCurrentPlayerState();
+        playerStateMachine.ChangePlayerState(inState);
+
+        PlayerState after = playerStateMachine.GetCurrentPlayerState();
+        if (before != after)
+        {
+            netCurrentPlayerState.Value = after;
+            GameManager.Instance?.UpdatePlayerState(this, after);
+        }
     }
 
     public void InputMousePosition(Vector3 inMousePosition)
@@ -223,17 +228,17 @@ public class PlayerController : NetworkBehaviour, IPlayerInputReceiver, ITakeDam
 
     public void Dodge()
     {
-        ChangeStateServerRpc(PlayerState.Dodge, NetworkManager.Singleton.LocalClientId);
-        //2. 구르기 방향 결정
+        if (playerStateMachine.GetCurrentPlayerState() == PlayerState.Dodge)
+        {
+            return;
+        }
         Vector3 dodgeDirection = new Vector3(lastInputHorizontal, 0, lastInputVertical).normalized;
         if(dodgeDirection == Vector3.zero)
         {
             dodgeDirection = transform.forward; // 입력이 없으면 정면
         }
-        float dodgeDistance = 5.0f; // 구르기 거리
-        playerMove.Move(dodgeDirection.x * dodgeDistance, dodgeDirection.z * dodgeDistance);
-        //4. 방향도 맞춰주고 싶으면
         playerMove.RotateCharacter(dodgeDirection);
+        ChangeStateServerRpc(PlayerState.Dodge, NetworkManager.Singleton.LocalClientId);
     }
 
     public void IsAim(bool isAim)
@@ -298,6 +303,10 @@ public class PlayerController : NetworkBehaviour, IPlayerInputReceiver, ITakeDam
     [Rpc(SendTo.Everyone)]
     private void TakeDamageRpc(float inBulletDamage)
     {
+        if (netCurrentPlayerState.Value == PlayerState.Dodge)
+        {
+            return;
+        }
         playerStat.ApplyHp(-inBulletDamage);
         float hp = playerStat.GetHP();
 
