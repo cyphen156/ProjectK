@@ -63,8 +63,9 @@ public class SystemUIManager : MonoBehaviour
             Debug.LogError("GameLifeTimeText∞° Null¿”");
         }
 
-        GameManager.GamePlayTimeChange += UpdateGameLifeTime;
-        GameManager.PlayerCountChange += UpdateRestPlayer;
+
+        GameManager.currentTime.OnValueChanged += UpdateGameLifeTime;
+        GameManager.alivePlayCount.OnValueChanged += UpdateRestPlayer;
         GameManager.OnWinnerChanged += UpdateLastPlayer;
         GameManager.OnGameStateChanged += UpdateGameState; 
         gameEndPanel.SetActive(false);
@@ -77,7 +78,7 @@ public class SystemUIManager : MonoBehaviour
         unityTransport = NetworkManager.Singleton.GetComponent<UnityTransport>();
     }
 
-    private void UpdateGameLifeTime(float inCurrentTime)
+    private void UpdateGameLifeTime(float pre, float inCurrentTime)
     {
         minutes = inCurrentTime / 60;
         seconds = inCurrentTime % 60;
@@ -85,7 +86,7 @@ public class SystemUIManager : MonoBehaviour
         GameLifeTimeText.text = $"{(int)minutes} : {(int)seconds}";
     }
 
-    private void UpdateRestPlayer(int inCurrentPlayer)
+    private void UpdateRestPlayer(int pre, int inCurrentPlayer)
     {
         RestPlayerText.text = $" Rest : {inCurrentPlayer}";
     }
