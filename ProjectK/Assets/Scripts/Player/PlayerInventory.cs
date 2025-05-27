@@ -19,8 +19,6 @@ public class PlayerInventory : NetworkBehaviour
 
     const int NO_INDEX_VALUE = -1;
 
-    
-
     private void Awake()
     {
         //총 인벤토리에서 고정위치
@@ -54,65 +52,40 @@ public class PlayerInventory : NetworkBehaviour
             //같은 아이템 차고 있으면 들어온 아이템을 장착하고 기존 아이템 반환
             EquiptItem(inItem, out returnItem);
             inPlayerGun?.EquiptItems(gunItems);
-
-            if (IsOwner)
-            {
-                OnChangeGunItems?.Invoke(gunItems);
-            }
-            
+            OnGunItemChange(); 
         }
         else if(itemType == ItemMainType.Expendables)
         {
             AquireConsumeItem(inItem, out returnItem);
-            if (IsOwner)
-            {
-                OnChangeConsumeItems?.Invoke(consumeItems);
-            }
+            OnConsumeItemChange();
         }
 
         return returnItem;
     }
 
-    // 여기 작업 필요
-    public bool HasUseItem(int inConsumeSlot)
+    private void OnGunItemChange()
     {
-        switch (inConsumeSlot)
+        if (IsOwner)
         {
-            case 1:
-                break;
-            case 2:
-                break;
-            case 3:
-                break;
-            case 4:
-                break;
-            default:
-                Logger.Log("There is not Allowed Input Key Event");
-                break;
+            OnChangeGunItems?.Invoke(gunItems);
         }
-        return false;
-    }
-    // 여기 작업 필요
-    public bool HasUseGranade()
-    {
-        //if ( > 0)
-        {
-            //--;
-            return true;
-        }
-        //return false;
-    }
-    public ItemBase[] GetGunItmes()
-    {
-        return gunItems;
     }
 
+    private void OnConsumeItemChange()
+    {
+        if (IsOwner)
+        {
+            OnChangeConsumeItems?.Invoke(consumeItems);
+        }
+    }
+
+    #region 습득
     private void EquiptItem(ItemBase inEquipItem, out ItemBase returnItem)
     {
         //장비타입 슬롯 인덱스 찾기
         ItemSubType subType = inEquipItem.subType;
         int slotIdx = FindSlotIndex(GunSlotInputType, subType);
-        if(slotIdx == NO_INDEX_VALUE)
+        if (slotIdx == NO_INDEX_VALUE)
         {
             returnItem = null;
             return;
@@ -132,9 +105,9 @@ public class PlayerInventory : NetworkBehaviour
             returnItem = null;
             return;
         }
-        
+
         //각 서브타입에 따라 획득 방식 적용
-        if(subType == ItemSubType.Recovery || subType == ItemSubType.Throw)
+        if (subType == ItemSubType.Recovery || subType == ItemSubType.Throw)
         {
             //해당 타입 1번 슬롯이 비어있거나 같은경우
             if (AddConsumeItem(slotIdx, inConsumeItem) == true)
@@ -148,17 +121,17 @@ public class PlayerInventory : NetworkBehaviour
             if (AddConsumeItem(nextIdx, inConsumeItem) == true)
             {
                 returnItem = null;
-                return ;
+                return;
             }
 
             //두 슬롯 다 다른 아이템이 있는경우
             returnItem = ChangeConsumeItem(nextIdx, inConsumeItem);
             return;
         }
-        else if(subType == ItemSubType.Stamina || subType == ItemSubType.Deploy)
+        else if (subType == ItemSubType.Stamina || subType == ItemSubType.Deploy)
         {
             //빈 슬롯이거나 같은 아이템인 경우 추가
-            if(AddConsumeItem(slotIdx, inConsumeItem) == true)
+            if (AddConsumeItem(slotIdx, inConsumeItem) == true)
             {
                 returnItem = null;
                 return;
@@ -168,7 +141,7 @@ public class PlayerInventory : NetworkBehaviour
             returnItem = ChangeConsumeItem(slotIdx, inConsumeItem);
             return;
         }
- 
+
         returnItem = null;
         return;
     }
@@ -210,4 +183,54 @@ public class PlayerInventory : NetworkBehaviour
         consumeItems[inSlotIdx] = inConsumeItem; //새로 획득하는 아이템을 추가
         return returnItem;
     }
+    #endregion
+
+    #region 소모
+    // 여기 작업 필요
+    public bool HasItem(int inConsumeSlot)
+    {
+        int slotIdx = inConsumeSlot - 1;
+        if(consumeItems[slotIdx] ==null || consumeItems[slotIdx].itemType == ItemMainType.None)
+        {
+            return false;
+        }
+
+        if (consumeItems[slotIdx].amount == 0)
+        {
+            return false;
+        }
+
+        return true;
+    }
+
+    public void UseItem(int inConsumeSlot, int inAmount = 1)
+    {
+        //사용한 슬롯 아이템 수량 감소
+        UseItemRpc(inConsumeSlot, inAmount); //수량 동기화
+    }
+
+    [Rpc(SendTo.Everyone)]
+    public void UseItemRpc(int inInputNumber, int amount)
+    {
+        int slotIdx = inInputNumber - 1;
+        consumeItems[slotIdx].ReduceItem(1);
+        if (consumeItems[slotIdx].amount == 0)
+        {
+            consumeItems[slotIdx] = null;
+        }
+        OnConsumeItemChange();
+    }
+
+    // 여기 작업 필요
+    public bool HasUseGranade()
+    {
+        //if ( > 0)
+        {
+            //--;
+            return true;
+        }
+        //return false;
+    }
+    #endregion
+
 }
