@@ -184,7 +184,7 @@ public class GameManager : NetworkBehaviour
 
             if (inPlayerState == PlayerState.Die)
             {
-                alivePlayCount.Value -= GetAlivePlayerCount();
+                alivePlayCount.Value = GetAlivePlayerCount();
                 CheckGameOver();
             }
         }
