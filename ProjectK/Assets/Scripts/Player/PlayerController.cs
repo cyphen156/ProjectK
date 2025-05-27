@@ -125,7 +125,11 @@ public class PlayerController : NetworkBehaviour, IPlayerInputReceiver, ITakeDam
         {
             playerMove.RotateCharacter(lookDirection);
         }
-        UpdateCrosshairSize();
+        if (IsOwner)
+        {
+            UpdateCrosshairSize();
+        }
+        
     }
 
     #endregion
