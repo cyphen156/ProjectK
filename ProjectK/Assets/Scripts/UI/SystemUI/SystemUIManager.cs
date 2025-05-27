@@ -65,7 +65,7 @@ public class SystemUIManager : MonoBehaviour
 
 
         GameManager.currentTime.OnValueChanged += UpdateGameLifeTime;
-        GameManager.PlayerCountChange += UpdateRestPlayer;
+        GameManager.alivePlayCount.OnValueChanged += UpdateRestPlayer;
         GameManager.OnWinnerChanged += UpdateLastPlayer;
         GameManager.OnGameStateChanged += UpdateGameState; 
         gameEndPanel.SetActive(false);
@@ -86,7 +86,7 @@ public class SystemUIManager : MonoBehaviour
         GameLifeTimeText.text = $"{(int)minutes} : {(int)seconds}";
     }
 
-    private void UpdateRestPlayer(int inCurrentPlayer)
+    private void UpdateRestPlayer(int pre, int inCurrentPlayer)
     {
         RestPlayerText.text = $" Rest : {inCurrentPlayer}";
     }

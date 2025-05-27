@@ -20,15 +20,13 @@ public class GameManager : NetworkBehaviour
     [Header("GamePlayTime")]
     [SerializeField] private float PlayTime;
     private float maxPlayTime;
-    private NetworkVariable<int> alivePlayCount = new NetworkVariable<int>(0);
+    public static NetworkVariable<int> alivePlayCount = new NetworkVariable<int>(0);
     public static NetworkVariable<float> currentTime = new NetworkVariable<float>(0);
     private float timeAccumulator;
 
     [Header("PlayerCount")]
     private const uint INVALID_PLAYER_NUMBER = 99999999;
     private readonly Dictionary<PlayerController, PlayerState> players = new Dictionary<PlayerController, PlayerState>();
-
-    public static event Action<int> PlayerCountChange;
 
     [Header("GameState")]
     [SerializeField] private NetworkVariable<GameState> currentGameState = new NetworkVariable<GameState>(GameState.None);
@@ -121,13 +119,14 @@ public class GameManager : NetworkBehaviour
     // 게임 종료 UI 띄우기
     private void ResetGame()
     {
+        //서버만 들어옴
         // 플레이 타임 초기화
         currentTime.Value = maxPlayTime;
         timeAccumulator = 0f;
 
         // 플레이어 수 초기화
         players.Clear();
-        PlayerCountChange?.Invoke(players.Count);
+        alivePlayCount.Value = players.Count;
 
         // 승자 초기화
         gameWinner = INVALID_PLAYER_NUMBER;
@@ -160,15 +159,20 @@ public class GameManager : NetworkBehaviour
         if (!players.ContainsKey(inPlayerController))
         {
             players.Add(inPlayerController, inPlayerState);
-            if (inIsOwner) //심볼이 Multi 면 오너값이 제대로 들어옴
+            
+            if (inIsOwner)
             {
                 LocalPlayerState?.Invoke(inPlayerController, inPlayerState);
             }
-            PlayerCountChange?.Invoke(players.Count);
+            if (IsHost)
+            {
+                alivePlayCount.Value = players.Count;
+            }
         }
     }
     public void UpdatePlayerState(PlayerController inPlayerController, PlayerState inPlayerState)
     {
+        //서버만 들어옴
         if (players.ContainsKey(inPlayerController))
         {
             players[inPlayerController] = inPlayerState;
@@ -180,24 +184,9 @@ public class GameManager : NetworkBehaviour
 
             if (inPlayerState == PlayerState.Die)
             {
-                PlayerCountChange?.Invoke(GetAlivePlayerCount());
+                alivePlayCount.Value -= GetAlivePlayerCount();
                 CheckGameOver();
             }
-        }
-    }
-
-    // -> 플레이어 사망시 인보크를 통해 호출로 변경 예정
-    public void UnregisterAlivePlayer(PlayerController inPlayerController)
-    {
-        if (!players.ContainsKey(inPlayerController))
-        {
-            Debug.LogError("PlayerController is not registered");
-            return;
-        }
-        else
-        {
-            players.Remove(inPlayerController);
-            PlayerCountChange?.Invoke(players.Count);
         }
     }
 
@@ -224,7 +213,6 @@ public class GameManager : NetworkBehaviour
     private void ApplyStartUIRpc()
     {
         OnHideLobbyUIRequested?.Invoke();
-        PlayerCountChange?.Invoke(players.Count);
     }
 
     private void SpawnDropBox()
