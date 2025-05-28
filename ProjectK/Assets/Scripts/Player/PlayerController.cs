@@ -445,14 +445,14 @@ public class PlayerController : NetworkBehaviour, IPlayerInputReceiver, ITakeDam
     {
         if (playerInventory.HasItem(5))
         {
-            SpawnGranadeRpc();
+            SpawnGranadeRpc(mouseWorldPosition);
             playerInventory.UseItem(5);
         }
         
     }
 
     [Rpc(SendTo.Server)]
-    private void SpawnGranadeRpc()
+    private void SpawnGranadeRpc(Vector3 mouseWorldPosition)
     {
         Granade granade = Instantiate(granadePrefab, transform.position, Quaternion.LookRotation(lookDirection));
         granade.GetComponent<NetworkObject>().Spawn();
