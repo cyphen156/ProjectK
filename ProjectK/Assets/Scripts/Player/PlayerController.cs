@@ -119,6 +119,7 @@ public class PlayerController : NetworkBehaviour, IPlayerInputReceiver, ITakeDam
     {
         yield return null;
         OnChangeHpUI?.Invoke(playerStat.GetHP());
+        OnChangeStaminaUI?.Invoke(playerStat.GetStamina());
     }
 
     private void Update()
@@ -433,7 +434,7 @@ public class PlayerController : NetworkBehaviour, IPlayerInputReceiver, ITakeDam
                     ApplyStaminaRpc(60f);
                     break;
                 case 4:
-                    SpawnDeployableRpc();
+                    SpawnDeployableRpc(GetNetworkNumber());
                     break;
                 default:
                     Logger.Log("There is not Allowed Input Key Event");
@@ -444,31 +445,31 @@ public class PlayerController : NetworkBehaviour, IPlayerInputReceiver, ITakeDam
     }
 
     [Rpc(SendTo.Server)]
-    private void SpawnDeployableRpc()
+    private void SpawnDeployableRpc(uint ownerNumber)
     {
         Quaternion lookRotation = Quaternion.LookRotation(lookDirection);
         Quaternion finalRotation = lookRotation;
         WoodenBox go = Instantiate(woodenBoxPrefab, transform.position + transform.forward * 7f + Vector3.up * 10f, finalRotation);
         go.GetComponent<NetworkObject>().Spawn();
-        go.SetOwner(GetNetworkNumber());
+        go.SetOwner(ownerNumber);
     }
 
     public void UseGranade()
     {
         if (playerInventory.HasItem(5))
         {
-            SpawnGranadeRpc(mouseWorldPosition);
+            SpawnGranadeRpc(mouseWorldPosition, GetNetworkNumber());
             playerInventory.UseItem(5);
         }
         
     }
 
     [Rpc(SendTo.Server)]
-    private void SpawnGranadeRpc(Vector3 mouseWorldPosition)
+    private void SpawnGranadeRpc(Vector3 mouseWorldPosition, uint ownerNumber)
     {
         Granade granade = Instantiate(granadePrefab, transform.position, Quaternion.LookRotation(lookDirection));
         granade.GetComponent<NetworkObject>().Spawn();
-        granade.SetOwner(GetNetworkNumber());
+        granade.SetOwner(ownerNumber);
         Vector3 start = transform.position + Vector3.up;
         granade.Launch(start, mouseWorldPosition);
     }
