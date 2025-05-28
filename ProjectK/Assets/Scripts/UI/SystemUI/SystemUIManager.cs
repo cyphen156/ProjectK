@@ -5,7 +5,7 @@ using Unity.Netcode;
 using Unity.Netcode.Transports.UTP;
 using UnityEngine;
 
-public class SystemUIManager : NetworkBehaviour
+public class SystemUIManager : MonoBehaviour
 {
     [Header("GameLifeTime")]
     private TextMeshProUGUI GameLifeTimeText;
@@ -121,12 +121,11 @@ public class SystemUIManager : NetworkBehaviour
       //  Debug.Log("데쓰 업그레이드" + NetworkManager.Singleton.LocalClientId +"번 클라에서 확인");
         if (inState == PlayerState.Die)
         {
-            PlayerDieRpc(inPlayerController.GetNetworkNumber());
+            PlayerDie(inPlayerController.GetNetworkNumber());
         }
     }
 
-    [Rpc(SendTo.Everyone)]
-    private void PlayerDieRpc(uint inPlayerNumber)
+    private void PlayerDie(uint inPlayerNumber)
     {
       //  Debug.Log(inPlayerNumber-1 + "죽었다고 들어옴" + NetworkManager.Singleton.LocalClientId + "번 클라에서 확인");
       // playerNumber를 매길때는 1부터, Localclient는 0번부터 시작인데, SetNumber도 문제고
