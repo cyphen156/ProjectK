@@ -103,8 +103,11 @@ public class PlayerSight : NetworkBehaviour
 
     private void LateUpdate()
     {
-        DrawFieldOfView();
-        DrawSelfCircleSight();
+        if (GetComponent<NetworkBehaviour>().IsOwner)
+        {
+            DrawFieldOfView();
+            DrawSelfCircleSight();
+        }
     }
     #endregion
 
@@ -214,7 +217,6 @@ public class PlayerSight : NetworkBehaviour
         {
             float angle = baseAngle - activeViewAngle / 2f + angleStep * i;
             ViewCastInfo newViewCast = ViewCast(angle);
-            Debug.DrawRay(transform.position + Vector3.up * 0.1f, DirectionFromAngle(angle, true) * activeViewRadius, Color.red, 0.1f);
 
             if (i > 0)
             {

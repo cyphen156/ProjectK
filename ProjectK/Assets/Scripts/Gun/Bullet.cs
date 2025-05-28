@@ -14,10 +14,10 @@ public class Bullet : NetworkBehaviour, ISpawnable
 
     private void Awake()
     {
-        defaultLifeTime = 5.0f;
+        defaultLifeTime = 4.0f;
         lifeTime = defaultLifeTime;
-        speed = 14.0f;
-        damage = 30f;
+        speed = 15.0f;
+        damage = 12f;
     }
 
 

@@ -30,7 +30,6 @@ public class BoxDetector : NetworkBehaviour
 
     private void OnTriggerEnter(Collider other)
     {
-       // Debug.Log("박스디텍터에서 출입" + other.gameObject.name);
         DropBox box = other.gameObject.GetComponent<DropBox>();
         if(box == null)
         {
@@ -42,7 +41,6 @@ public class BoxDetector : NetworkBehaviour
  
     private void OnTriggerExit(Collider other)
     {
-      //  Debug.Log("박스디텍터에서 반출" + other.gameObject.name);
         DropBox box = other.gameObject.GetComponent<DropBox>();
         if (box == null)
         {

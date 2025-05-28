@@ -244,7 +244,6 @@ public class Gun : NetworkBehaviour
         }
         if (CurrentGunState != inGunState)
         {
-            Logger.Warning($"gunstateChanged :{CurrentGunState} -> {inGunState}");
             CurrentGunState = inGunState;
             switch (inGunState)
             {

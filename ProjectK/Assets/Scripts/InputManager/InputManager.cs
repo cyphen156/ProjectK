@@ -173,7 +173,6 @@ public class InputManager : MonoBehaviour
         {
             RegisterLocalPlayer(inPlayerController);
         }
-        Logger.Error($"플레이어 상태 변경 {localPlayerState} -> " + inLocalPlayerState);
         localPlayerState = inLocalPlayerState;
     }
 }
