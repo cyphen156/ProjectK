@@ -5,9 +5,10 @@ using UnityEngine;
 [RequireComponent(typeof(Rigidbody))]
 public class Granade : NetworkBehaviour, ISpawnable
 {
-    [SerializeField] private GameObject explosionEffectPrefab;
+    [SerializeField] private EffectSpawner explosionEffectPrefab;
     [SerializeField] private SoundSpawner explosionSound;
     [SerializeField] private SoundSpawner grenadeLaunchSound;
+
     private Rigidbody rb;
 
     private float damage;
@@ -68,7 +69,7 @@ public class Granade : NetworkBehaviour, ISpawnable
                 Target.TakeDamage(damage);
             }
         }
-        Instantiate(explosionEffectPrefab, transform.position, Quaternion.identity);
+        explosionEffectPrefab.PlayEffect();
         explosionSound.PlaySound();
         GetComponent<NetworkObject>().Despawn();
     }
