@@ -78,9 +78,10 @@ public class Gun : NetworkBehaviour
     }
 
     [ServerRpc]
-    private void SpawnBulletServerRpc(Vector3 inDirection)
+    private void SpawnBulletServerRpc(Vector3 inDirection, uint ownerId)
     {
         Bullet bullet = BulletPool.Instance.GetBullet();
+        bullet.SetOwner(ownerId);
         bullet.SetBulletInfo(fireTransform.position, inDirection);
     }
 
@@ -99,7 +100,8 @@ public class Gun : NetworkBehaviour
 
         fireEffectSpawner.PlayEffect();
         shellEffectSpawner.PlayEffect();
-        SpawnBulletServerRpc(inDirection);
+        uint ownerId = GetComponentInParent<PlayerController>().GetNetworkNumber();
+        SpawnBulletServerRpc(inDirection, ownerId);
         fireSound.PlaySound();
 
 

@@ -41,6 +41,15 @@ public class PlayerStat
 
     public void ApplyStamina(float inApplyStaminaValue)
     {
-        stamina += Mathf.Clamp(inApplyStaminaValue, 0, maxStemina);
+        stamina += inApplyStaminaValue;
+
+        if (stamina > maxStemina)
+        {
+            stamina = maxStemina;
+        }
+        else if (stamina < 0)
+        {
+            stamina = 0;
+        }
     }
 }
