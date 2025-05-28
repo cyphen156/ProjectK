@@ -53,7 +53,6 @@ public class Granade : NetworkBehaviour, ISpawnable
         yield return new WaitForSeconds(explosionDelay);
         if (IsHost)
         {
-            Debug.Log("!111111111111111111");
             Explode();
         }
     }
