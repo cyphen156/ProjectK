@@ -83,9 +83,9 @@ public class PlayerController : NetworkBehaviour, IPlayerInputReceiver, ITakeDam
     private void Awake()
     {
         myNetworkNumber = new NetworkVariable<uint>();
-        defaultSpeed = 5.0f;
-        slowSpeed = 3.0f;
-        runSpeed = 8.0f;
+        defaultSpeed = 8.0f;
+        slowSpeed = 5.0f;
+        runSpeed = 12.0f;
         currentMoveSpeed = defaultSpeed;
         mouseWorldPosition = Vector3.zero;
         lookDirection = Vector3.forward;
