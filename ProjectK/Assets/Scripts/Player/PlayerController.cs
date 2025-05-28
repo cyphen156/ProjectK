@@ -436,7 +436,7 @@ public class PlayerController : NetworkBehaviour, IPlayerInputReceiver, ITakeDam
     {
         Quaternion lookRotation = Quaternion.LookRotation(lookDirection);
         Quaternion finalRotation = lookRotation;
-        WoodenBox go = Instantiate(woodenBoxPrefab, transform.position + Vector3.forward * 7f + Vector3.up * 10f, finalRotation);
+        WoodenBox go = Instantiate(woodenBoxPrefab, transform.position + transform.forward * 7f + Vector3.up * 10f, finalRotation);
         go.GetComponent<NetworkObject>().Spawn();
         go.SetOwner(GetNetworkNumber());
     }
