@@ -13,6 +13,8 @@ public class Gun : NetworkBehaviour
 {
     [SerializeField] private Bullet bulletPrefab;
     [SerializeField] private Transform fireTransform;
+    [SerializeField] private SoundSpawner fireSound;
+    [SerializeField] private SoundSpawner reloadSound;
 
     public Animator animator;
 
@@ -98,6 +100,7 @@ public class Gun : NetworkBehaviour
         fireEffectSpawner.PlayEffect();
         shellEffectSpawner.PlayEffect();
         SpawnBulletServerRpc(inDirection);
+        fireSound.PlaySound();
 
 
         isRating = true;
@@ -120,6 +123,7 @@ public class Gun : NetworkBehaviour
         }
         isReloading = true;
         restReloadTime = equiptReloadTime;
+        reloadSound.PlaySound();
     }
 
     public void EquiptItems(ItemBase[] inEquiptItems)
