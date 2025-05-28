@@ -24,7 +24,7 @@ public class EffectSpawner : MonoBehaviour
 
     private void MakeEffectPool()
     {
-        poolCount = 3;
+        poolCount = 10;
         readyPool = new();
         for (int i = 0; i < poolCount; i++)
         {

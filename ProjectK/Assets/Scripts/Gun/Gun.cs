@@ -16,8 +16,6 @@ public class Gun : NetworkBehaviour
 
     public Animator animator;
 
-    public static event Action<Vector3> OnFire;
-
     public GunState CurrentGunState { get; private set; }
     private bool isReloading;
     private float defaultReloadTime; //기본 탄창 채우는 시간
@@ -42,6 +40,10 @@ public class Gun : NetworkBehaviour
 
     public static event Action<int> OnChageAmmoUI;
     private bool isStateLock;
+
+    [Header("Effect")]
+    [SerializeField] private EffectSpawner fireEffectSpawner;
+    [SerializeField] private EffectSpawner shellEffectSpawner;
 
     private void Awake()
     {
@@ -92,16 +94,11 @@ public class Gun : NetworkBehaviour
         }
         //보내고 - 서버에서 한번더 확인해서 -> 생성
         //서버에게 총알만들기
-#if MULTI
+
+        fireEffectSpawner.PlayEffect();
+        shellEffectSpawner.PlayEffect();
         SpawnBulletServerRpc(inDirection);
-#else
-        Bullet bullet = Instantiate(bulletPrefab, fireTransform.position, Quaternion.LookRotation(inDirection));
-        bullet.SetDirection(inDirection);
-#endif
-        if (OnFire != null)
-        {
-            OnFire.Invoke(transform.position);
-        }
+
 
         isRating = true;
         restRateTime = rateTime;

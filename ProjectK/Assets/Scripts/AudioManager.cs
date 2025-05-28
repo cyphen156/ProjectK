@@ -7,10 +7,6 @@ public class AudioManager : MonoBehaviour
 {
     [SerializeField] private AudioClip fireClip;
 
-    private void Start()
-    {
-        Gun.OnFire += FireSound;
-    }
 
     private void FireSound(Vector3 inFirePosition)
     {
