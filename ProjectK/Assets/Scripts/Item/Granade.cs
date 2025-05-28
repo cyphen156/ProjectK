@@ -69,8 +69,8 @@ public class Granade : NetworkBehaviour, ISpawnable
             }
         }
         Instantiate(explosionEffectPrefab, transform.position, Quaternion.identity);
-        GetComponent<NetworkObject>().Despawn();
         explosionSound.PlaySound();
+        GetComponent<NetworkObject>().Despawn();
     }
 
     public void SetOwner(uint inOwnerId)

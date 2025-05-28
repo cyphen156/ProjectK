@@ -19,6 +19,7 @@ public class SoundObject : MonoBehaviour
 
     public void PlaySound()
     {
+        transform.SetParent(null, true);
         lifeTime = defaultLifeTime;
         gameObject.SetActive(true);
         audioSource.Play();
@@ -30,7 +31,16 @@ public class SoundObject : MonoBehaviour
         if (lifeTime <= 0)
         {
             gameObject.SetActive(false);
-            soundMaker.Recycle(this);
+            if (soundMaker != null)
+            {
+                soundMaker.Recycle(this);
+                transform.SetParent(soundMaker.transform);
+            }
+            else
+            {
+                Destroy(gameObject);
+            }
+            
         }
     }
 }
