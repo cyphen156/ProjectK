@@ -6,6 +6,8 @@ using UnityEngine;
 public class Granade : NetworkBehaviour, ISpawnable
 {
     [SerializeField] private GameObject explosionEffectPrefab;
+    [SerializeField] private SoundSpawner explosionSound;
+    [SerializeField] private SoundSpawner grenadeLaunchSound;
     private Rigidbody rb;
 
     private float damage;
@@ -40,6 +42,7 @@ public class Granade : NetworkBehaviour, ISpawnable
         Vector3 velocityVec = velocity * dir.normalized;
 
         rb.linearVelocity = velocityVec;
+        grenadeLaunchSound.PlaySound();
 
         // 5초 뒤에는 무조건 폭발함
         StartCoroutine(ExplodeAfterDelay());
@@ -68,6 +71,7 @@ public class Granade : NetworkBehaviour, ISpawnable
         }
         Instantiate(explosionEffectPrefab, transform.position, Quaternion.identity);
         GetComponent<NetworkObject>().Despawn();
+        explosionSound.PlaySound();
     }
 
     public void SetOwner(uint inOwnerId)
