@@ -16,7 +16,7 @@ public class Bullet : NetworkBehaviour, ISpawnable
     {
         defaultLifeTime = 4.0f;
         lifeTime = defaultLifeTime;
-        speed = 15.0f;
+        speed = 25.0f;
         damage = 12f;
     }
 

@@ -23,7 +23,7 @@ public class Granade : NetworkBehaviour, ISpawnable
         rb = GetComponent<Rigidbody>();
         damage = 60f;
         explosionRadius = 5f;
-        explosionDelay = 5f;
+        explosionDelay = 2f;
         obstacleMask = LayerMask.GetMask("Player", "Deploy");
     }
 

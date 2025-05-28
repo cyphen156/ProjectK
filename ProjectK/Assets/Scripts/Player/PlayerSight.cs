@@ -58,6 +58,7 @@ public class PlayerSight : NetworkBehaviour
     private LayerMask obstacleMask;
     private List<Transform> visibleTargets;
     private Vector3 sightOffset;
+    private Vector3 sightDirection;
 
     #region Unity Methods   
     private void Awake()
@@ -73,6 +74,7 @@ public class PlayerSight : NetworkBehaviour
         edgeDistanceThreshold = 0.5f;
         sightOffset = new Vector3(0f, 2f, 0f);
         visibleTargets = new List<Transform>();
+        sightDirection = Vector3.zero;
     }
     private void OnEnable()
     {
@@ -210,7 +212,10 @@ public class PlayerSight : NetworkBehaviour
         float angleStep = activeViewAngle / stepCount;
         List<Vector3> viewPoints = new List<Vector3>();
 
-        float baseAngle = Mathf.Atan2(transform.forward.x, transform.forward.z) * Mathf.Rad2Deg;
+        float baseAngle = Mathf.Atan2(
+            (sightDirection - (transform.position + sightOffset)).x,
+            (sightDirection - (transform.position + sightOffset)).z
+        ) * Mathf.Rad2Deg;
 
         ViewCastInfo oldViewCast = new ViewCastInfo();
         for (int i = 0; i <= stepCount; ++i)
@@ -304,5 +309,10 @@ public class PlayerSight : NetworkBehaviour
         crosshairRadius = inCrosshairRadius;
         float spreadAngleRad = Mathf.Atan(crosshairRadius / viewDistance);
         crosshairAngle = spreadAngleRad * Mathf.Rad2Deg / 10;
+    }
+
+    public void SetSightDirection(Vector3 inMouseWorldPosition)
+    {
+        sightDirection = inMouseWorldPosition;
     }
 }

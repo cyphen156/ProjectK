@@ -32,6 +32,7 @@ public class PlayerController : NetworkBehaviour, IPlayerInputReceiver, ITakeDam
 
     [Header("PlayerMovement")]
     private Vector3 lookDirection;
+    private Vector3 dodgeDirection;
     [SerializeField] private float currentMoveSpeed; // 현재 움직임 속도
     private float defaultSpeed; // 기본 걷는 속도
     private float slowSpeed; // 느리게 걷는 속도
@@ -41,6 +42,7 @@ public class PlayerController : NetworkBehaviour, IPlayerInputReceiver, ITakeDam
     private bool isAimed;
     public Vector3 mouseWorldPosition;
     public static event Action<Vector3> OnMousePositionUpdated;
+    private bool isDodging;
 
     public MoveType currentMoveType;
     [Header("PlayerSight")]
@@ -100,9 +102,9 @@ public class PlayerController : NetworkBehaviour, IPlayerInputReceiver, ITakeDam
         gunCrosshairSize = 0f;
         crosshairspreadRadius = 10f;
         crosshairLerpSpeed = 5f;
-
+        dodgeDirection = lookDirection;
         netCurrentPlayerState = new NetworkVariable<PlayerState>(PlayerState.Idle);
-        
+        isDodging = false;
     }
 
     private void Start()
@@ -122,15 +124,19 @@ public class PlayerController : NetworkBehaviour, IPlayerInputReceiver, ITakeDam
     private void Update()
     {
         lookDirection = CalculateDirectionFromMouseWorldPosition();
-        if (netCurrentPlayerState.Value != PlayerState.Dodge)
+        if (isDodging)
+        {
+            playerMove.RotateCharacter(dodgeDirection);
+        }
+        else
         {
             playerMove.RotateCharacter(lookDirection);
         }
         if (IsOwner)
         {
+            playerSight.SetSightDirection(mouseWorldPosition);
             UpdateCrosshairSize();
         }
-        
     }
 
     #endregion
@@ -188,7 +194,6 @@ public class PlayerController : NetworkBehaviour, IPlayerInputReceiver, ITakeDam
         }
 
         ChangeStateServerRpc(PlayerState.Walk, NetworkManager.Singleton.LocalClientId);
-        // inState
 
         playerMove.Move(inInputHorizontal * Time.deltaTime * currentMoveSpeed, inInputVertical * Time.deltaTime * currentMoveSpeed);
     }
@@ -244,16 +249,23 @@ public class PlayerController : NetworkBehaviour, IPlayerInputReceiver, ITakeDam
         {
             return;
         }
-        Vector3 dodgeDirection = new Vector3(lastInputHorizontal, 0, lastInputVertical).normalized;
+
+        StartCoroutine(LockLookDirecion(0.8f));
+        dodgeDirection = new Vector3(lastInputHorizontal, 0, lastInputVertical).normalized;
         if(dodgeDirection == Vector3.zero)
         {
             dodgeDirection = transform.forward; // 입력이 없으면 정면
         }
-        playerMove.RotateCharacter(dodgeDirection);
         ApplyStaminaRpc(-30f);
         ChangeStateServerRpc(PlayerState.Dodge, NetworkManager.Singleton.LocalClientId);
     }
 
+    private IEnumerator LockLookDirecion(float delay)
+    {
+        isDodging = true;
+        yield return new WaitForSeconds(delay);
+        isDodging = false;
+    }
     public void IsAim(bool isAim)
     {
         isAimed = isAim;
@@ -324,7 +336,7 @@ public class PlayerController : NetworkBehaviour, IPlayerInputReceiver, ITakeDam
     public void ApplyStaminaRpc(float inStaminaStat)
     {
         playerStat.ApplyStamina(inStaminaStat);
-
+        Logger.Info(playerStat.GetStamina().ToString());
         float stamina = playerStat.GetStamina();
 
         if (IsOwner)
