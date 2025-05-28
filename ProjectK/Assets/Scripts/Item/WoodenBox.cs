@@ -6,6 +6,7 @@ public class WoodenBox : NetworkBehaviour, ITakeDamage, ISpawnable
     [SerializeField] private float hp;
     [SerializeField] private float lifeTime;
     [SerializeField] private uint ownerNetworkId;
+    [SerializeField] private EffectSpawner woodHitEffect;
 
     #region Unity Methods
 
@@ -54,6 +55,7 @@ public class WoodenBox : NetworkBehaviour, ITakeDamage, ISpawnable
             GetComponent<NetworkObject>().Despawn();
         }
         // ««∞› ¿Ã∆Â∆Æ 
+        woodHitEffect.PlayEffect();
     }
 
     private void OnCollisionEnter(Collision collision)
