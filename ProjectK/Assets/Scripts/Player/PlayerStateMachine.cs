@@ -31,7 +31,6 @@ public class PlayerStateMachine : MonoBehaviour
         PlayerState previousPlayerState = currentPlayerState;
 
         currentPlayerState = state;
-        Logger.Warning($"PlayerStateChanged :{previousPlayerState} -> {currentPlayerState}");
 
         switch (currentPlayerState)
         {
