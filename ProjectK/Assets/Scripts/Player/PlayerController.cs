@@ -446,8 +446,9 @@ public class PlayerController : NetworkBehaviour, IPlayerInputReceiver, ITakeDam
         if (playerInventory.HasItem(5))
         {
             SpawnGranadeRpc();
+            playerInventory.UseItem(5);
         }
-        playerInventory.UseItem(5);
+        
     }
 
     [Rpc(SendTo.Server)]
