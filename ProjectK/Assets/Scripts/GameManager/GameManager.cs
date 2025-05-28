@@ -65,11 +65,11 @@ public class GameManager : NetworkBehaviour
     private void Update()
     {
         // 게임 플레이중
-         if (currentGameState.Value == GameState.Play)
+        if (currentGameState.Value == GameState.Play)
         {
             if (currentTime.Value <= 0)
             {
-                EndGame();
+                EndGame(gameWinner);
                 return;
             }
 
@@ -84,7 +84,7 @@ public class GameManager : NetworkBehaviour
                     timeAccumulator -= 1f;
                 }
             }
-     
+
         }
     }
     #endregion
@@ -115,7 +115,7 @@ public class GameManager : NetworkBehaviour
             ResetGame();
         }
     }
-    
+
     // 게임 종료 UI 띄우기
     private void ResetGame()
     {
@@ -136,15 +136,15 @@ public class GameManager : NetworkBehaviour
     }
 
     // 게임 종료 UI 띄우기
-    private void EndGame()
+    [Rpc(SendTo.Everyone)]
+    private void NotifyEndGameRpc(uint lastPlayerId)
     {
-        OnWinnerChanged?.Invoke(gameWinner);
-        ChangeGameState(GameState.End);
+        OnWinnerChanged?.Invoke(lastPlayerId);
     }
-    private void EndGame(PlayerController inWinner)
+
+    private void EndGame(uint lastPlayerId)
     {
-        gameWinner = inWinner.GetNetworkNumber();
-        OnWinnerChanged?.Invoke(gameWinner);
+        NotifyEndGameRpc(lastPlayerId);
         ChangeGameState(GameState.End);
         StartCoroutine(GameEnd(10f));
     }
@@ -159,7 +159,7 @@ public class GameManager : NetworkBehaviour
         if (!players.ContainsKey(inPlayerController))
         {
             players.Add(inPlayerController, inPlayerState);
-            
+
             if (inIsOwner)
             {
                 LocalPlayerState?.Invoke(inPlayerController, inPlayerState);
@@ -177,16 +177,22 @@ public class GameManager : NetworkBehaviour
         {
             players[inPlayerController] = inPlayerState;
 
-            //if (isLocal)
-            {
-                LocalPlayerState?.Invoke(inPlayerController, inPlayerState);
-            }
+            NotifyPlayerStateChangedRpc(inPlayerController.GetNetworkNumber(), inPlayerState);
 
             if (inPlayerState == PlayerState.Die)
             {
                 alivePlayCount.Value = GetAlivePlayerCount();
                 CheckGameOver();
             }
+        }
+    }
+    [Rpc(SendTo.Everyone)]
+    private void NotifyPlayerStateChangedRpc(uint inPlayerNumber, PlayerState inPlayerState)
+    {
+        PlayerController playerController = GetPlayer(inPlayerNumber);
+        if (inPlayerNumber == (NetworkManager.Singleton.LocalClientId + 1))
+        {
+            LocalPlayerState?.Invoke(playerController, inPlayerState);
         }
     }
 
@@ -259,15 +265,11 @@ public class GameManager : NetworkBehaviour
                 }
             }
         }
-
         if (aliveCount == 1)
         {
-            EndGame(lastAlive);
+            gameWinner = lastAlive.GetNetworkNumber();
         }
-        else if (aliveCount == 0)
-        {
-            EndGame();
-        }
+        EndGame(gameWinner);
     }
 
     private void AllocatePlayerNomber()
@@ -281,9 +283,9 @@ public class GameManager : NetworkBehaviour
 
     public PlayerController GetPlayer(uint inPlayerNumber)
     {
-        foreach(var player in players)
+        foreach (var player in players)
         {
-            if(player.Key.GetNetworkNumber() == inPlayerNumber)
+            if (player.Key.GetNetworkNumber() == inPlayerNumber)
             {
                 return player.Key;
             }

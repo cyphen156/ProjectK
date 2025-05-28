@@ -6,7 +6,7 @@ using UnityEngine;
 /// 플레이어 입력을 해석하고 로컬 플레이어에게만 전달하는 전역 입력 처리기
 /// </summary>
 
-public class InputManager : NetworkBehaviour
+public class InputManager : MonoBehaviour
 {
     public static InputManager Instance { get; private set; }
 
@@ -174,16 +174,6 @@ public class InputManager : NetworkBehaviour
             RegisterLocalPlayer(inPlayerController);
         }
         Logger.Error($"플레이어 상태 변경 {localPlayerState} -> " + inLocalPlayerState);
-        ChangeStateRpc(inPlayerController.GetNetworkNumber(), inLocalPlayerState);
+        localPlayerState = inLocalPlayerState;
     }
-
-    [Rpc(SendTo.Everyone)]
-    private void ChangeStateRpc(uint inPlayerNumber, PlayerState inChangeState)
-    {
-        if(inPlayerNumber == (NetworkManager.Singleton.LocalClientId + 1))
-        {
-            localPlayerState = inChangeState;
-        }
-    }
-
 }
