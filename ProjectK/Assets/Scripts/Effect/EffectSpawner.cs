@@ -1,8 +1,9 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using Unity.Netcode;
 
-public class EffectSpawner : MonoBehaviour
+public class EffectSpawner : NetworkBehaviour
 {
     //해당 장소에 효과 발생
     //풀링으로 관리
@@ -36,18 +37,32 @@ public class EffectSpawner : MonoBehaviour
 
     public void PlayEffect()
     {
-        if(isReadyToPlay == false)
+        if(IsOwner == false)
         {
-            return;
-        }
-        if(readyPool.TryDequeue(out EffectObject effectObject))
-        {
-            effectObject.PlayEffect();
-            StartCoroutine(Timer());
             return;
         }
 
+        if(isReadyToPlay == false)
+        {
+           
+            return;
+        }
+
+        PlayEffectRpc();
     }
+
+    [Rpc(SendTo.Everyone)]
+    private void PlayEffectRpc()
+    {
+        if (readyPool.TryDequeue(out EffectObject effectObject))
+        {
+            effectObject.PlayEffect();
+            effectObject.transform.position = transform.position;
+            StartCoroutine(Timer());
+            return;
+        }
+    }
+
 
     public void Recycle(EffectObject inEffectObject)
     {

@@ -162,7 +162,7 @@ public class PlayerInventory : NetworkBehaviour
     {
         //해당 슬롯에 새로 넣거나 추가 되는경우
 
-        if (consumeItems[inSlotIdx] == null)
+        if (consumeItems[inSlotIdx] == null || consumeItems[inSlotIdx].itemType == ItemMainType.None)
         {
             consumeItems[inSlotIdx] = inConsumeItem; //그 물건 수량 그대로 적립
             return true;
