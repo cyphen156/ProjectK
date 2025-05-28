@@ -63,6 +63,7 @@ public class PlayerController : NetworkBehaviour, IPlayerInputReceiver, ITakeDam
     private PlayerInventory playerInventory;
 
     public static event Action<float> OnChangeHpUI;
+    public static event Action<float> OnChangeStaminaUI;
 
     private float lastInputHorizontal = 0f;
     private float lastInputVertical = 0f;
@@ -239,12 +240,17 @@ public class PlayerController : NetworkBehaviour, IPlayerInputReceiver, ITakeDam
         {
             return;
         }
+        if (playerStat.GetStamina() < 30)
+        {
+            return;
+        }
         Vector3 dodgeDirection = new Vector3(lastInputHorizontal, 0, lastInputVertical).normalized;
         if(dodgeDirection == Vector3.zero)
         {
             dodgeDirection = transform.forward; // 입력이 없으면 정면
         }
         playerMove.RotateCharacter(dodgeDirection);
+        ApplyStaminaRpc(-30f);
         ChangeStateServerRpc(PlayerState.Dodge, NetworkManager.Singleton.LocalClientId);
     }
 
@@ -301,6 +307,31 @@ public class PlayerController : NetworkBehaviour, IPlayerInputReceiver, ITakeDam
         //}
     }
 
+    [Rpc(SendTo.Everyone)]
+    public void ApplyHpRpc(float inHpStat)
+    {
+        playerStat.ApplyHp(inHpStat);
+
+        float hp = playerStat.GetHP();
+
+        if (IsOwner)
+        {
+            OnChangeHpUI?.Invoke(hp);
+        }
+    }
+
+    [Rpc(SendTo.Everyone)]
+    public void ApplyStaminaRpc(float inStaminaStat)
+    {
+        playerStat.ApplyStamina(inStaminaStat);
+
+        float stamina = playerStat.GetStamina();
+
+        if (IsOwner)
+        {
+            OnChangeStaminaUI?.Invoke(stamina);
+        }
+    }
     public void TakeDamage(float inBulletDamage)
     {
         //서버에서 피격 충돌 판정, 피격 함수를 Rpc로 동기화
@@ -337,7 +368,6 @@ public class PlayerController : NetworkBehaviour, IPlayerInputReceiver, ITakeDam
     public ItemBase PickItem(ItemBase inPickItem)
     {
         uint number = myNetworkNumber.Value;
-        //Debug.Log(NetworkManager.Singleton.LocalClientId + "의 " + number + " 인벤토리가 습득");
         //인벤토리 적용
         ItemBase previousItem = playerInventory.TryAddOrReturnPreviousItem(inPickItem, playerGun);
         PickItemRpc(inPickItem.id, inPickItem.amount);
@@ -350,7 +380,6 @@ public class PlayerController : NetworkBehaviour, IPlayerInputReceiver, ITakeDam
     {
         //인벤토리 적용
         uint number = myNetworkNumber.Value;
-        //Debug.Log(NetworkManager.Singleton.LocalClientId + "의 " + number + " 인벤토리가 습득");
         ItemBase pickItem = new ItemBase(MasterDataManager.Instance.GetMasterItemData(inItemId), itemAmount);
         ItemBase previousItem = playerInventory.TryAddOrReturnPreviousItem(pickItem, playerGun);
     }
@@ -383,10 +412,13 @@ public class PlayerController : NetworkBehaviour, IPlayerInputReceiver, ITakeDam
             switch (inIndex)
             {
                 case 1:
+                    ApplyHpRpc(60f);
                     break;
                 case 2:
+                    ApplyHpRpc(20f);
                     break;
                 case 3:
+                    ApplyStaminaRpc(60f);
                     break;
                 case 4:
                     SpawnDeployableRpc();
@@ -395,6 +427,7 @@ public class PlayerController : NetworkBehaviour, IPlayerInputReceiver, ITakeDam
                     Logger.Log("There is not Allowed Input Key Event");
                     break;
             }
+            playerInventory.UseItem(inIndex);
         }
     }
 
@@ -410,11 +443,13 @@ public class PlayerController : NetworkBehaviour, IPlayerInputReceiver, ITakeDam
 
     public void UseGranade()
     {
-        if (playerInventory.HasUseGranade())
+        if (playerInventory.HasItem(5))
         {
             SpawnGranadeRpc();
         }
+        playerInventory.UseItem(5);
     }
+
     [Rpc(SendTo.Server)]
     private void SpawnGranadeRpc()
     {
