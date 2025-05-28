@@ -199,7 +199,6 @@ public class PlayerInventory : NetworkBehaviour
         {
             return false;
         }
-
         return true;
     }
 
@@ -221,16 +220,6 @@ public class PlayerInventory : NetworkBehaviour
         OnConsumeItemChange();
     }
 
-    // 여기 작업 필요
-    public bool HasUseGranade()
-    {
-        //if ( > 0)
-        {
-            //--;
-            return true;
-        }
-        //return false;
-    }
     #endregion
 
 }

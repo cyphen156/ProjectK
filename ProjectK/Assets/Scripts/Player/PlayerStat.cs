@@ -1,17 +1,17 @@
 using System;
+using UnityEngine;
 
 public class PlayerStat
 {
     private const float maxHp = 100;
     private float hp;
-    private float maxStemina;
+    private float maxStemina = 100;
     private float stamina;
 
     public PlayerStat()
     {
         hp = maxHp;
 
-        maxStemina = 100;
         stamina = maxStemina;
     }
 
@@ -37,7 +37,10 @@ public class PlayerStat
         {
             hp = 0;
         }
+    }
 
-        Logger.Info("³²Àº HP: " + hp);
+    public void ApplyStamina(float inApplyStaminaValue)
+    {
+        stamina += Mathf.Clamp(inApplyStaminaValue, 0, maxStemina);
     }
 }

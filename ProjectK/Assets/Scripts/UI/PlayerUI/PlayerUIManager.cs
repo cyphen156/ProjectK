@@ -53,6 +53,7 @@ public class PlayerUIManager : MonoBehaviour
         DropBox.OnChangeBox += OnChangeDropBox;
         PlayerController.OnCrosshairSizeChanged += UpdateCrosshairUISize;
         PlayerController.OnChangeHpUI += UpdateHpUI;
+        PlayerController.OnChangeStaminaUI += UpdateStaminaUI;
         Gun.OnChageAmmoUI += UpdateAmmoUI;
         PlayerInventory.OnChangeGunItems += GunSlotUISetting;
         PlayerInventory.OnChangeConsumeItems += ConsumeSlotUISetting;
@@ -61,6 +62,8 @@ public class PlayerUIManager : MonoBehaviour
 
         StartSettingDropBoxUI();
     }
+
+   
 
     private void Update()
     {
@@ -178,6 +181,19 @@ public class PlayerUIManager : MonoBehaviour
         }
     }
 
+    private void UpdateStaminaUI(float inStamina)
+    {
+        staminaSlider.value = inStamina;
+
+        if (staminaSlider.value <= 0)
+        {
+            staminaSlider.fillRect.GetComponent<Image>().color = Color.clear;
+        }
+        else
+        {
+            staminaSlider.fillRect.GetComponent<Image>().color = Color.yellow;
+        }
+    }
     private void UpdateCrosshairUISize(float inCurrentCrosshairSize)
     {
         rectTransform.sizeDelta = new Vector2(5 * inCurrentCrosshairSize, 5 * inCurrentCrosshairSize);
