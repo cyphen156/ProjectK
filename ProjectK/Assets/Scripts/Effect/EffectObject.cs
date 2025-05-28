@@ -18,6 +18,7 @@ public class EffectObject : MonoBehaviour
 
     public void PlayEffect()
     {
+        transform.SetParent(null, true); //별도로 생성
         lifeTime = defaultLifeTime;
         gameObject.SetActive(true);
     }
@@ -28,7 +29,16 @@ public class EffectObject : MonoBehaviour
         if(lifeTime <= 0)
         {
             gameObject.SetActive(false);
-            effectMaker.Recycle(this);
+            if(effectMaker != null)
+            {
+                effectMaker.Recycle(this);
+                transform.SetParent(effectMaker.transform);
+            }
+            else
+            {
+                Destroy(gameObject);
+            }
+            
         }
     }
 }
