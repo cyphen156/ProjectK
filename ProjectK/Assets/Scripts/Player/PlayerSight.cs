@@ -103,8 +103,11 @@ public class PlayerSight : NetworkBehaviour
 
     private void LateUpdate()
     {
-        DrawFieldOfView();
-        DrawSelfCircleSight();
+        if (GetComponent<NetworkBehaviour>().IsOwner)
+        {
+            DrawFieldOfView();
+            DrawSelfCircleSight();
+        }
     }
     #endregion
 
