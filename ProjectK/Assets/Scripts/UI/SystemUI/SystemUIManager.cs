@@ -135,7 +135,7 @@ public class SystemUIManager : MonoBehaviour
     {
       // playerNumber를 매길때는 1부터, Localclient는 0번부터 시작인데, SetNumber도 문제고
       // LocalClientId 를 쓰면 좋은데 얘 값은 uLong 이걸 쓰는 변수가 uInt로 너무많은 변수가 있어서 로컬클라에 +1 
-        if(inPlayerNumber == (NetworkManager.Singleton.LocalClientId + 1))
+        if(inPlayerNumber == GameManager.Instance.GetMyPlayerNumber())
         {
             PlayerDieText.text = "플레이어" + (inPlayerNumber) + "사망";
 

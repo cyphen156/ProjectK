@@ -202,7 +202,7 @@ public class GameManager : NetworkBehaviour
     private void NotifyPlayerStateChangedRpc(uint inPlayerNumber, PlayerState inPlayerState)
     {
         PlayerController playerController = GetPlayer(inPlayerNumber);
-        if (inPlayerNumber == (NetworkManager.Singleton.LocalClientId + 1))
+        if (inPlayerNumber == GetMyPlayerNumber())
         {
             LocalPlayerState?.Invoke(playerController, inPlayerState);
         }
