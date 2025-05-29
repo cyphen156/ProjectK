@@ -112,7 +112,16 @@ public class GameManager : NetworkBehaviour
     {
         if (IsServer)
         {
+            NetworkManager.Singleton.OnClientDisconnectCallback += HandleClientDisconnect;
             ResetGame();
+        }
+    }
+
+    private void OnDestroy()
+    {
+        if (NetworkManager.Singleton != null)
+        {
+            NetworkManager.Singleton.OnClientDisconnectCallback -= HandleClientDisconnect;
         }
     }
 
@@ -196,6 +205,28 @@ public class GameManager : NetworkBehaviour
         }
     }
 
+    private void HandleClientDisconnect(ulong clientId)
+    {
+        PlayerController disconnectedPlayer = null;
+
+        foreach (var kvp in players)
+        {
+            if (kvp.Key.OwnerClientId == clientId)
+            {
+                disconnectedPlayer = kvp.Key;
+                break;
+            }
+        }
+
+        if (disconnectedPlayer != null)
+        {
+            players.Remove(disconnectedPlayer);
+            alivePlayCount.Value = GetAlivePlayerCount();
+            Logger.Warning($"Client {clientId} disconnected. Remaining: {players.Count}");
+            CheckGameOver();
+        }
+    }
+
     // UI상에서 입력 받아서 게임 시작
     public void StartGame()
     {
@@ -211,6 +242,15 @@ public class GameManager : NetworkBehaviour
     {
         if (IsHost)
         {
+            StartGame();
+        }
+    }
+
+    public void RequestRestartGame()
+    {
+        if (IsHost)
+        {
+            ResetGame();
             StartGame();
         }
     }

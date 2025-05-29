@@ -87,6 +87,7 @@ public class SystemUIManager : MonoBehaviour
 
     private void UpdateRestPlayer(int pre, int inCurrentPlayer)
     {
+        Debug.Log($"[SystemUI] Connected player count changed: {pre} ¡æ {inCurrentPlayer}");
         RestPlayerText.text = $" Rest : {inCurrentPlayer}";
     }
 
@@ -167,6 +168,14 @@ public class SystemUIManager : MonoBehaviour
         unityTransport.ConnectionData.Address = Address;
         NetworkManager.Singleton.StartClient();
         loginPanel.SetActive(false);
+    }
+
+    #endregion
+
+    #region GameEndPanel
+    public void OnClickButtonRestartGame()
+    {
+        GameManager.Instance.RequestRestartGame();
     }
     #endregion
 }
