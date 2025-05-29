@@ -7,6 +7,7 @@ public class WoodenBox : NetworkBehaviour, ITakeDamage, ISpawnable
     [SerializeField] private float lifeTime;
     [SerializeField] private uint ownerNetworkId;
     [SerializeField] private EffectSpawner woodHitEffect;
+    [SerializeField] private EffectSpawner dropEffect;
 
     #region Unity Methods
 
@@ -70,6 +71,7 @@ public class WoodenBox : NetworkBehaviour, ITakeDamage, ISpawnable
         {
             Rigidbody rb = GetComponent<Rigidbody>();
             rb.isKinematic = true;
+            dropEffect.PlayEffect();
         }
     }
 }

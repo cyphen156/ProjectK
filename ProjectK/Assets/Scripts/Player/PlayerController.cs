@@ -79,6 +79,7 @@ public class PlayerController : NetworkBehaviour, IPlayerInputReceiver, ITakeDam
 
     [Header("Effect")]
     [SerializeField] private EffectSpawner hitEffectSpawner;
+    [SerializeField] private EffectSpawner spawnEffectSpawner;
     #endregion
 
     #region Unity Methods
@@ -414,6 +415,7 @@ public class PlayerController : NetworkBehaviour, IPlayerInputReceiver, ITakeDam
         if (IsOwner)
         {
             transform.position = inPosition;
+            spawnEffectSpawner.PlayEffect();
         }
     }
 
