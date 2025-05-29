@@ -32,6 +32,7 @@ public class PlayerController : NetworkBehaviour, IPlayerInputReceiver, ITakeDam
 
     [Header("PlayerMovement")]
     private Vector3 lookDirection;
+    private Vector3 dodgeDirection;
     [SerializeField] private float currentMoveSpeed; // 현재 움직임 속도
     private float defaultSpeed; // 기본 걷는 속도
     private float slowSpeed; // 느리게 걷는 속도
@@ -41,6 +42,7 @@ public class PlayerController : NetworkBehaviour, IPlayerInputReceiver, ITakeDam
     private bool isAimed;
     public Vector3 mouseWorldPosition;
     public static event Action<Vector3> OnMousePositionUpdated;
+    private bool isDodging;
 
     public MoveType currentMoveType;
     [Header("PlayerSight")]
@@ -77,6 +79,7 @@ public class PlayerController : NetworkBehaviour, IPlayerInputReceiver, ITakeDam
 
     [Header("Effect")]
     [SerializeField] private EffectSpawner hitEffectSpawner;
+    [SerializeField] private EffectSpawner spawnEffectSpawner;
     #endregion
 
     #region Unity Methods
@@ -100,9 +103,9 @@ public class PlayerController : NetworkBehaviour, IPlayerInputReceiver, ITakeDam
         gunCrosshairSize = 0f;
         crosshairspreadRadius = 10f;
         crosshairLerpSpeed = 5f;
-
+        dodgeDirection = lookDirection;
         netCurrentPlayerState = new NetworkVariable<PlayerState>(PlayerState.Idle);
-        
+        isDodging = false;
     }
 
     private void Start()
@@ -117,20 +120,25 @@ public class PlayerController : NetworkBehaviour, IPlayerInputReceiver, ITakeDam
     {
         yield return null;
         OnChangeHpUI?.Invoke(playerStat.GetHP());
+        OnChangeStaminaUI?.Invoke(playerStat.GetStamina());
     }
 
     private void Update()
     {
         lookDirection = CalculateDirectionFromMouseWorldPosition();
-        if (netCurrentPlayerState.Value != PlayerState.Dodge)
+        if (isDodging)
+        {
+            playerMove.RotateCharacter(dodgeDirection);
+        }
+        else
         {
             playerMove.RotateCharacter(lookDirection);
         }
         if (IsOwner)
         {
+            playerSight.SetSightDirection(mouseWorldPosition);
             UpdateCrosshairSize();
         }
-        
     }
 
     #endregion
@@ -188,7 +196,6 @@ public class PlayerController : NetworkBehaviour, IPlayerInputReceiver, ITakeDam
         }
 
         ChangeStateServerRpc(PlayerState.Walk, NetworkManager.Singleton.LocalClientId);
-        // inState
 
         playerMove.Move(inInputHorizontal * Time.deltaTime * currentMoveSpeed, inInputVertical * Time.deltaTime * currentMoveSpeed);
     }
@@ -244,16 +251,23 @@ public class PlayerController : NetworkBehaviour, IPlayerInputReceiver, ITakeDam
         {
             return;
         }
-        Vector3 dodgeDirection = new Vector3(lastInputHorizontal, 0, lastInputVertical).normalized;
+
+        StartCoroutine(LockLookDirecion(0.8f));
+        dodgeDirection = new Vector3(lastInputHorizontal, 0, lastInputVertical).normalized;
         if(dodgeDirection == Vector3.zero)
         {
             dodgeDirection = transform.forward; // 입력이 없으면 정면
         }
-        playerMove.RotateCharacter(dodgeDirection);
         ApplyStaminaRpc(-30f);
         ChangeStateServerRpc(PlayerState.Dodge, NetworkManager.Singleton.LocalClientId);
     }
 
+    private IEnumerator LockLookDirecion(float delay)
+    {
+        isDodging = true;
+        yield return new WaitForSeconds(delay);
+        isDodging = false;
+    }
     public void IsAim(bool isAim)
     {
         isAimed = isAim;
@@ -324,7 +338,7 @@ public class PlayerController : NetworkBehaviour, IPlayerInputReceiver, ITakeDam
     public void ApplyStaminaRpc(float inStaminaStat)
     {
         playerStat.ApplyStamina(inStaminaStat);
-
+        Logger.Info(playerStat.GetStamina().ToString());
         float stamina = playerStat.GetStamina();
 
         if (IsOwner)
@@ -401,6 +415,7 @@ public class PlayerController : NetworkBehaviour, IPlayerInputReceiver, ITakeDam
         if (IsOwner)
         {
             transform.position = inPosition;
+            spawnEffectSpawner.PlayEffect();
         }
     }
 
@@ -422,7 +437,7 @@ public class PlayerController : NetworkBehaviour, IPlayerInputReceiver, ITakeDam
                     ApplyStaminaRpc(useItem.power);
                     break;
                 case 4:
-                    SpawnDeployableRpc();
+                    SpawnDeployableRpc(GetNetworkNumber());
                     break;
                 default:
                     Logger.Log("There is not Allowed Input Key Event");
@@ -433,31 +448,31 @@ public class PlayerController : NetworkBehaviour, IPlayerInputReceiver, ITakeDam
     }
 
     [Rpc(SendTo.Server)]
-    private void SpawnDeployableRpc()
+    private void SpawnDeployableRpc(uint ownerNumber)
     {
         Quaternion lookRotation = Quaternion.LookRotation(lookDirection);
         Quaternion finalRotation = lookRotation;
-        WoodenBox go = Instantiate(woodenBoxPrefab, transform.position + Vector3.forward * 7f + Vector3.up * 10f, finalRotation);
+        WoodenBox go = Instantiate(woodenBoxPrefab, transform.position + transform.forward * 7f + Vector3.up * 10f, finalRotation);
         go.GetComponent<NetworkObject>().Spawn();
-        go.SetOwner(GetNetworkNumber());
+        go.SetOwner(ownerNumber);
     }
 
     public void UseGranade()
     {
         if (playerInventory.HasItem(5))
         {
-            SpawnGranadeRpc(mouseWorldPosition);
+            SpawnGranadeRpc(mouseWorldPosition, GetNetworkNumber());
             playerInventory.UseItem(5);
         }
         
     }
 
     [Rpc(SendTo.Server)]
-    private void SpawnGranadeRpc(Vector3 mouseWorldPosition)
+    private void SpawnGranadeRpc(Vector3 mouseWorldPosition, uint ownerNumber)
     {
         Granade granade = Instantiate(granadePrefab, transform.position, Quaternion.LookRotation(lookDirection));
         granade.GetComponent<NetworkObject>().Spawn();
-        granade.SetOwner(GetNetworkNumber());
+        granade.SetOwner(ownerNumber);
         Vector3 start = transform.position + Vector3.up;
         granade.Launch(start, mouseWorldPosition);
     }

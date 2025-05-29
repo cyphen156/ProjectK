@@ -45,7 +45,7 @@ public class PlayerStateMachine : MonoBehaviour
                 break;
             case PlayerState.Dodge:
                 SetPlayerAnimatorTrigger(currentPlayerState);
-                StartCoroutine(ChangePlayerStateCoroutine(currentPlayerState, 0.4f));
+                StartCoroutine(ChangePlayerStateCoroutine(currentPlayerState, 0.8f));
                 break;
             default:
                 Logger.Log("FatalErreo :: Tried State Change is Not Allowed");

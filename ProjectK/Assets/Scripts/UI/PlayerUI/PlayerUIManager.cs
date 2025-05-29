@@ -43,9 +43,6 @@ public class PlayerUIManager : MonoBehaviour
     {
         InputManager.OnLocalPlayerRegistered -= SetPlayerController;
     }
-
-   
-
     private void Start()
     {
         DropBox.OnOpenBox += OnOpenDropBox;
@@ -62,8 +59,6 @@ public class PlayerUIManager : MonoBehaviour
 
         StartSettingDropBoxUI();
     }
-
-   
 
     private void Update()
     {
