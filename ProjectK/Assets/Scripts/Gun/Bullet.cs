@@ -11,12 +11,13 @@ public class Bullet : NetworkBehaviour, ISpawnable
     private Vector3 direction;
     private NetworkVariable<bool> isActive = new NetworkVariable<bool>();
     private uint ownerNetworkId;
+    [SerializeField] private EffectSpawner bulletEffect;
 
     private void Awake()
     {
         defaultLifeTime = 4.0f;
         lifeTime = defaultLifeTime;
-        speed = 25.0f;
+        speed = 50.0f;
         damage = 12f;
     }
 
@@ -43,6 +44,7 @@ public class Bullet : NetworkBehaviour, ISpawnable
         netTransform.Teleport(inSpawnPosition, Quaternion.identity, transform.localScale);
         direction = inDirection;
         lifeTime = defaultLifeTime;
+
     }
 
     #region ÃÑ¾Ë Çàµ¿
@@ -70,6 +72,7 @@ public class Bullet : NetworkBehaviour, ISpawnable
     private void Move()
     {
         transform.Translate(direction.normalized * speed * Time.deltaTime, Space.World);
+        bulletEffect.PlayEffect();
     }
 
     private void CountLifeTime()

@@ -47,6 +47,7 @@ public class Gun : NetworkBehaviour
     [SerializeField] private EffectSpawner fireEffectSpawner;
     [SerializeField] private EffectSpawner shellEffectSpawner;
 
+
     private void Awake()
     {
         defaultReloadTime = 2f;
