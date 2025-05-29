@@ -15,7 +15,7 @@ public class Bullet : NetworkBehaviour, ISpawnable
 
     private void Awake()
     {
-        defaultLifeTime = 4.0f;
+        defaultLifeTime = 3.0f;
         lifeTime = defaultLifeTime;
         speed = 50.0f;
         damage = 12f;

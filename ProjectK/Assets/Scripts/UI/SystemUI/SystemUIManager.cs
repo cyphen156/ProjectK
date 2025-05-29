@@ -108,6 +108,12 @@ public class SystemUIManager : MonoBehaviour
 
     private void UpdateGameState(GameState inGameState)
     {
+        if (inGameState == GameState.Ready)
+        {
+            gameEndPanel.SetActive(false);
+            PlayerDiePanel.SetActive(false);
+        }
+
         if (inGameState == GameState.End)
         {
             gameEndPanel.SetActive(true);
