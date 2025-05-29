@@ -424,16 +424,17 @@ public class PlayerController : NetworkBehaviour, IPlayerInputReceiver, ITakeDam
     {
         if(playerInventory.HasItem(inIndex))
         {
+            ItemBase useItem = playerInventory.GetItem(inIndex);
             switch (inIndex)
             {
                 case 1:
-                    ApplyHpRpc(60f);
+                    ApplyHpRpc(useItem.power);
                     break;
                 case 2:
-                    ApplyHpRpc(20f);
+                    ApplyHpRpc(useItem.power);
                     break;
                 case 3:
-                    ApplyStaminaRpc(60f);
+                    ApplyStaminaRpc(useItem.power);
                     break;
                 case 4:
                     SpawnDeployableRpc(GetNetworkNumber());

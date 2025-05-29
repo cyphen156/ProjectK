@@ -6,9 +6,9 @@
 1005,AttachMent,수평 손잡이,Equipt,Rail,Focus,5,0,0,0,0
 1006,AttachMent,퀵드로우 탄창,Equipt,Magazine,ReloadTime,1,0,0,0,0
 1007,AttachMent,대용량 탄창,Equipt,Magazine,AmmoSize,10,0,0,0,0
-2001,Expendables,구급 상자,Recover,Recovery,Hp,60,0,0,0,0
+2001,Expendables,구급 상자,Recover,Recovery,Hp,65,0,0,0,0
 2002,Expendables,붕대,Recover,Recovery,Hp,30,0,0,0,0
-2003,Expendables,에너지 드링크,Stamina,Stamina,Stamina,2,0,10,0,0
+2003,Expendables,에너지 드링크,Stamina,Stamina,Stamina,60,0,0,0,0
 2004,Expendables,수류탄,Throw,Throw,Hp,20,0,2,3,5
 2006,Expendables,모래 주머니,Deploy,Deploy,None,500,0,15,0,0
 2007,Expendables,나무 상자,Deploy,Deploy,None,300,0,15,0,0
