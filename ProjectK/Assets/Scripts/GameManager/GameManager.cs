@@ -31,6 +31,7 @@ public class GameManager : NetworkBehaviour
     [Header("GameState")]
     [SerializeField] private NetworkVariable<GameState> currentGameState = new NetworkVariable<GameState>(GameState.None);
 
+    private PlayerController myPlayer;
     private uint gameWinner;
     public static event Action<uint> OnWinnerChanged;
     public static event Action<GameState> OnGameStateChanged;
@@ -60,6 +61,7 @@ public class GameManager : NetworkBehaviour
 
         PlayTime = 5f;
         maxPlayTime = 60 * PlayTime;  // ºÐ´ÜÀ§
+        myPlayer = null;
     }
 
     private void Update()
@@ -171,6 +173,7 @@ public class GameManager : NetworkBehaviour
 
             if (inIsOwner)
             {
+                myPlayer = inPlayerController;
                 LocalPlayerState?.Invoke(inPlayerController, inPlayerState);
             }
             if (IsHost)
@@ -285,6 +288,11 @@ public class GameManager : NetworkBehaviour
     public int GetAlivePlayerCount()
     {
         return players.Count(pair => pair.Value != PlayerState.Die);
+    }
+
+    public uint GetMyPlayerNumber()
+    {
+        return myPlayer.GetNetworkNumber();
     }
 
     private void CheckGameOver()
