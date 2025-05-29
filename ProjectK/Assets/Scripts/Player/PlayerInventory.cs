@@ -186,6 +186,11 @@ public class PlayerInventory : NetworkBehaviour
     #endregion
 
     #region 소모
+    public ItemBase GetItem(int inConsumeSlot)
+    {
+        return consumeItems[inConsumeSlot-1];
+    }
+
     // 여기 작업 필요
     public bool HasItem(int inConsumeSlot)
     {
