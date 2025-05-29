@@ -92,6 +92,7 @@ public class SystemUIManager : MonoBehaviour
 
     private void UpdateLastPlayer(uint inLastPlayerNumber)
     {
+        PlayerDiePanel.SetActive(false);
         string lastPlayerInfo;
         if (inLastPlayerNumber == 99999999)
         {
