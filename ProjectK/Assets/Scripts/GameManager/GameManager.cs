@@ -20,8 +20,8 @@ public class GameManager : NetworkBehaviour
     [Header("GamePlayTime")]
     [SerializeField] private float PlayTime;
     private float maxPlayTime;
-    public static NetworkVariable<int> alivePlayCount = new NetworkVariable<int>(0);
-    public static NetworkVariable<float> currentTime = new NetworkVariable<float>(0);
+    public NetworkVariable<int> alivePlayCount = new NetworkVariable<int>(0);
+    public NetworkVariable<float> currentTime = new NetworkVariable<float>(0);
     private float timeAccumulator;
 
     [Header("PlayerCount")]
