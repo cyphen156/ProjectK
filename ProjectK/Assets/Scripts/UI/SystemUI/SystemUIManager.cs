@@ -63,8 +63,8 @@ public class SystemUIManager : MonoBehaviour
         }
 
 
-        GameManager.currentTime.OnValueChanged += UpdateGameLifeTime;
-        GameManager.alivePlayCount.OnValueChanged += UpdateRestPlayer;
+        GameManager.Instance.currentTime.OnValueChanged += UpdateGameLifeTime;
+        GameManager.Instance.alivePlayCount.OnValueChanged += UpdateRestPlayer;
         GameManager.OnWinnerChanged += UpdateLastPlayer;
         GameManager.OnGameStateChanged += UpdateGameState; 
         gameEndPanel.SetActive(false);
