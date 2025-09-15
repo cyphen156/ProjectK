@@ -43,7 +43,7 @@
 - **데이터** : CSV
 
 ## 시연 자료
-- **프로젝트(배포)** : [`ProjectK.zip`](ProjectK.zip)
+- **프로젝트(배포)** : [`ProjectK.zip`](https://github.com/Unity-Bootcamp-12/ProjectK/releases/download/%EB%B0%B0%ED%8B%80%EB%A1%9C%EC%96%84%EC%A7%AC%EB%BD%95v1.0.0/ProjectK.zip)
 - **Presentation**
   - [`배틀로얄짬뽕_4조.pdf`](https://drive.google.com/file/d/1BFWQLrpwrAkx4iI_O8Isnkq3zDCFhuWF/view?usp=drive_link)
   - [`배틀로얄짬뽕_4조.pptx`](https://docs.google.com/presentation/d/16wLXi8FHvrB7dzUwHuOSS3B_d_yf-O84/edit?usp=drive_link&ouid=114643264030116262200&rtpof=true&sd=true)
