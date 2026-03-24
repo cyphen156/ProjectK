@@ -3,7 +3,7 @@
 > Unity 6 탑뷰 캐주얼 배틀로얄 · K-Digital Training 12기 · Team 4  
 > Reference: Escape from Duckov / SuperVive / PUBG
 
-![thumbnail](./docs/img/thumbnail.png)
+![thumbnail](./ProjectK/docs/img/thumbnail.png)
 
 ---
 
@@ -18,7 +18,7 @@ Unity 6 엔진을 활용한 탑뷰 시점의 캐주얼 배틀로얄 게임입니
 
 ## 게임 플레이
 
-![PlayerSight_01](./docs/gifs/readme_team/PlayerSight_01.gif)![PlayerSight_02](./docs/gifs/readme_team/PlayerSight_02.gif)
+![PlayerSight_01](./ProjectK/docs/gifs/readme_team/PlayerSight_01.gif)![PlayerSight_02](./ProjectK/docs/gifs/readme_team/PlayerSight_02.gif)
 **플레이어 시야 시스템** — FOV + 장애물 차폐, Stencil Buffer 기반 암흑 시야
 
 <br>
@@ -39,9 +39,7 @@ Unity 6 엔진을 활용한 탑뷰 시점의 캐주얼 배틀로얄 게임입니
 3. 멀티플레이 *(동일 네트워크 필수)*
    - Host : `Create Host Room`
    - Client : `Join Client` → Host IP 입력
-   
-![lobby](./docs/img/lobby.png)
- 
+
 ---
 
 ## 팀
