@@ -1,9 +1,9 @@
 # 배틀 로얄 짬뽕 — ProjectK
 
+![thumbnail](./ProjectK/docs/img/thumbnail.png)
+
 > Unity 6 탑뷰 캐주얼 배틀로얄 · K-Digital Training 12기 · Team 4  
 > Reference: Escape from Duckov / SuperVive / PUBG
-
-![thumbnail](./ProjectK/docs/img/thumbnail.png)
 
 ---
 
@@ -18,14 +18,31 @@ Unity 6 엔진을 활용한 탑뷰 시점의 캐주얼 배틀로얄 게임입니
 
 ## 게임 플레이
 
-![PlayerSight_01](./ProjectK/docs/gifs/readme_team/PlayerSight_01.gif)![PlayerSight_02](./ProjectK/docs/gifs/readme_team/PlayerSight_02.gif)
 **플레이어 시야 시스템** — FOV + 장애물 차폐, Stencil Buffer 기반 암흑 시야
-
+Raycast FOV 메시 + Stencil Buffer 3셰이더 파이프라인으로 구현한 암흑 시야
+ 
+| 개방 시야 | 장애물 차폐 |
+|:---:|:---:|
+| ![unblocked](./ProjectK/docs/gifs/readme_team/PlayerSight_Unblocked.gif) | ![blocked](./ProjectK/docs/gifs/readme_team/PlayerSight_Blocked.gif) |
+ 
 <br>
-
-![farming](./docs/gifs/readme_team/farming.gif)
-**드롭박스 상호작용** — 아이템 획득, 장착 장비 스위칭
-
+ 
+### 드롭박스 상호작용
+아이템 획득 즉시 인벤토리 적용, 기존 장비 자동 스위칭
+ 
+| 아이템 획득 | 장비 스위칭 | 아이템 사용 |
+|:---:|:---:|:---:|
+| ![get](./ProjectK/docs/gifs/readme_team/Item_Get.gif) | ![switch](./ProjectK/docs/gifs/readme_team/Item_Switch.gif) | ![use](./ProjectK/docs/gifs/readme_team/Item_Use.gif) |
+ 
+<br>
+ 
+### 크로스헤어 & 탄착군 시스템
+이동 상태 · 조준 여부 · 장착 부착물 스탯에 따라 크로스헤어 크기와 탄착군이 동적으로 변화
+ 
+| 달리기 | 평시 | 심호흡 (조준) |
+|:---:|:---:|:---:|
+| ![expanded](./ProjectK/docs/gifs/readme_team/bulletSpread_expanded.gif) | ![default](./ProjectK/docs/gifs/readme_team/bulletSpread_Default.gif) | ![zoomed](./ProjectK/docs/gifs/readme_team/bulletSpread_zoomed.gif) |
+ 
 <br>
 
 ▶ [플레이 영상](https://youtu.be/VIDEO_ID)
@@ -48,8 +65,8 @@ Unity 6 엔진을 활용한 탑뷰 시점의 캐주얼 배틀로얄 게임입니
 |------|------|------|
 | **오융택** | 팀장 | 게임 아키텍처 설계 · 플레이어 시야 시스템 · 입력 시스템 |
 | **박광호** | 팀원 | 플레이어 행동 · UI · 이펙트/사운드 시스템 · 네트워크 동기화 |
-| **이정균** | 팀원 | 인벤토리 · 총기 & 총기 부착물 시스템 · 아이템 & 드롭박스 시스템 · 멀티플레이 |
-| **이재훈** | 팀원 | 레벨 디자인 · QA |
+| **이정균** | 팀원 | 인벤토리 · 총기 & 장비 시스템 · 아이템 & 드롭박스 시스템 · 멀티플레이 |
+| **이재훈** | 팀원 | 레벨 디자인 · 폴리싱 · QA |
  
 ---
 
