@@ -32,7 +32,7 @@ Unity 6 기반 탑뷰 캐주얼 배틀로얄 게임입니다.
 
 - 플레이어 시야 시스템
   - Raycast 기반 FOV 메시 생성
-  - Stencil Buffer 기반 시야 필터링
+  - Stencil Buffer 기반 오브젝트 필터링
   - 클라이언트 단위 시야 처리
 - 입력 시스템
   - IPlayerInputReceiver 기반 입력 대상 분리
@@ -62,89 +62,43 @@ Unity 6 기반 탑뷰 캐주얼 배틀로얄 게임입니다.
 - 마우스 방향 기준 Raycast를 방사형으로 발사해 방향성 FOV 계산
 - 이진 탐색으로 경계 구간을 보완해 벽면을 따라 자연스러운 시야 형성
 - 플레이어 주변 고정 반경을 원형 메시로 근접 시야 형성
-
-```csharp
-// PlayerSight.cs — DrawFieldOfView()
-for (int i = 0; i <= stepCount; ++i)
-{
-    float angle = baseAngle - activeViewAngle / 2f + angleStep * i;
-    ViewCastInfo newViewCast = ViewCast(angle);
- 
-    bool edgeDistanceThresholdExceeded =
-        Mathf.Abs(oldViewCast.distance - newViewCast.distance) > edgeDistanceThreshold;
- 
-    if (oldViewCast.hit != newViewCast.hit ||
-       (oldViewCast.hit && newViewCast.hit && edgeDistanceThresholdExceeded))
-    {
-        EdgeInfo edge = FindEdge(oldViewCast, newViewCast);
-        viewPoints.Add(edge.pointA);
-        viewPoints.Add(edge.pointB);
-    }
-    viewPoints.Add(newViewCast.point);
-    oldViewCast = newViewCast;
-}
-```
  
 #### Stencil Buffer 기반 오브젝트 필터링
- 
-FOV 메시로 가시 영역을 계산하고, Stencil Buffer로 해당 영역을 마킹해 시야 밖 전투 정보를 필터링합니다.  
-지형은 항상 보이되, 전투 정보만 선택적으로 차단됩니다.
- 
-```
-StencilMask.shader    →  FOV 메시 영역에 Stencil 값 기록 (색상 출력 없음)
-StencilCover.shader   →  Stencil 값이 기록된 영역만 URP Lit으로 재렌더링
-StencilFilter.shader  →  Stencil 값이 없는 영역 전체에 오버레이 적용
-```
- 
-- 렌더링 단계에만 적용되어 멀티플레이 동기화 구조와 분리
-- `LateUpdate()` 에서 `IsOwner` 체크 후 클라이언트 단위로 독립 처리
-- 시야 밖 오브젝트의 그림자는 유지 — 완전 정보 차단 대신 최소한의 위치 힌트로 활용
+
+화면 전체를 오버레이로 덮고, 시야 영역만 드러내어 시야 밖 전투 정보를 제한합니다.
+
+| 셰이더 | 역할 |
+|---|---|
+| `StencilFilter` | 지형과 사물을 음영진 형태로 보이게 하는 필터 셰이더 |
+| `StencilCover` | 시야 내에서만 노출되어야 하는 전투 정보 오브젝트용 셰이더 |
+| `StencilMask` | FOV 메시 기반 가시 영역을 정의하기 위한 Stencil 기록 셰이더 |
+
+- `StencilFilter`가 화면 전체를 음영 처리
+- FOV 메시가 Stencil 값을 기록한 영역은 필터를 통과해 원본 색상으로 드러남
+- `StencilCover`가 적용된 전투 정보 오브젝트는 시야 영역 밖에서 렌더링 자체가 차단됨
+- 렌더링 단계에서 클라이언트 단위로 독립 처리되어 멀티플레이 동기화 구조와 분리
+- 전투 관련 오브젝트의 그림자를 유지하여 정보 완전 차단 대신 최소한의 전투 힌트를 제공
 
 ---
 
 ### 입력 시스템
 
-플레이어 행동을 `IPlayerInputReceiver`로 정의하고, `InputManager`가 로컬 플레이어를 식별해 입력을 전달합니다.
+멀티플레이 환경에서 입력이 올바른 대상에게만 적용되도록 제어하는 시스템입니다.
 
-- 입력 수신 대상은 인터페이스 기반으로 분리
-- 입력 허용 범위는 게임 상태에 따라 전환
-- 플레이어 상태에 따라 입력 처리 여부 제어
+#### 입력 대상 분리
 
-#### IPlayerInputReceiver
+입력 수신 대상을 인터페이스로 분리해, 입력이 특정 객체에 종속되지 않도록 구성했습니다.
 
-```csharp
-public interface IPlayerInputReceiver
-{
-    void InputMove(MoveType inMoveType, float inH, float inV);
-    void InputAttack();
-    void InputReload();
-    void InputMousePosition(Vector3 inMousePosition);
-    void InteractDropBox();
-    void Dodge();
-    void IsAim(bool isAim);
-    void UseItem(int number);
-    void UseGranade();
-}
-```
+- Player, UI 등 입력 처리 주체를 분리
+- 동일한 입력 구조를 다양한 대상에 재사용 가능
+- 입력 처리 로직과 실제 동작을 분리
 
-- 로컬 플레이어 등록 시 `OnLocalPlayerRegistered` 이벤트로 브로드캐스트
-- `PlayerUIManager`, `InGameUIManager` 등 관심 객체가 PlayerController 참조를 공유
+#### 입력 범위 제어
 
-#### InputReceiver enum 기반 입력 범위 제어
+플레이 상태에 따라 허용되는 입력을 제한합니다.
 
-```csharp
-public enum InputReceiver
-{
-    None,
-    PlayerOnly,
-    InGameUIOnly,
-    All
-}
-```
-
-- 플레이어 등록 시점 → `InGameUIOnly`
-- `GameState.Play` 이후 → `All` 로 전환
-- `PlayerState.Die` 시 입력 차단
+- `InputReceiver` enum 기반 입력 상태 구분
+- 상태에 따른 입력 처리 주체 변 
 
 #### 상태 기반 플레이어 제어 (PlayerStateMachine)
 
